@@ -6,6 +6,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video 1 — Generative AI vs Agentic AI</title>
     <style>
+        :root {
+            --bg: #2d353b;
+            --surface: #343f44;
+            --surface2: #3d484d;
+            --border: #475258;
+            --text: #d3c6aa;
+            --muted: #859289;
+            --yellow: #dbbc7f;
+            --green: #a7c080;
+            --blue: #7fbbb3;
+            --pink: #d699b6;
+            --purple: #b78bfa;
+            --orange: #e69875;
+            --red: #e67e80;
+            --teal: #83c092;
+            /* Semantic Mappings */
+            --accent: var(--blue);
+            --gold: var(--yellow);
+            --card: var(--surface);
+            --card2: var(--surface2);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -14,8 +36,8 @@
 
         body {
             font-family: 'Segoe UI', system-ui, sans-serif;
-            background: #f0f4f8;
-            color: #1e293b;
+            background: var(--bg);
+            color: var(--text);
             font-size: 14.5px;
             line-height: 1.7;
             padding: 32px 16px 80px;
@@ -27,8 +49,8 @@
         }
 
         .header {
-            background: linear-gradient(135deg, #1e3a5f 0%, #2d6a9f 100%);
-            color: white;
+            background: linear-gradient(135deg, var(--surface) 0%, var(--border) 100%);
+            color: var(--text);
             border-radius: 16px;
             padding: 32px 36px;
             margin-bottom: 28px;
@@ -55,11 +77,11 @@
         }
 
         .toc {
-            background: white;
+            background: var(--surface);
             border-radius: 12px;
             padding: 20px 24px;
             margin-bottom: 28px;
-            border-left: 4px solid #2d6a9f;
+            border-left: 4px solid var(--blue);
         }
 
         .toc h3 {
@@ -78,7 +100,7 @@
         }
 
         .toc a {
-            color: #2d6a9f;
+            color: var(--blue);
             text-decoration: none;
             font-size: 13px;
         }
@@ -88,28 +110,28 @@
         }
 
         .section {
-            background: white;
+            background: var(--surface);
             border-radius: 14px;
             padding: 28px 32px;
             margin-bottom: 20px;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
         }
 
         .section-title {
             font-size: 18px;
             font-weight: 700;
-            color: #1e3a5f;
+            color: var(--yellow);
             margin-bottom: 18px;
             padding-bottom: 12px;
-            border-bottom: 2px solid #e2e8f0;
+            border-bottom: 2px solid var(--border);
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
         .num {
-            background: #2d6a9f;
-            color: white;
+            background: var(--blue);
+            color: var(--bg);
             width: 28px;
             height: 28px;
             border-radius: 50%;
@@ -128,17 +150,17 @@
         .sub h4 {
             font-size: 13.5px;
             font-weight: 700;
-            color: #334155;
+            color: var(--yellow);
             margin-bottom: 8px;
         }
 
         .def {
-            background: #eff6ff;
-            border-left: 4px solid #2563eb;
+            background: var(--surface);
+            border-left: 4px solid var(--green);
             border-radius: 0 8px 8px 0;
             padding: 14px 18px;
             margin-bottom: 14px;
-            color: #1e40af;
+            color: var(--green);
             font-size: 14px;
         }
 
@@ -166,7 +188,7 @@
         .tag.blue {
             background: #dbeafe;
             border-color: #93c5fd;
-            color: #1d4ed8;
+            color: var(--blue);
         }
 
         .tag.green {
@@ -183,25 +205,25 @@
         }
 
         table.cmp th {
-            background: #1e3a5f;
-            color: white;
+            background: var(--border);
+            color: var(--yellow);
             padding: 10px 14px;
             text-align: left;
         }
 
         table.cmp td {
             padding: 9px 14px;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid var(--border);
             vertical-align: top;
         }
 
         table.cmp tr:nth-child(even) td {
-            background: #f8fafc;
+            background: var(--surface);
         }
 
         .chatbot-card {
             border-radius: 12px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border);
             overflow: hidden;
             margin-bottom: 0;
         }
@@ -213,23 +235,23 @@
         }
 
         .cb1 .chatbot-header {
-            background: #dbeafe;
-            color: #1e40af;
+            background: var(--surface);
+            color: var(--blue);
         }
 
         .cb2 .chatbot-header {
-            background: #fef3c7;
-            color: #92400e;
+            background: var(--surface);
+            color: var(--yellow);
         }
 
         .cb3 .chatbot-header {
-            background: #d1fae5;
-            color: #065f46;
+            background: var(--surface);
+            color: var(--green);
         }
 
         .cb4 .chatbot-header {
-            background: #ede9fe;
-            color: #4c1d95;
+            background: var(--surface);
+            color: var(--pink);
         }
 
         .chatbot-body {
@@ -247,7 +269,7 @@
             align-items: flex-start;
             gap: 12px;
             padding: 8px 0 8px 20px;
-            border-left: 2px solid #e2e8f0;
+            border-left: 2px solid var(--border);
             margin-left: 14px;
             position: relative;
         }
@@ -264,9 +286,9 @@
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            background: #2d6a9f;
-            border: 2px solid white;
-            box-shadow: 0 0 0 2px #2d6a9f;
+            background: var(--blue);
+            border: 2px solid var(--surface);
+            box-shadow: 0 0 0 2px var(--blue);
         }
 
         .wf-label {
