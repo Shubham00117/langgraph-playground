@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LangGraph Learning Notes</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0e0f13;
+            --surface: #16181f;
+            --border: #2a2d38;
+            --text: #e8eaf0;
+            --muted: #7a7f96;
+            --yellow: #f5c842;
+            --green: #5ef0a0;
+            --blue: #6ab8f7;
+            --pink: #f77fbe;
+            --purple: #b78bfa;
+            --sand: #d4c4a8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'DM Mono', monospace;
+            min-height: 100vh;
+            padding: 48px 24px;
+        }
+
+        .noise {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            margin-bottom: 56px;
+            animation: fadeUp 0.6s ease both;
+        }
+
+        .label {
+            font-size: 11px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 12px;
+        }
+
+        h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(2.4rem, 6vw, 4rem);
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: -0.02em;
+        }
+
+        h1 span {
+            color: var(--green);
+        }
+
+        .subtitle {
+            margin-top: 16px;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.7;
+            max-width: 540px;
+        }
+
+        .progress-bar {
+            margin-top: 28px;
+            height: 3px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            width: 200px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 16.6%;
+            background: var(--green);
+            border-radius: 4px;
+            animation: grow 1s ease 0.5s both;
+        }
+
+        @keyframes grow {
+            from {
+                width: 0
+            }
+        }
+
+        .modules {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media(max-width: 640px) {
+            .modules {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            position: relative;
+            overflow: hidden;
+            animation: fadeUp 0.5s ease both;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            border-radius: 16px 16px 0 0;
+        }
+
+        .card.yellow::before {
+            background: var(--yellow);
+            border-color: var(--yellow);
+        }
+
+        .card.green::before {
+            background: var(--green);
+            border-color: var(--green);
+        }
+
+        .card.blue::before {
+            background: var(--blue);
+            border-color: var(--blue);
+        }
+
+        .card.pink::before {
+            background: var(--pink);
+            border-color: var(--pink);
+        }
+
+        .card.purple::before {
+            background: var(--purple);
+            border-color: var(--purple);
+        }
+
+        .card.sand::before {
+            background: var(--sand);
+            border-color: var(--sand);
+        }
+
+        .card.yellow:hover {
+            border-color: var(--yellow);
+        }
+
+        .card.green:hover {
+            border-color: var(--green);
+        }
+
+        .card.blue:hover {
+            border-color: var(--blue);
+        }
+
+        .card.pink:hover {
+            border-color: var(--pink);
+        }
+
+        .card.purple:hover {
+            border-color: var(--purple);
+        }
+
+        .card.sand:hover {
+            border-color: var(--sand);
+        }
+
+        .card-num {
+            font-size: 10px;
+            letter-spacing: 0.15em;
+            color: var(--muted);
+            margin-bottom: 10px;
+        }
+
+        .card-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .card.yellow .card-title {
+            color: var(--yellow);
+        }
+
+        .card.green .card-title {
+            color: var(--green);
+        }
+
+        .card.blue .card-title {
+            color: var(--blue);
+        }
+
+        .card.pink .card-title {
+            color: var(--pink);
+        }
+
+        .card.purple .card-title {
+            color: var(--purple);
+        }
+
+        .card.sand .card-title {
+            color: var(--sand);
+        }
+
+        .card-desc {
+            font-size: 12.5px;
+            line-height: 1.75;
+            color: var(--muted);
+            margin-bottom: 18px;
+        }
+
+        .topics {
+            list-style: none;
+        }
+
+        .topics li {
+            font-size: 12px;
+            padding: 7px 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            color: #c5c8d8;
+            line-height: 1.5;
+        }
+
+        .topics li:last-child {
+            border-bottom: none;
+        }
+
+        .topics li::before {
+            content: '▸';
+            font-size: 9px;
+            margin-top: 3px;
+            flex-shrink: 0;
+        }
+
+        .card.yellow .topics li::before {
+            color: var(--yellow);
+        }
+
+        .card.green .topics li::before {
+            color: var(--green);
+        }
+
+        .card.blue .topics li::before {
+            color: var(--blue);
+        }
+
+        .card.pink .topics li::before {
+            color: var(--pink);
+        }
+
+        .card.purple .topics li::before {
+            color: var(--purple);
+        }
+
+        .card.sand .topics li::before {
+            color: var(--sand);
+        }
+
+        .card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .card:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .card:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        .card:nth-child(5) {
+            animation-delay: 0.5s;
+        }
+
+        .card:nth-child(6) {
+            animation-delay: 0.6s;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .divider {
+            margin: 48px 0;
+            border: none;
+            border-top: 1px solid var(--border);
+        }
+
+        .quick-ref {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            animation: fadeUp 0.5s ease 0.7s both;
+        }
+
+        .quick-ref h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--green);
+        }
+
+        .concepts {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .concept-chip {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 11.5px;
+        }
+
+        .concept-chip strong {
+            display: block;
+            color: var(--text);
+            margin-bottom: 4px;
+            font-family: 'Syne', sans-serif;
+            font-size: 12px;
+        }
+
+        .concept-chip span {
+            color: var(--muted);
+            line-height: 1.5;
+            display: block;
+        }
+
+        footer {
+            margin-top: 48px;
+            text-align: center;
+            font-size: 11px;
+            color: var(--border);
+            animation: fadeUp 0.5s ease 0.9s both;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="noise"></div>
+    <div class="container">
+
+        <header>
+            <p class="label">Study Notes · LangGraph Course</p>
+            <h1>Agentic AI with<br><span>LangGraph</span></h1>
+            <p class="subtitle">Clear, concise notes from the course curriculum covering all 6 modules — from
+                foundations to production deployment.</p>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+            <p style="font-size:11px;color:var(--muted);margin-top:8px;">1 / 6 modules started</p>
+        </header>
+
+        <div class="modules">
+
+            <!-- 1 -->
+            <div class="card yellow">
+                <p class="card-num">MODULE 01</p>
+                <p class="card-title">Foundations of Agentic AI</p>
+                <p class="card-desc">The starting point — understand what agentic AI is and how LLMs move from simple
+                    chat to autonomous decision-making.</p>
+                <ul class="topics">
+                    <li>What is an AI Agent? Difference between a chatbot and an agent</li>
+                    <li>LLMs as reasoning engines — how they plan and act</li>
+                    <li>Tool use: giving models the ability to call external functions</li>
+                    <li>The ReAct loop — Reason → Act → Observe → Repeat</li>
+                    <li>Why control flow matters in multi-step AI tasks</li>
+                </ul>
+            </div>
+
+            <!-- 2 -->
+            <div class="card green">
+                <p class="card-num">MODULE 02</p>
+                <p class="card-title">LangGraph Fundamentals</p>
+                <p class="card-desc">Core building blocks of LangGraph — model stateful, graph-based workflows for LLM
+                    applications.</p>
+                <ul class="topics">
+                    <li><strong>Graph</strong>: the main container for your agent workflow</li>
+                    <li><strong>Nodes</strong>: Python functions that perform a single action</li>
+                    <li><strong>Edges</strong>: connections that define the flow between nodes</li>
+                    <li><strong>State</strong>: a typed dict passed through all nodes</li>
+                    <li>Conditional edges — branching logic based on output</li>
+                    <li>Compiling and running your first graph</li>
+                </ul>
+            </div>
+
+            <!-- 3 -->
+            <div class="card blue">
+                <p class="card-num">MODULE 03</p>
+                <p class="card-title">Advanced LangGraph</p>
+                <p class="card-desc">Level up — handle complex patterns like cycles, memory, streaming, and
+                    human-in-the-loop interactions.</p>
+                <ul class="topics">
+                    <li>Cycles & loops — how agents can retry or iterate</li>
+                    <li>Checkpointers — saving & resuming state (persistence)</li>
+                    <li>Streaming: token-by-token output to the UI</li>
+                    <li>Human-in-the-loop: pausing for approval or input</li>
+                    <li>Subgraphs — composing graphs inside graphs</li>
+                    <li>Parallel node execution for speed</li>
+                </ul>
+            </div>
+
+            <!-- 4 -->
+            <div class="card pink">
+                <p class="card-num">MODULE 04</p>
+                <p class="card-title">AI Agents</p>
+                <p class="card-desc">Build real agents — equip them with tools, memory, and multi-agent coordination to
+                    tackle complex tasks.</p>
+                <ul class="topics">
+                    <li>Tool-calling agents — search, code execution, APIs</li>
+                    <li>Memory types: in-context, external (vector DB), episodic</li>
+                    <li>Multi-agent systems — supervisor & worker patterns</li>
+                    <li>Agent communication via shared state or message passing</li>
+                    <li>Reflection agents — self-critique and improvement loops</li>
+                </ul>
+            </div>
+
+            <!-- 5 -->
+            <div class="card purple">
+                <p class="card-num">MODULE 05</p>
+                <p class="card-title">Agentic RAG</p>
+                <p class="card-desc">Combine retrieval-augmented generation with agentic control — smarter, more
+                    accurate knowledge-grounded agents.</p>
+                <ul class="topics">
+                    <li>Classic RAG recap — embed, retrieve, generate</li>
+                    <li>Agentic RAG: the agent decides <em>when</em> and <em>what</em> to retrieve</li>
+                    <li>Query rewriting — reframe the question for better retrieval</li>
+                    <li>Self-RAG — grade retrieved docs, retry if poor quality</li>
+                    <li>Corrective RAG (CRAG) — fallback to web search if needed</li>
+                    <li>Adaptive RAG — route queries to the best retrieval strategy</li>
+                </ul>
+            </div>
+
+            <!-- 6 -->
+            <div class="card sand">
+                <p class="card-num">MODULE 06</p>
+                <p class="card-title">Productanization</p>
+                <p class="card-desc">Ship your agent — monitoring, evaluation, deployment, and making it robust enough
+                    for real users.</p>
+                <ul class="topics">
+                    <li>LangSmith tracing — debug and observe every node step</li>
+                    <li>Evaluation — score agent runs with LLM-as-judge</li>
+                    <li>LangGraph Cloud / LangGraph Platform deployment</li>
+                    <li>API exposure — wrap your graph as a REST endpoint</li>
+                    <li>Error handling, retries, and fallback strategies</li>
+                    <li>Cost & latency optimization for production</li>
+                </ul>
+            </div>
+
+        </div>
+
+        <hr class="divider">
+
+        <div class="quick-ref">
+            <h2>⚡ Key Concepts at a Glance</h2>
+            <div class="concepts">
+                <div class="concept-chip">
+                    <strong>StateGraph</strong>
+                    <span>The graph class you define your agent workflow in</span>
+                </div>
+                <div class="concept-chip">
+                    <strong>State (TypedDict)</strong>
+                    <span>Shared data object flowing through every node</span>
+                </div>
+                <div class="concept-chip">
+                    <strong>Node</strong>
+                    <span>A Python function — receives state, returns updated state</span>
+                </div>
+                <div class="concept-chip">
+                    <strong>Edge</strong>
+                    <span>A directed connection between two nodes</span>
+                </div>
+                <div class="concept-chip">
+                    <strong>Conditional Edge</strong>
+                    <span>Routes to different nodes based on a condition function</span>
+                </div>
+                <div class="concept-chip">
+                    <strong>Checkpointer</strong>
+                    <span>Persists state between runs — enables memory & resume</span>
+                </div>
+                <div class="concept-chip">
+                    <strong>Tool Call</strong>
+                    <span>LLM requests to run external functions (search, code…)</span>
+                </div>
+                <div class="concept-chip">
+                    <strong>ReAct Pattern</strong>
+                    <span>Reason → Act → Observe loop for agent reasoning</span>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>LangGraph Study Notes · Agentic AI Course · Updated Feb 2026</p>
+        </footer>
+
+    </div>
+</body>
+
+</html>

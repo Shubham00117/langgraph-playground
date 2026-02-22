@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video 1 — Generative AI vs Agentic AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #f0f4f8;
+            color: #1e293b;
+            font-size: 14.5px;
+            line-height: 1.7;
+            padding: 32px 16px 80px;
+        }
+
+        .page {
+            max-width: 860px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d6a9f 100%);
+            color: white;
+            border-radius: 16px;
+            padding: 32px 36px;
+            margin-bottom: 28px;
+        }
+
+        .header .course-tag {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            opacity: 0.7;
+            margin-bottom: 8px;
+        }
+
+        .header h1 {
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .header .subtitle {
+            opacity: 0.8;
+            font-size: 14px;
+        }
+
+        .toc {
+            background: white;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 28px;
+            border-left: 4px solid #2d6a9f;
+        }
+
+        .toc h3 {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 10px;
+        }
+
+        .toc-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px 24px;
+        }
+
+        .toc a {
+            color: #2d6a9f;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .toc a:hover {
+            text-decoration: underline;
+        }
+
+        .section {
+            background: white;
+            border-radius: 14px;
+            padding: 28px 32px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e3a5f;
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .num {
+            background: #2d6a9f;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .sub {
+            margin-bottom: 18px;
+        }
+
+        .sub h4 {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #334155;
+            margin-bottom: 8px;
+        }
+
+        .def {
+            background: #eff6ff;
+            border-left: 4px solid #2563eb;
+            border-radius: 0 8px 8px 0;
+            padding: 14px 18px;
+            margin-bottom: 14px;
+            color: #1e40af;
+            font-size: 14px;
+        }
+
+        .def strong {
+            color: #1e3a8a;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .tag {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 12.5px;
+            color: #475569;
+            font-weight: 500;
+        }
+
+        .tag.blue {
+            background: #dbeafe;
+            border-color: #93c5fd;
+            color: #1d4ed8;
+        }
+
+        .tag.green {
+            background: #dcfce7;
+            border-color: #86efac;
+            color: #166534;
+        }
+
+        table.cmp {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13.5px;
+            margin-top: 10px;
+        }
+
+        table.cmp th {
+            background: #1e3a5f;
+            color: white;
+            padding: 10px 14px;
+            text-align: left;
+        }
+
+        table.cmp td {
+            padding: 9px 14px;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: top;
+        }
+
+        table.cmp tr:nth-child(even) td {
+            background: #f8fafc;
+        }
+
+        .chatbot-card {
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            margin-bottom: 0;
+        }
+
+        .chatbot-header {
+            padding: 12px 18px;
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .cb1 .chatbot-header {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .cb2 .chatbot-header {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .cb3 .chatbot-header {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .cb4 .chatbot-header {
+            background: #ede9fe;
+            color: #4c1d95;
+        }
+
+        .chatbot-body {
+            padding: 18px;
+        }
+
+        .wf {
+            display: flex;
+            flex-direction: column;
+            margin: 8px 0;
+        }
+
+        .wf-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 8px 0 8px 20px;
+            border-left: 2px solid #e2e8f0;
+            margin-left: 14px;
+            position: relative;
+        }
+
+        .wf-step:last-child {
+            border-left-color: transparent;
+        }
+
+        .wf-step::before {
+            content: '';
+            position: absolute;
+            left: -7px;
+            top: 13px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #2d6a9f;
+            border: 2px solid white;
+            box-shadow: 0 0 0 2px #2d6a9f;
+        }
+
+        .wf-label {
+            font-weight: 600;
+            color: #334155;
+            min-width: 100px;
+            font-size: 13px;
+            flex-shrink: 0;
+            padding-top: 1px;
+        }
+
+        .wf-info {
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .sl {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            margin: 8px 0;
+        }
+
+        .sl li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13.5px;
+            color: #334155;
+        }
+
+        .ok {
+            color: #16a34a;
+            font-size: 15px;
+        }
+
+        .no {
+            color: #dc2626;
+            font-size: 15px;
+        }
+
+        .kb-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .kb {
+            border-radius: 10px;
+            padding: 12px 14px;
+            font-size: 13px;
+        }
+
+        .kb h5 {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .kb ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .kb ul li {
+            padding: 2px 0;
+            color: #475569;
+        }
+
+        .kb ul li::before {
+            content: '• ';
+            color: #94a3b8;
+        }
+
+        .kb-g {
+            background: #dcfce7;
+            border: 1px solid #86efac;
+        }
+
+        .kb-g h5 {
+            color: #166534;
+        }
+
+        .kb-y {
+            background: #fef9c3;
+            border: 1px solid #fde047;
+        }
+
+        .kb-y h5 {
+            color: #713f12;
+        }
+
+        .kb-b {
+            background: #dbeafe;
+            border: 1px solid #93c5fd;
+        }
+
+        .kb-b h5 {
+            color: #1e40af;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .tool {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 9px 12px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #334155;
+            text-align: center;
+        }
+
+        .bubble-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .bubble-row.u {
+            justify-content: flex-end;
+        }
+
+        .bubble {
+            padding: 8px 13px;
+            border-radius: 10px;
+            max-width: 80%;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .bu {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .bb {
+            background: #fef9c3;
+            color: #3f3200;
+        }
+
+        .conc-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .conc {
+            background: #f8fafc;
+            border-radius: 10px;
+            border-left: 4px solid #2d6a9f;
+            padding: 14px 16px;
+            font-size: 13.5px;
+            color: #334155;
+        }
+
+        .conc strong {
+            color: #1e3a5f;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .evo-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 12px 0;
+        }
+
+        .evo-box {
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .evo-arrow {
+            color: #94a3b8;
+            font-size: 20px;
+        }
+
+        @media(max-width:600px) {
+
+            .kb-grid,
+            .tools-grid,
+            .conc-grid,
+            .toc-grid {
+                grid-template-columns: 1fr;
+            }
+
+            table.cmp {
+                font-size: 12px;
+            }
+
+            .section {
+                padding: 20px 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+
+        <!-- HEADER -->
+        <div class="header">
+            <div class="course-tag">Agentic AI using LangGraph · CampusX · Video 1</div>
+            <h1>Generative AI vs Agentic AI</h1>
+            <div class="subtitle">From Basic LLM → RAG → Tool-Augmented → Full Agentic AI &nbsp;|&nbsp; 42 slides
+                covered</div>
+        </div>
+
+        <!-- TOC -->
+        <div class="toc">
+            <h3>Contents</h3>
+            <div class="toc-grid">
+                <a href="#s1">1. What is Generative AI</a>
+                <a href="#s5">5. Chatbot 2 — RAG Based</a>
+                <a href="#s2">2. Gen AI vs Traditional AI</a>
+                <a href="#s6">6. Chatbot 3 — Tool Augmented</a>
+                <a href="#s3">3. Application Areas</a>
+                <a href="#s7">7. Chatbot 4 — Agentic AI</a>
+                <a href="#s4">4. Chatbot 1 — Basic LLM</a>
+                <a href="#s8">8. Conclusion &amp; Evolution</a>
+            </div>
+        </div>
+
+        <!-- 1. WHAT IS GENAI -->
+        <div class="section" id="s1">
+            <div class="section-title"><span class="num">1</span> What is Generative AI</div>
+            <div class="def">
+                <strong>Generative AI</strong> refers to a class of artificial intelligence models that can create new
+                content — such as text, images, audio, code, or video — that resembles human-created data.
+            </div>
+            <div class="sub">
+                <h4>Examples</h4>
+                <div class="tags">
+                    <span class="tag blue">LLM apps like ChatGPT</span>
+                    <span class="tag blue">Diffusion models for images</span>
+                    <span class="tag blue">Code-gen LLMs like CodeLlama</span>
+                    <span class="tag blue">TTS models like ElevenLabs</span>
+                    <span class="tag blue">Video gen models like Sora</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. GEN AI VS TRADITIONAL -->
+        <div class="section" id="s2">
+            <div class="section-title"><span class="num">2</span> Generative AI vs Traditional AI</div>
+            <table class="cmp">
+                <tr>
+                    <th>Traditional AI</th>
+                    <th>Generative AI</th>
+                </tr>
+                <tr>
+                    <td>Finds patterns in data and gives <strong>predictions</strong></td>
+                    <td>Learns the <strong>distribution of data</strong> so it can generate a new sample from it</td>
+                </tr>
+                <tr>
+                    <td>Examples: classification, regression, detection</td>
+                    <td>Can <strong>mimic humans</strong> — creates original text, images, code, audio, video</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- 3. APPLICATION AREAS -->
+        <div class="section" id="s3">
+            <div class="section-title"><span class="num">3</span> Application Areas</div>
+            <div class="tags">
+                <span class="tag green">Creative &amp; Business Writing</span>
+                <span class="tag green">Software Development</span>
+                <span class="tag green">Customer Support</span>
+                <span class="tag green">Education</span>
+                <span class="tag green">Designing</span>
+            </div>
+            <p style="margin-top:12px;color:#64748b;font-size:13px;font-style:italic;">Generative AI is constantly
+                evolving and improving.</p>
+        </div>
+
+        <!-- USE CASE SETUP -->
+        <div class="section">
+            <div class="section-title"><span class="num" style="background:#059669;">🎯</span> Use Case — Hire a Backend
+                Engineer</div>
+            <p style="color:#475569; margin-bottom:14px;">The video uses a <strong>hiring workflow</strong> to show how
+                each generation of chatbot handles the same real-world goal. The process has 6 stages:</p>
+            <div class="wf">
+                <div class="wf-step"><span class="wf-label">1. Create JD</span><span class="wf-info">Draft a job
+                        description for Backend Engineer, 2–4 yrs experience</span></div>
+                <div class="wf-step"><span class="wf-label">2. Post JD</span><span class="wf-info">Publish on job
+                        platforms (LinkedIn, Naukri, Angellist)</span></div>
+                <div class="wf-step"><span class="wf-label">3. Shortlist</span><span class="wf-info">Screen applications
+                        against skill criteria</span></div>
+                <div class="wf-step"><span class="wf-label">4. Interview</span><span class="wf-info">Schedule interviews
+                        and prepare question bank</span></div>
+                <div class="wf-step"><span class="wf-label">5. Offer Letter</span><span class="wf-info">Draft and send
+                        offer to selected candidate</span></div>
+                <div class="wf-step"><span class="wf-label">6. Onboarding</span><span class="wf-info">Welcome email,
+                        provision tools, schedule KT session</span></div>
+            </div>
+        </div>
+
+        <!-- CHATBOT 1 -->
+        <div class="section" id="s4">
+            <div class="section-title"><span class="num">4</span> Chatbot 1 — Basic LLM Chatbot</div>
+            <div class="chatbot-card cb1">
+                <div class="chatbot-header">🤖 Plain LLM &nbsp;|&nbsp; No tools · No memory · No knowledge base</div>
+                <div class="chatbot-body">
+                    <div class="sub">
+                        <h4>What it does at each stage</h4>
+                        <div class="wf">
+                            <div class="wf-step"><span class="wf-label">JD Drafting</span><span class="wf-info">"Help me
+                                    draft a JD" → generates a generic JD. Output: <em>"We are looking for a remote
+                                        backend engineer with 2–4 years experience."</em></span></div>
+                            <div class="wf-step"><span class="wf-label">Job Posting</span><span class="wf-info">"Where
+                                    should I post?" → "You can try LinkedIn or Naukri." User must post manually.</span>
+                            </div>
+                            <div class="wf-step"><span class="wf-label">Shortlisting</span><span class="wf-info">"I've
+                                    got 8 applications, help me screen them" → "Look for Python and cloud experience."
+                                    User screens manually.</span></div>
+                            <div class="wf-step"><span class="wf-label">Scheduling</span><span class="wf-info">"Draft a
+                                    scheduling email" → generic template: <em>"We'd like to schedule a 45-min interview.
+                                        Please share your availability."</em> User sends manually.</span></div>
+                            <div class="wf-step"><span class="wf-label">Interviewing</span><span class="wf-info">"What
+                                    questions can I ask?" → generic: describe a backend system, backend frameworks,
+                                    debugging approach</span></div>
+                            <div class="wf-step"><span class="wf-label">Offer Letter</span><span class="wf-info">"Draft
+                                    an offer letter" → sample template. User sends it manually.</span></div>
+                        </div>
+                    </div>
+                    <div class="sub">
+                        <h4>❌ Problems</h4>
+                        <ul class="sl">
+                            <li><span class="no">✗</span> <strong>Reactive</strong> — only responds when asked, never
+                                initiates</li>
+                            <li><span class="no">✗</span> <strong>No memory</strong> — forgets context between sessions
+                            </li>
+                            <li><span class="no">✗</span> <strong>Generic advice</strong> — no company-specific
+                                knowledge</li>
+                            <li><span class="no">✗</span> <strong>Can't take actions</strong> — only drafts text; user
+                                executes everything</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CHATBOT 2 -->
+        <div class="section" id="s5">
+            <div class="section-title"><span class="num">5</span> Chatbot 2 — RAG-Based Chatbot</div>
+            <div class="chatbot-card cb2">
+                <div class="chatbot-header">📚 RAG (Retrieval-Augmented Generation) &nbsp;|&nbsp; Adds company knowledge
+                    base</div>
+                <div class="chatbot-body">
+                    <div class="sub">
+                        <h4>Knowledge Base Added</h4>
+                        <div class="kb-grid">
+                            <div class="kb kb-g">
+                                <h5>JD Templates</h5>
+                                <ul>
+                                    <li>Past JDs used by the company</li>
+                                    <li>High-performing JD examples</li>
+                                    <li>Variations: remote vs office, junior vs senior</li>
+                                </ul>
+                            </div>
+                            <div class="kb kb-y">
+                                <h5>Hiring Strategies</h5>
+                                <ul>
+                                    <li>Best platforms for hiring</li>
+                                    <li>Best practices</li>
+                                    <li>Internal salary band</li>
+                                    <li>Hiring checklist per profile</li>
+                                    <li>Interview question banks</li>
+                                </ul>
+                            </div>
+                            <div class="kb kb-b">
+                                <h5>Onboarding Checklist</h5>
+                                <ul>
+                                    <li>Offer letter template</li>
+                                    <li>Welcome email template</li>
+                                    <li>Employee policies</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sub">
+                        <h4>Improvements</h4>
+                        <div class="wf">
+                            <div class="wf-step"><span class="wf-label">Job Posting</span><span class="wf-info">Now
+                                    recommends based on past data: <em>"LinkedIn, Naukri, Angellist performed
+                                        best."</em></span></div>
+                            <div class="wf-step"><span class="wf-label">Shortlisting</span><span
+                                    class="wf-info">Prioritizes from historical patterns: Python/Django, AWS cloud
+                                    deployment, prior startup experience, project experience</span></div>
+                            <div class="wf-step"><span class="wf-label">Interviewing</span><span
+                                    class="wf-info">Retrieves past interview questions: describe a backend system you
+                                    designed, design a rate limiter, scale for high traffic</span></div>
+                        </div>
+                    </div>
+                    <div class="sub">
+                        <h4>Status after Chatbot 2</h4>
+                        <ul class="sl">
+                            <li><span class="no">✗</span> <strong>Reactive</strong> — still waits for prompts</li>
+                            <li><span class="no">✗</span> <strong>No memory</strong></li>
+                            <li><span class="ok">✓</span> <strong>Specific Advice</strong> — uses company's historical
+                                data</li>
+                            <li><span class="no">✗</span> <strong>Can't take actions</strong></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CHATBOT 3 -->
+        <div class="section" id="s6">
+            <div class="section-title"><span class="num">6</span> Chatbot 3 — Tool Augmented Chatbot</div>
+            <div class="chatbot-card cb3">
+                <div class="chatbot-header">🔧 Tool Augmented &nbsp;|&nbsp; RAG + API Tools = Can execute tasks</div>
+                <div class="chatbot-body">
+                    <div class="sub">
+                        <h4>Tools Added</h4>
+                        <div class="tools-grid">
+                            <div class="tool">LinkedIn API</div>
+                            <div class="tool">Resume Parser Tool</div>
+                            <div class="tool">Calendar API</div>
+                            <div class="tool">Mail API (Gmail)</div>
+                            <div class="tool">Zoho HRM Tool</div>
+                        </div>
+                    </div>
+                    <div class="sub" style="margin-top:14px;">
+                        <h4>What it can do now</h4>
+                        <div class="wf">
+                            <div class="wf-step"><span class="wf-label">Job Posting</span><span class="wf-info">User:
+                                    "Can you post on various platforms?" → Uses LinkedIn API to actually post on
+                                    LinkedIn & Naukri</span></div>
+                            <div class="wf-step"><span class="wf-label">Revising JD</span><span class="wf-info">Checks
+                                    LinkedIn API → "We've received just 1 application." → Suggests: broaden JD + boost
+                                    post → User approves → Revised JD posted. Full-stack candidates now allowed.</span>
+                            </div>
+                            <div class="wf-step"><span class="wf-label">Shortlisting</span><span class="wf-info">Runs
+                                    Resume Parser tool → screens for Python/Django, AWS, project experience → "2
+                                    candidates shortlisted." → User: "Mail me the profiles" → Sends via Gmail API</span>
+                            </div>
+                            <div class="wf-step"><span class="wf-label">Scheduling</span><span class="wf-info">Checks
+                                    Calendar API → "You are free this Friday. Should I schedule?" → Yes → drafts + sends
+                                    invite automatically</span></div>
+                            <div class="wf-step"><span class="wf-label">Offer</span><span class="wf-info">Drafts offer →
+                                    shows user for review → approved → sends via Mail API</span></div>
+                            <div class="wf-step"><span class="wf-label">Onboarding</span><span class="wf-info">Executes
+                                    in Zoho HRMS: share employment contract, create official email ID, provision
+                                    hardware, schedule KT session</span></div>
+                        </div>
+                    </div>
+                    <div class="sub">
+                        <h4>Status after Chatbot 3</h4>
+                        <ul class="sl">
+                            <li><span class="no">✗</span> <strong>Reactive</strong> — still needs user prompts to start
+                                each task</li>
+                            <li><span class="no">✗</span> <strong>No memory</strong></li>
+                            <li><span class="ok">✓</span> <strong>Specific Advice</strong></li>
+                            <li><span class="ok">✓</span> <strong>Takes Actions</strong> — uses real APIs to execute
+                                tasks</li>
+                            <li><span class="no">✗</span> <strong>Can't adapt</strong> — cannot proactively monitor
+                                pipeline or adjust strategy without being asked</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CHATBOT 4 -->
+        <div class="section" id="s7">
+            <div class="section-title"><span class="num">7</span> Chatbot 4 — Agentic AI</div>
+            <div class="chatbot-card cb4">
+                <div class="chatbot-header">🧠 Agentic AI &nbsp;|&nbsp; Proactive · Adaptive · Autonomous</div>
+                <div class="chatbot-body">
+                    <div class="sub">
+                        <h4>Key difference — one prompt triggers the entire workflow</h4>
+                        <div class="bubble-row u">
+                            <div class="bubble bu">I want to hire a backend engineer.</div>
+                        </div>
+                        <div class="bubble-row">
+                            <div class="bubble bb">✅ Goal: Hire a remote backend engineer (2–4 yrs
+                                experience)<br><br><strong>Proposed plan:</strong><br>1. Draft JD → post on best
+                                platforms<br>2. Monitor pipeline → adjust strategy if needed<br>3. Screen candidates →
+                                schedule interviews<br>4. Draft + send offer → start onboarding</div>
+                        </div>
+                    </div>
+                    <div class="sub">
+                        <h4>Agentic behaviour at each stage</h4>
+                        <div class="wf">
+                            <div class="wf-step"><span class="wf-label">JD Drafting</span><span
+                                    class="wf-info">Proactively drafts JD using company documents. Presents it: "Do you
+                                    want me to make changes?" → User: "No, this is fine."</span></div>
+                            <div class="wf-step"><span class="wf-label">Job Posting</span><span class="wf-info">Suggests
+                                    platforms, gets approval, posts via API → <em>"Job posted. I will monitor the
+                                        applications and keep you posted."</em> Monitors autonomously.</span></div>
+                            <div class="wf-step"><span class="wf-label">Revising JD</span><span class="wf-info">Detects
+                                    only 2 applications — below expectations. <em>Proactively alerts:</em> suggests
+                                    broadening JD to full-stack + promote on LinkedIn. Gets approval → <em>"Revised JD
+                                        posted. Promotions activated. I'll continue monitoring."</em></span></div>
+                            <div class="wf-step"><span class="wf-label">Scheduling</span><span class="wf-info">Checks
+                                    calendar → "You are free this Friday. Do you want me to schedule the interview?" →
+                                    User confirms → invitation drafted + sent.</span></div>
+                            <div class="wf-step"><span class="wf-label">Interviewing</span><span
+                                    class="wf-info">Proactively sends reminder: <em>"Quick reminder! You have 2
+                                        interviews today."</em> Also emails a document of past interview questions for
+                                    the role.</span></div>
+                            <div class="wf-step"><span class="wf-label">Offer Letter</span><span class="wf-info">Drafts
+                                    offer → user approves → <em>"Offer letter sent. Tracking acceptance."</em></span>
+                            </div>
+                            <div class="wf-step"><span class="wf-label">Onboarding</span><span class="wf-info">On
+                                    acceptance: welcome email sent, IT access submitted, laptop provisioned. Then:
+                                    <em>"Shall I schedule intro meetings?"</em> → Yes → scheduled.</span></div>
+                        </div>
+                    </div>
+                    <div class="sub">
+                        <h4>✅ All problems solved</h4>
+                        <ul class="sl">
+                            <li><span class="ok">✓</span> <strong>Proactive</strong> — initiates actions, monitors,
+                                sends reminders unprompted</li>
+                            <li><span class="ok">✓</span> <strong>Memory</strong> — maintains full context across entire
+                                workflow</li>
+                            <li><span class="ok">✓</span> <strong>Specific Advice</strong> — uses company knowledge base
+                            </li>
+                            <li><span class="ok">✓</span> <strong>Takes Actions</strong> — posts, emails, schedules,
+                                onboards via APIs</li>
+                            <li><span class="ok">✓</span> <strong>Adapts</strong> — detects low applications, revises
+                                strategy autonomously</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONCLUSION -->
+        <div class="section" id="s8">
+            <div class="section-title"><span class="num">8</span> Conclusion &amp; Evolution Summary</div>
+
+            <div class="conc-grid" style="margin-bottom:22px;">
+                <div class="conc">
+                    <strong>Purpose</strong>
+                    Gen AI is about <em>creating content</em>.<br>
+                    Agentic AI is about <em>solving a goal</em>.
+                </div>
+                <div class="conc">
+                    <strong>Behaviour</strong>
+                    Gen AI is <em>reactive</em> — waits for prompts.<br>
+                    Agentic AI is <em>proactive &amp; autonomous</em>.
+                </div>
+                <div class="conc" style="grid-column:1/-1;">
+                    <strong>Relationship</strong>
+                    Generative AI is a <em>building block</em> of Agentic AI — agentic systems use LLMs for reasoning
+                    and generation, but add memory, tools, and the ability to plan and act autonomously.
+                </div>
+            </div>
+
+            <div class="sub">
+                <h4>Evolution at a glance</h4>
+            </div>
+            <div class="evo-row">
+                <div class="evo-box" style="background:#dbeafe;color:#1e40af;">Chatbot 1<br><small>Basic LLM</small>
+                </div>
+                <span class="evo-arrow">→</span>
+                <div class="evo-box" style="background:#fef9c3;color:#713f12;">Chatbot 2<br><small>+ RAG</small></div>
+                <span class="evo-arrow">→</span>
+                <div class="evo-box" style="background:#dcfce7;color:#166534;">Chatbot 3<br><small>+ Tools</small></div>
+                <span class="evo-arrow">→</span>
+                <div class="evo-box" style="background:#ede9fe;color:#4c1d95;">Chatbot 4<br><small>Agentic AI</small>
+                </div>
+            </div>
+
+            <table class="cmp" style="margin-top:14px;font-size:13px;">
+                <tr>
+                    <th>Capability</th>
+                    <th style="text-align:center;">CB1 LLM</th>
+                    <th style="text-align:center;">CB2 RAG</th>
+                    <th style="text-align:center;">CB3 Tools</th>
+                    <th style="text-align:center;">CB4 Agentic</th>
+                </tr>
+                <tr>
+                    <td>Proactive</td>
+                    <td style="text-align:center;color:#dc2626;">✗</td>
+                    <td style="text-align:center;color:#dc2626;">✗</td>
+                    <td style="text-align:center;color:#dc2626;">✗</td>
+                    <td style="text-align:center;color:#16a34a;">✓</td>
+                </tr>
+                <tr>
+                    <td>Memory</td>
+                    <td style="text-align:center;color:#dc2626;">✗</td>
+                    <td style="text-align:center;color:#dc2626;">✗</td>
+                    <td style="text-align:center;color:#dc2626;">✗</td>
+                    <td style="text-align:center;color:#16a34a;">✓</td>
+                </tr>
+                <tr>
+                    <td>Specific Advice</td>
+                    <td style="text-align:center;color:#dc2626;">✗</td>
+                    <td style="text-align:center;color:#16a34a;">✓</td>
+                    <td style="text-align:center;color:#16a34a;">✓</td>
+                    <td style="text-align:center;color:#16a34a;">✓</td>
+                </tr>
+                <tr>
+                    <td>Takes Actions</td>
+                    <td style="text-align:center;color:#dc2626;">✗</td>
+                    <td style="text-align:center;color:#dc2626;">✗</td>
+                    <td style="text-align:center;color:#16a34a;">✓</td>
+                    <td style="text-align:center;color:#16a34a;">✓</td>
+                </tr>
+                <tr>
+                    <td>Adapts</td>
+                    <td style="text-align:center;color:#dc2626;">✗</td>
+                    <td style="text-align:center;color:#dc2626;">✗</td>
+                    <td style="text-align:center;color:#dc2626;">✗</td>
+                    <td style="text-align:center;color:#16a34a;">✓</td>
+                </tr>
+            </table>
+        </div>
+
+    </div>
+</body>
+
+</html>

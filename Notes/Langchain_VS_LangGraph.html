@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LangChain vs LangGraph — Study Notes</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap');
+
+        :root {
+            --bg: #0f0f11;
+            --surface: #18181c;
+            --surface2: #222228;
+            --border: #2e2e38;
+            --accent: #7c6af7;
+            --accent2: #f7516a;
+            --accent3: #3ecf8e;
+            --accent4: #f5a623;
+            --text: #e8e8f0;
+            --muted: #8888a0;
+            --code-bg: #1a1a22;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 300;
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        /* --- HEADER --- */
+        header {
+            background: linear-gradient(135deg, #1a1230 0%, #0f1a2e 50%, #1a0f20 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 48px 40px 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: -60px;
+            right: -60px;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(124, 106, 247, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: -40px;
+            left: 10%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(247, 81, 106, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(124, 106, 247, 0.15);
+            border: 1px solid rgba(124, 106, 247, 0.4);
+            color: var(--accent);
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            padding: 4px 12px;
+            border-radius: 4px;
+            margin-bottom: 16px;
+        }
+
+        h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(28px, 4vw, 48px);
+            font-weight: 800;
+            line-height: 1.15;
+            position: relative;
+        }
+
+        h1 span {
+            color: var(--accent);
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: 14px;
+            margin-top: 10px;
+            font-family: 'DM Mono', monospace;
+        }
+
+        /* --- LAYOUT --- */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        /* --- NAV PILLS --- */
+        .nav-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 40px;
+        }
+
+        .nav-pills a {
+            font-family: 'DM Mono', monospace;
+            font-size: 12px;
+            text-decoration: none;
+            color: var(--muted);
+            border: 1px solid var(--border);
+            padding: 5px 14px;
+            border-radius: 20px;
+            transition: all 0.2s;
+        }
+
+        .nav-pills a:hover {
+            color: var(--text);
+            border-color: var(--accent);
+            background: rgba(124, 106, 247, 0.08);
+        }
+
+        /* --- SECTION --- */
+        .section {
+            margin-bottom: 48px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-num {
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            color: var(--accent);
+            border: 1px solid rgba(124, 106, 247, 0.4);
+            padding: 2px 8px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
+        h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text);
+            margin: 18px 0 8px;
+        }
+
+        p {
+            color: #c0c0d0;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        /* --- CARD --- */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px 22px;
+            margin-bottom: 14px;
+        }
+
+        .card-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--muted);
+            margin-bottom: 12px;
+        }
+
+        /* --- LIST --- */
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        ul li {
+            font-size: 14px;
+            color: #c0c0d0;
+            padding: 5px 0 5px 20px;
+            position: relative;
+        }
+
+        ul li::before {
+            content: '›';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-size: 16px;
+            line-height: 1.4;
+        }
+
+        /* --- COMPONENT PILLS --- */
+        .pill-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 10px 0;
+        }
+
+        .pill {
+            font-family: 'DM Mono', monospace;
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: 1px solid;
+        }
+
+        .pill-purple {
+            color: #a89cf7;
+            border-color: rgba(168, 156, 247, 0.4);
+            background: rgba(124, 106, 247, 0.08);
+        }
+
+        .pill-green {
+            color: #3ecf8e;
+            border-color: rgba(62, 207, 142, 0.4);
+            background: rgba(62, 207, 142, 0.08);
+        }
+
+        .pill-red {
+            color: #f7516a;
+            border-color: rgba(247, 81, 106, 0.4);
+            background: rgba(247, 81, 106, 0.08);
+        }
+
+        .pill-yellow {
+            color: #f5a623;
+            border-color: rgba(245, 166, 35, 0.4);
+            background: rgba(245, 166, 35, 0.08);
+        }
+
+        /* --- CODE BLOCK --- */
+        pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            border-radius: 8px;
+            padding: 16px 18px;
+            overflow-x: auto;
+            font-family: 'DM Mono', monospace;
+            font-size: 12.5px;
+            color: #c8d3f5;
+            line-height: 1.65;
+            margin: 12px 0;
+        }
+
+        .kw {
+            color: #c099ff;
+        }
+
+        .fn {
+            color: #82aaff;
+        }
+
+        .str {
+            color: #c3e88d;
+        }
+
+        .cm {
+            color: #636da6;
+        }
+
+        /* --- CHALLENGE CARDS --- */
+        .challenge-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .challenge-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .ch-num {
+            font-family: 'DM Mono', monospace;
+            font-size: 12px;
+            font-weight: 500;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .ch-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .challenge-body {
+            padding: 16px 20px;
+        }
+
+        .c1 .ch-num {
+            background: rgba(247, 81, 106, 0.15);
+            color: #f7516a;
+        }
+
+        .c1 .ch-title {
+            color: #f7516a;
+        }
+
+        .c2 .ch-num {
+            background: rgba(245, 166, 35, 0.15);
+            color: #f5a623;
+        }
+
+        .c2 .ch-title {
+            color: #f5a623;
+        }
+
+        .c3 .ch-num {
+            background: rgba(62, 207, 142, 0.15);
+            color: #3ecf8e;
+        }
+
+        .c3 .ch-title {
+            color: #3ecf8e;
+        }
+
+        .c4 .ch-num {
+            background: rgba(124, 106, 247, 0.15);
+            color: #a89cf7;
+        }
+
+        .c4 .ch-title {
+            color: #a89cf7;
+        }
+
+        .c5 .ch-num {
+            background: rgba(247, 141, 81, 0.15);
+            color: #f7a151;
+        }
+
+        .c5 .ch-title {
+            color: #f7a151;
+        }
+
+        .c6 .ch-num {
+            background: rgba(62, 155, 207, 0.15);
+            color: #3eabcf;
+        }
+
+        .c6 .ch-title {
+            color: #3eabcf;
+        }
+
+        .c7 .ch-num {
+            background: rgba(200, 62, 207, 0.15);
+            color: #cf3ec7;
+        }
+
+        .c7 .ch-title {
+            color: #cf3ec7;
+        }
+
+        /* --- VS GRID --- */
+        .vs-grid {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 0;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0 16px;
+        }
+
+        .vs-col {
+            padding: 16px 18px;
+        }
+
+        .vs-col:first-child {
+            background: rgba(247, 81, 106, 0.05);
+            border-right: 1px solid var(--border);
+        }
+
+        .vs-col:last-child {
+            background: rgba(62, 207, 142, 0.05);
+            border-left: 1px solid var(--border);
+        }
+
+        .vs-label {
+            font-family: 'DM Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .vs-col:first-child .vs-label {
+            color: #f7516a;
+        }
+
+        .vs-col:last-child .vs-label {
+            color: #3ecf8e;
+        }
+
+        .vs-divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 10px;
+            font-family: 'Syne', sans-serif;
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--muted);
+            background: var(--surface2);
+        }
+
+        .vs-col ul li {
+            font-size: 13px;
+        }
+
+        /* --- FLOW --- */
+        .flow {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+            margin: 10px 0;
+            font-family: 'DM Mono', monospace;
+            font-size: 12px;
+        }
+
+        .flow-box {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 5px 10px;
+            color: var(--text);
+        }
+
+        .flow-arrow {
+            color: var(--accent);
+            font-size: 14px;
+        }
+
+        .flow-diamond {
+            background: rgba(124, 106, 247, 0.1);
+            border: 1px solid rgba(124, 106, 247, 0.4);
+            border-radius: 6px;
+            padding: 5px 10px;
+            color: #a89cf7;
+        }
+
+        /* --- STATE BLOCK --- */
+        .state-block {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px 18px;
+            font-family: 'DM Mono', monospace;
+            font-size: 12px;
+            color: #c8d3f5;
+            line-height: 1.8;
+            margin: 10px 0;
+        }
+
+        .sk {
+            color: #82aaff;
+        }
+
+        .sv {
+            color: #c3e88d;
+        }
+
+        .sn {
+            color: #f78c6c;
+        }
+
+        /* --- CONCLUSION TABLE --- */
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13.5px;
+        }
+
+        th {
+            font-family: 'Syne', sans-serif;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 2px solid var(--border);
+        }
+
+        th:nth-child(1) {
+            color: var(--muted);
+        }
+
+        th:nth-child(2) {
+            color: #f7516a;
+        }
+
+        th:nth-child(3) {
+            color: #3ecf8e;
+        }
+
+        td {
+            padding: 11px 16px;
+            border-bottom: 1px solid var(--border);
+            color: #c0c0d0;
+            vertical-align: top;
+        }
+
+        td:nth-child(1) {
+            font-family: 'DM Mono', monospace;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* --- KEY INSIGHT --- */
+        .insight {
+            background: linear-gradient(135deg, rgba(124, 106, 247, 0.08), rgba(62, 207, 142, 0.05));
+            border: 1px solid rgba(124, 106, 247, 0.25);
+            border-left: 3px solid var(--accent);
+            border-radius: 8px;
+            padding: 14px 18px;
+            font-size: 14px;
+            color: #d0d0e8;
+            margin: 12px 0;
+        }
+
+        .insight strong {
+            color: var(--accent);
+        }
+
+        /* --- SCROLLBAR --- */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="badge">CampusX · Video 3 · Agentic AI</div>
+        <h1>LangChain <span>vs</span> LangGraph</h1>
+        <div class="subtitle">03 July 2025 · Complete Study Notes</div>
+    </header>
+
+    <div class="container">
+
+        <!-- NAV -->
+        <nav class="nav-pills">
+            <a href="#langchain">What is LangChain</a>
+            <a href="#workflow">Hiring Workflow</a>
+            <a href="#agents">Agents vs Workflows</a>
+            <a href="#challenges">Challenges</a>
+            <a href="#conclusion">Conclusion</a>
+        </nav>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- SECTION 1: LangChain -->
+        <!-- ═══════════════════════════════════════════ -->
+        <section class="section" id="langchain">
+            <div class="section-header">
+                <span class="section-num">01</span>
+                <h2>What is LangChain?</h2>
+            </div>
+
+            <div class="insight">
+                LangChain is an <strong>open-source library</strong> designed to simplify building <strong>LLM-based
+                    applications</strong>. It provides modular building blocks for creating sophisticated LLM-based
+                workflows.
+            </div>
+
+            <div
+                style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap:12px; margin:16px 0;">
+                <div class="card">
+                    <div class="card-title">Core Components</div>
+                    <ul>
+                        <li><strong>Model</strong> — unified interface for all LLM providers</li>
+                        <li><strong>Prompts</strong> — prompt engineering helpers</li>
+                        <li><strong>Retrievers</strong> — fetch docs from a vector store</li>
+                        <li><strong>Chains</strong> — biggest offering; connects everything</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <div class="card-title">Use Cases</div>
+                    <ul>
+                        <li>Chatbots & Text Summarizers</li>
+                        <li>Multistep workflows</li>
+                        <li>RAG applications</li>
+                        <li>Basic-level agents</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>Chain Flow Pattern</h3>
+            <div class="flow">
+                <div class="flow-box">Prompt</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-box">LLM</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-box">Output Parser</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-box">Output</div>
+            </div>
+
+            <h3>RAG Flow Pattern</h3>
+            <div class="flow">
+                <div class="flow-box">Prompt</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-box">Retriever (Vector Store)</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-box">LLM</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-box">Response</div>
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- SECTION 2: Automated Hiring Workflow -->
+        <!-- ═══════════════════════════════════════════ -->
+        <section class="section" id="workflow">
+            <div class="section-header">
+                <span class="section-num">02</span>
+                <h2>Use Case: Automated Hiring Workflow</h2>
+            </div>
+
+            <p>A real-world agentic workflow that shows where LangChain alone starts to struggle.</p>
+
+            <div class="card">
+                <div class="card-title">Full Workflow Steps</div>
+                <div class="flow" style="flex-direction:column; align-items:flex-start; gap:4px;">
+                    <div class="flow-box">START</div>
+                    <span class="flow-arrow" style="padding-left:10px;">↓</span>
+                    <div class="flow-box">Hiring Request</div>
+                    <span class="flow-arrow" style="padding-left:10px;">↓</span>
+                    <div class="flow-box">Create JD (LLM)</div>
+                    <span class="flow-arrow" style="padding-left:10px;">↓</span>
+                    <div class="flow-diamond">JD Approved? <span style="color:#8888a0; font-size:11px;">(No → loop
+                            back)</span></div>
+                    <span class="flow-arrow" style="padding-left:10px;">↓ Yes</span>
+                    <div class="flow-box">Post JD <span style="color:#8888a0; font-size:11px;">(LinkedIn API
+                            tool)</span></div>
+                    <span class="flow-arrow" style="padding-left:10px;">↓</span>
+                    <div class="flow-box">Wait 7 Days</div>
+                    <span class="flow-arrow" style="padding-left:10px;">↓</span>
+                    <div class="flow-box">Monitor Applications</div>
+                    <span class="flow-arrow" style="padding-left:10px;">↓</span>
+                    <div class="flow-diamond">Enough Applications? (e.g. 20) <span
+                            style="color:#8888a0; font-size:11px;">(No → Modify JD → Wait 48hrs → loop)</span></div>
+                    <span class="flow-arrow" style="padding-left:10px;">↓ Yes</span>
+                    <div class="flow-box">Shortlist Candidates</div>
+                    <span class="flow-arrow" style="padding-left:10px;">↓</span>
+                    <div class="flow-box">Schedule Interviews <span style="color:#8888a0; font-size:11px;">(Calendar +
+                            Mail tools)</span></div>
+                    <span class="flow-arrow" style="padding-left:10px;">↓</span>
+                    <div class="flow-box">Conduct Interview</div>
+                    <span class="flow-arrow" style="padding-left:10px;">↓</span>
+                    <div class="flow-diamond">Selected?</div>
+                    <span class="flow-arrow" style="padding-left:10px;">↓ Yes → Send Offer Letter</span>
+                    <div class="flow-diamond">Accepted? <span style="color:#8888a0; font-size:11px;">(No → Renegotiate
+                            (human) | Yes → Onboarding)</span></div>
+                    <span class="flow-arrow" style="padding-left:10px;">↓ No (from Selected)</span>
+                    <div class="flow-box">Regret Email → END</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- SECTION 3: Agents vs Workflows -->
+        <!-- ═══════════════════════════════════════════ -->
+        <section class="section" id="agents">
+            <div class="section-header">
+                <span class="section-num">03</span>
+                <h2>Agents vs Workflows (Anthropic)</h2>
+            </div>
+            <div class="insight">
+                <em>From Anthropic's "Building Effective Agents" (Dec 2024):</em> Successful LLM implementations use
+                <strong>simple, composable patterns</strong> over complex frameworks.
+            </div>
+            <div class="vs-grid">
+                <div class="vs-col">
+                    <div class="vs-label">Workflows</div>
+                    <ul>
+                        <li>LLMs + tools orchestrated via <strong>predefined code paths</strong></li>
+                        <li>Deterministic, sequential execution</li>
+                        <li>Examples: chains, summarizers, RAG</li>
+                    </ul>
+                </div>
+                <div class="vs-divider">VS</div>
+                <div class="vs-col">
+                    <div class="vs-label">Agents</div>
+                    <ul>
+                        <li>LLMs <strong>dynamically direct</strong> their own process & tool usage</li>
+                        <li>Non-linear, event-driven</li>
+                        <li>Examples: hiring agent, autonomous researcher</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- SECTION 4: Challenges -->
+        <!-- ═══════════════════════════════════════════ -->
+        <section class="section" id="challenges">
+            <div class="section-header">
+                <span class="section-num">04</span>
+                <h2>LangChain Challenges → LangGraph Solutions</h2>
+            </div>
+
+            <!-- Challenge 1 -->
+            <div class="challenge-card c1">
+                <div class="challenge-header">
+                    <div class="ch-num">1</div>
+                    <div class="ch-title">Control Flow Complexity</div>
+                </div>
+                <div class="challenge-body">
+                    <div class="vs-grid">
+                        <div class="vs-col">
+                            <div class="vs-label">LangChain Problem</div>
+                            <ul>
+                                <li>Conditional branching is awkward</li>
+                                <li>Loops must be written manually</li>
+                                <li>Jumps between steps need "glue code"</li>
+                                <li>Logic lives in raw Python <code>while</code> loops outside the chain</li>
+                            </ul>
+                        </div>
+                        <div class="vs-divider">→</div>
+                        <div class="vs-col">
+                            <div class="vs-label">LangGraph Solution</div>
+                            <ul>
+                                <li>Nodes, edges, and conditional edges built into the graph</li>
+                                <li>No custom Python glue code needed</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <pre><span class="cm"># LangGraph approach</span>
+graph.add_node(<span class="str">"HiringRequest"</span>, hiring_request)
+graph.add_node(<span class="str">"CreateJD"</span>, create_jd)
+graph.add_node(<span class="str">"CheckApproval"</span>, check_approval)
+graph.add_node(<span class="str">"PostJD"</span>, post_jd)
+
+graph.add_edge(<span class="str">"HiringRequest"</span>, <span class="str">"CreateJD"</span>)
+graph.add_edge(<span class="str">"CreateJD"</span>, <span class="str">"CheckApproval"</span>)
+graph.add_conditional_edges(
+    <span class="str">"CheckApproval"</span>, approval_router,
+    {<span class="str">"approved"</span>: <span class="str">"PostJD"</span>, <span class="str">"not_approved"</span>: <span class="str">"CreateJD"</span>}  <span class="cm"># Loop back!</span>
+)
+graph.add_edge(<span class="str">"PostJD"</span>, END)</pre>
+                </div>
+            </div>
+
+            <!-- Challenge 2 -->
+            <div class="challenge-card c2">
+                <div class="challenge-header">
+                    <div class="ch-num">2</div>
+                    <div class="ch-title">Handling State</div>
+                </div>
+                <div class="challenge-body">
+                    <div class="vs-grid">
+                        <div class="vs-col">
+                            <div class="vs-label">LangChain Problem</div>
+                            <ul>
+                                <li>State managed <strong>manually</strong> — passed around as custom dict</li>
+                                <li>Memory limited to conversation history</li>
+                                <li>Complex workflows need manual state wiring</li>
+                            </ul>
+                        </div>
+                        <div class="vs-divider">→</div>
+                        <div class="vs-col">
+                            <div class="vs-label">LangGraph Solution</div>
+                            <ul>
+                                <li>Built-in <strong>stateful</strong> graph — typed state object (Pydantic / TypedDict)
+                                </li>
+                                <li>Every node can read <em>and</em> edit the state</li>
+                                <li>State covers the entire workflow</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <h3 style="margin-top:12px;">Example State Object</h3>
+                    <div class="state-block">
+                        state = {<br>
+                        &nbsp;&nbsp;<span class="sk">"goal"</span>: <span class="sv">"Hire a backend software
+                            engineer"</span>,<br>
+                        &nbsp;&nbsp;<span class="sk">"jd"</span>: <span class="sv">""</span>,<br>
+                        &nbsp;&nbsp;<span class="sk">"jd_approved"</span>: <span class="sn">False</span>,<br>
+                        &nbsp;&nbsp;<span class="sk">"jd_posted"</span>: <span class="sn">False</span>,<br>
+                        &nbsp;&nbsp;<span class="sk">"min_applicants"</span>: <span class="sn">5</span>,<br>
+                        &nbsp;&nbsp;<span class="sk">"num_applications"</span>: <span class="sn">0</span>,<br>
+                        &nbsp;&nbsp;<span class="sk">"shortlisted_candidates"</span>: {},<br>
+                        &nbsp;&nbsp;<span class="sk">"interview_questions"</span>: [],<br>
+                        &nbsp;&nbsp;<span class="sk">"offer_status"</span>: { <span class="sk">"sent"</span>: <span
+                            class="sn">False</span>, <span class="sk">"accepted"</span>: <span class="sn">False</span>,
+                        <span class="sk">"renegotiated"</span>: <span class="sn">False</span> },<br>
+                        &nbsp;&nbsp;<span class="sk">"onboarding_status"</span>: { <span class="sk">"completed"</span>:
+                        <span class="sn">False</span>, <span class="sk">"start_date"</span>: <span
+                            class="sn">None</span>, <span class="sk">"employee_id"</span>: <span class="sn">None</span>
+                        }<br>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Challenge 3 -->
+            <div class="challenge-card c3">
+                <div class="challenge-header">
+                    <div class="ch-num">3</div>
+                    <div class="ch-title">Event Driven Execution</div>
+                </div>
+                <div class="challenge-body">
+                    <div class="vs-grid">
+                        <div class="vs-col">
+                            <div class="vs-label">LangChain Problem</div>
+                            <ul>
+                                <li>Purely <strong>sequential</strong>: step 1 → 2 → 3 → end</li>
+                                <li>Cannot pause mid-execution</li>
+                                <li>Cannot wait for an external trigger</li>
+                            </ul>
+                        </div>
+                        <div class="vs-divider">→</div>
+                        <div class="vs-col">
+                            <div class="vs-label">LangGraph Solution</div>
+                            <ul>
+                                <li><strong>Event-driven</strong>: can pause, wait for input, resume</li>
+                                <li>Supports <strong>checkpointing</strong>: save state → store → resume later</li>
+                                <li>Enables async human review without time constraints</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Challenge 4 -->
+            <div class="challenge-card c4">
+                <div class="challenge-header">
+                    <div class="ch-num">4</div>
+                    <div class="ch-title">Fault Tolerance</div>
+                </div>
+                <div class="challenge-body">
+                    <div class="vs-grid">
+                        <div class="vs-col">
+                            <div class="vs-label">LangChain Problem</div>
+                            <ul>
+                                <li>Chains are designed to be <strong>short</strong></li>
+                                <li>No built-in retry or recovery logic</li>
+                                <li>Long-running workflows: one failure = restart from scratch</li>
+                            </ul>
+                        </div>
+                        <div class="vs-divider">→</div>
+                        <div class="vs-col">
+                            <div class="vs-label">LangGraph Solution</div>
+                            <ul>
+                                <li><strong>Retry logic</strong> built-in at node level</li>
+                                <li><strong>Checkpointing</strong> via a persistence layer</li>
+                                <li>On failure: <strong>resume from last checkpoint</strong>, not from start</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Challenge 5 -->
+            <div class="challenge-card c5">
+                <div class="challenge-header">
+                    <div class="ch-num">5</div>
+                    <div class="ch-title">Human in the Loop</div>
+                </div>
+                <div class="challenge-body">
+                    <div class="vs-grid">
+                        <div class="vs-col">
+                            <div class="vs-label">LangChain Problem</div>
+                            <ul>
+                                <li>Chain cannot <strong>pause</strong> mid-execution for human review</li>
+                                <li>No mechanism to inject human input mid-workflow</li>
+                            </ul>
+                        </div>
+                        <div class="vs-divider">→</div>
+                        <div class="vs-col">
+                            <div class="vs-label">LangGraph Solution</div>
+                            <ul>
+                                <li>Workflow <strong>pauses</strong> at any node, collects human input, then continues
+                                </li>
+                                <li>State saved to store (e.g. 24 hrs), human reviews/approves, execution resumes</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="insight" style="margin-top:12px;">
+                        <strong>LangGraph HIL Patterns:</strong> Approve/Reject · Edit Graph State · Review Tool Calls ·
+                        Persistent execution state (pause indefinitely — minutes, hours, days)
+                    </div>
+                </div>
+            </div>
+
+            <!-- Challenge 6 -->
+            <div class="challenge-card c6">
+                <div class="challenge-header">
+                    <div class="ch-num">6</div>
+                    <div class="ch-title">Nested Workflows (Subgraphs)</div>
+                </div>
+                <div class="challenge-body">
+                    <div class="vs-grid">
+                        <div class="vs-col">
+                            <div class="vs-label">LangChain Problem</div>
+                            <ul>
+                                <li>No native concept of composing graphs inside graphs</li>
+                                <li>Multi-agent coordination is manual</li>
+                            </ul>
+                        </div>
+                        <div class="vs-divider">→</div>
+                        <div class="vs-col">
+                            <div class="vs-label">LangGraph Solution</div>
+                            <ul>
+                                <li><strong>Subgraphs</strong>: a graph used as a <em>node</em> inside another graph
+                                </li>
+                                <li>Enables <strong>multi-agent</strong> systems (e.g. self-driving car)</li>
+                                <li>Supports <strong>reusability</strong> — subgraphs are reusable modules</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Challenge 7 -->
+            <div class="challenge-card c7">
+                <div class="challenge-header">
+                    <div class="ch-num">7</div>
+                    <div class="ch-title">Observability</div>
+                </div>
+                <div class="challenge-body">
+                    <div class="vs-grid">
+                        <div class="vs-col">
+                            <div class="vs-label">LangChain Problem</div>
+                            <ul>
+                                <li>Observability is <strong>partial</strong> — hard to monitor or debug complex flows
+                                </li>
+                                <li>Glue code + while loops are opaque</li>
+                            </ul>
+                        </div>
+                        <div class="vs-divider">→</div>
+                        <div class="vs-col">
+                            <div class="vs-label">LangGraph Solution</div>
+                            <ul>
+                                <li>Native integration with <strong>LangSmith</strong></li>
+                                <li>Full <strong>timeline</strong> of node executions, state transitions, and tool calls
+                                </li>
+                                <li>Monitor, debug, and understand the workflow at runtime</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="insight" style="margin-top:12px;">
+                        <strong>Observability</strong> = ability to <em>monitor</em>, <em>debug</em>, and
+                        <em>understand</em> what your workflow is doing at runtime.
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- SECTION 5: Conclusion -->
+        <!-- ═══════════════════════════════════════════ -->
+        <section class="section" id="conclusion">
+            <div class="section-header">
+                <span class="section-num">05</span>
+                <h2>Conclusion</h2>
+            </div>
+
+            <div class="insight">
+                <strong>What is LangGraph?</strong> An orchestration framework that enables you to build
+                <strong>stateful, multi-step, event-driven</strong> workflows using LLMs. Think of it as a <em>flowchart
+                    engine for LLMs</em> — you define the steps (nodes), connections (edges), and transition logic.
+                LangGraph handles state management, conditional branching, looping, pausing/resuming, and fault
+                recovery.
+            </div>
+
+            <div class="table-wrap" style="margin-top:20px;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>LangChain</th>
+                            <th>LangGraph</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Control Flow</td>
+                            <td>Manual Python glue code</td>
+                            <td>Built-in nodes, edges, conditional edges</td>
+                        </tr>
+                        <tr>
+                            <td>State Management</td>
+                            <td>Manual dict, limited memory</td>
+                            <td>Typed, stateful state object (Pydantic/TypedDict)</td>
+                        </tr>
+                        <tr>
+                            <td>Execution Model</td>
+                            <td>Sequential only</td>
+                            <td>Event-driven, pausable, resumable</td>
+                        </tr>
+                        <tr>
+                            <td>Fault Tolerance</td>
+                            <td>None — restart from scratch</td>
+                            <td>Retry logic + checkpointing + resume</td>
+                        </tr>
+                        <tr>
+                            <td>Human-in-Loop</td>
+                            <td>Not supported mid-execution</td>
+                            <td>Native — pause, input, continue</td>
+                        </tr>
+                        <tr>
+                            <td>Multi-agent</td>
+                            <td>Manual coordination</td>
+                            <td>Subgraphs + native multi-agent support</td>
+                        </tr>
+                        <tr>
+                            <td>Observability</td>
+                            <td>Partial</td>
+                            <td>Full via LangSmith (timeline, traces)</td>
+                        </tr>
+                        <tr>
+                            <td>Best For</td>
+                            <td>Simple, linear workflows</td>
+                            <td>Complex, non-linear, agentic workflows</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:20px;">
+                <div class="card">
+                    <div class="card-title" style="color:#f7516a;">Use LangChain When</div>
+                    <ul>
+                        <li>Simple, linear workflows</li>
+                        <li>Prompt chains</li>
+                        <li>Text summarizers</li>
+                        <li>Basic RAG / retrieval systems</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <div class="card-title" style="color:#3ecf8e;">Use LangGraph When</div>
+                    <ul>
+                        <li>Conditional paths & loops</li>
+                        <li>Human-in-the-loop steps</li>
+                        <li>Multi-agent coordination</li>
+                        <li>Async / event-driven execution</li>
+                        <li>Long-running production workflows</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="insight" style="margin-top:20px;">
+                <strong>Does LangGraph replace LangChain?</strong> No. LangGraph is built <strong>on top of
+                    LangChain</strong>. You still use LangChain components inside each node: <code>ChatOpenAI</code>,
+                <code>PromptTemplate</code>, <code>Retrievers</code>, <code>DocumentLoaders</code>, <code>Tools</code>,
+                etc.<br><br>
+                <strong>LangGraph</strong> handles <em>workflow orchestration</em>. <strong>LangChain</strong> provides
+                the <em>building blocks</em> for each step.
+            </div>
+        </section>
+
+        <div
+            style="text-align:center; color:var(--muted); font-family:'DM Mono',monospace; font-size:11px; padding: 24px 0 40px; border-top: 1px solid var(--border); margin-top:20px;">
+            Notes from CampusX · LangChain vs LangGraph · Video 3 · 03 July 2025
+        </div>
+
+    </div>
+</body>
+
+</html>

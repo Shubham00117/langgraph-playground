@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What is Agentic AI? — Study Notes</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0c0e16;
+            --surface: #11141f;
+            --card: #161b28;
+            --card2: #1a1f2e;
+            --border: #232840;
+            --gold: #f0c060;
+            --blue: #5ba8f5;
+            --green: #5dd68c;
+            --red: #f06070;
+            --purple: #a87ef5;
+            --orange: #f5a050;
+            --teal: #50d4c8;
+            --text: #dde2f0;
+            --muted: #6b7494;
+            --mono: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 300;
+            line-height: 1.75;
+        }
+
+        /* NAV */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(12, 14, 22, 0.96);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 2rem;
+            overflow-x: auto;
+        }
+
+        nav a {
+            color: var(--muted);
+            text-decoration: none;
+            font-family: var(--mono);
+            font-size: 0.7rem;
+            letter-spacing: .03em;
+            padding: .95rem 1rem;
+            border-bottom: 2px solid transparent;
+            white-space: nowrap;
+            transition: color .2s, border-color .2s;
+        }
+
+        nav a:hover {
+            color: var(--text);
+        }
+
+        nav a.active {
+            color: var(--gold);
+            border-bottom-color: var(--gold);
+        }
+
+        /* HERO */
+        .hero {
+            text-align: center;
+            padding: 4.5rem 2rem 3rem;
+            background: radial-gradient(ellipse at 20% 0%, rgba(240, 192, 96, .07) 0%, transparent 55%),
+                radial-gradient(ellipse at 80% 0%, rgba(91, 168, 245, .07) 0%, transparent 55%);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .badge {
+            display: inline-block;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            font-family: var(--mono);
+            font-size: .68rem;
+            color: var(--muted);
+            padding: .3rem 1rem;
+            margin-bottom: 1.4rem;
+            letter-spacing: .08em;
+        }
+
+        .hero h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(2rem, 5vw, 3.6rem);
+            font-weight: 800;
+            letter-spacing: -.02em;
+            line-height: 1.1;
+            margin-bottom: 1rem;
+        }
+
+        .hero h1 span {
+            color: var(--gold);
+        }
+
+        .hero p {
+            max-width: 540px;
+            margin: 0 auto;
+            color: var(--muted);
+            font-size: .95rem;
+        }
+
+        /* LAYOUT */
+        main {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 3rem 1.5rem 6rem;
+        }
+
+        /* SECTION HEADERS */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: .9rem;
+            margin: 3.5rem 0 1.5rem;
+        }
+
+        .section-num {
+            font-family: var(--mono);
+            font-size: .68rem;
+            color: var(--muted);
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: .2rem .55rem;
+        }
+
+        .section-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -.01em;
+        }
+
+        .section-line {
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* DEF BOX */
+        .def-box {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--gold);
+            border-radius: 10px;
+            padding: 1.3rem 1.5rem;
+            font-size: 1rem;
+            line-height: 1.8;
+            margin-bottom: 1.4rem;
+        }
+
+        .def-box strong {
+            color: var(--gold);
+            font-weight: 500;
+        }
+
+        /* COMPARE */
+        .compare-table {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .compare-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.2rem 1.4rem;
+            text-align: center;
+        }
+
+        .compare-card h3 {
+            font-family: var(--mono);
+            font-size: .75rem;
+            letter-spacing: .06em;
+            margin-bottom: .5rem;
+        }
+
+        .compare-card.gen h3 {
+            color: var(--muted);
+        }
+
+        .compare-card.agn h3 {
+            color: var(--gold);
+        }
+
+        .compare-card p {
+            font-size: .83rem;
+            color: var(--muted);
+            margin-bottom: .6rem;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: .3rem .9rem;
+            border-radius: 100px;
+            font-size: .82rem;
+            font-weight: 500;
+        }
+
+        .compare-card.gen .tag {
+            background: rgba(107, 116, 148, .15);
+            color: var(--muted);
+        }
+
+        .compare-card.agn .tag {
+            background: rgba(240, 192, 96, .12);
+            color: var(--gold);
+        }
+
+        /* WORKFLOW */
+        .workflow {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: .75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .step-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem 1.1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .step-card::after {
+            content: attr(data-n);
+            position: absolute;
+            bottom: .4rem;
+            right: .7rem;
+            font-family: var(--mono);
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, .03);
+            line-height: 1;
+        }
+
+        .step-card .sn {
+            font-family: var(--mono);
+            font-size: .62rem;
+            color: var(--muted);
+            margin-bottom: .3rem;
+        }
+
+        .step-card h4 {
+            font-family: 'Syne', sans-serif;
+            font-size: .9rem;
+            font-weight: 700;
+            margin-bottom: .3rem;
+        }
+
+        .step-card p {
+            font-size: .8rem;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .s1 {
+            border-top: 2px solid var(--blue)
+        }
+
+        .s2 {
+            border-top: 2px solid var(--green)
+        }
+
+        .s3 {
+            border-top: 2px solid var(--gold)
+        }
+
+        .s4 {
+            border-top: 2px solid var(--purple)
+        }
+
+        .s5 {
+            border-top: 2px solid var(--orange)
+        }
+
+        .s6 {
+            border-top: 2px solid var(--teal)
+        }
+
+        .s7 {
+            border-top: 2px solid var(--red)
+        }
+
+        .s8 {
+            border-top: 2px solid var(--green)
+        }
+
+        /* TRAIT PILLS */
+        .trait-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .55rem;
+            margin: 1rem 0 1.5rem;
+            justify-content: center;
+        }
+
+        .trait-pill {
+            padding: .4rem 1rem;
+            border-radius: 100px;
+            font-family: var(--mono);
+            font-size: .74rem;
+            font-weight: 500;
+            border: 1px solid;
+        }
+
+        .tp-blue {
+            background: rgba(91, 168, 245, .1);
+            color: var(--blue);
+            border-color: rgba(91, 168, 245, .3)
+        }
+
+        .tp-gold {
+            background: rgba(240, 192, 96, .1);
+            color: var(--gold);
+            border-color: rgba(240, 192, 96, .3)
+        }
+
+        .tp-green {
+            background: rgba(93, 214, 140, .1);
+            color: var(--green);
+            border-color: rgba(93, 214, 140, .3)
+        }
+
+        .tp-purple {
+            background: rgba(168, 126, 245, .1);
+            color: var(--purple);
+            border-color: rgba(168, 126, 245, .3)
+        }
+
+        .tp-orange {
+            background: rgba(245, 160, 80, .1);
+            color: var(--orange);
+            border-color: rgba(245, 160, 80, .3)
+        }
+
+        .tp-teal {
+            background: rgba(80, 212, 200, .1);
+            color: var(--teal);
+            border-color: rgba(80, 212, 200, .3)
+        }
+
+        /* CHAR CARD */
+        .char-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.4rem 1.6rem;
+            margin-bottom: 1rem;
+        }
+
+        .char-head {
+            display: flex;
+            align-items: center;
+            gap: .8rem;
+            margin-bottom: .9rem;
+        }
+
+        .char-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .char-card h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+        }
+
+        .char-def {
+            font-size: .88rem;
+            color: var(--muted);
+            border-left: 2px solid var(--border);
+            padding-left: .85rem;
+            margin-bottom: .9rem;
+            line-height: 1.65;
+        }
+
+        .char-def strong {
+            color: var(--text);
+        }
+
+        .points {
+            display: flex;
+            flex-direction: column;
+            gap: .45rem;
+        }
+
+        .pt {
+            background: var(--card2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: .6rem .85rem;
+            font-size: .83rem;
+            display: flex;
+            gap: .55rem;
+            align-items: flex-start;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-top: .5rem;
+        }
+
+        .pt strong {
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .pt span {
+            color: var(--muted);
+        }
+
+        /* WARN */
+        .warn {
+            background: rgba(240, 96, 112, .06);
+            border: 1px solid rgba(240, 96, 112, .22);
+            border-radius: 8px;
+            padding: .85rem 1rem;
+            font-size: .83rem;
+            color: var(--red);
+            margin-top: .8rem;
+        }
+
+        .warn strong {
+            display: block;
+            font-weight: 600;
+            margin-bottom: .25rem;
+        }
+
+        /* CONTROL GRID */
+        .ctrl-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: .5rem;
+            margin-top: .7rem;
+        }
+
+        .ctrl {
+            background: var(--card2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: .6rem .85rem;
+            font-size: .82rem;
+        }
+
+        .ctrl strong {
+            color: var(--purple);
+            display: block;
+            font-weight: 500;
+            font-size: .76rem;
+            margin-bottom: .15rem;
+        }
+
+        .ctrl span {
+            color: var(--muted);
+        }
+
+        /* CODE */
+        .code-block {
+            background: #090b12;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem 1.2rem;
+            font-family: var(--mono);
+            font-size: .76rem;
+            line-height: 1.85;
+            overflow-x: auto;
+            margin: .8rem 0;
+            color: #8895bb;
+        }
+
+        .k {
+            color: var(--purple)
+        }
+
+        .s {
+            color: var(--green)
+        }
+
+        .n {
+            color: var(--gold)
+        }
+
+        .b {
+            color: var(--blue)
+        }
+
+        .r {
+            color: var(--red)
+        }
+
+        /* PLAN STEPS */
+        .plan-steps {
+            display: flex;
+            flex-direction: column;
+            gap: .5rem;
+            margin-top: .8rem;
+        }
+
+        .plan-step {
+            display: flex;
+            gap: .8rem;
+            align-items: flex-start;
+            background: var(--card2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: .7rem .9rem;
+        }
+
+        .pn {
+            font-family: var(--mono);
+            font-size: .68rem;
+            color: var(--gold);
+            background: rgba(240, 192, 96, .1);
+            border: 1px solid rgba(240, 192, 96, .25);
+            border-radius: 5px;
+            padding: .1rem .5rem;
+            flex-shrink: 0;
+            margin-top: .15rem;
+        }
+
+        .plan-step-body {
+            font-size: .83rem;
+        }
+
+        .plan-step-body strong {
+            color: var(--text);
+            font-weight: 500;
+            display: block;
+            margin-bottom: .15rem;
+        }
+
+        .plan-step-body span {
+            color: var(--muted);
+            font-size: .78rem;
+        }
+
+        /* REASONING */
+        .reason-cols {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: .75rem;
+            margin-top: .8rem;
+        }
+
+        .reason-col {
+            background: var(--card2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: .9rem 1rem;
+        }
+
+        .reason-col h5 {
+            font-family: var(--mono);
+            font-size: .68rem;
+            color: var(--teal);
+            letter-spacing: .05em;
+            margin-bottom: .6rem;
+            padding-bottom: .35rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .ri {
+            font-size: .81rem;
+            color: var(--muted);
+            padding: .22rem 0;
+        }
+
+        .ri strong {
+            color: var(--text);
+            font-weight: 500;
+            display: block;
+        }
+
+        /* CONTEXT GRID */
+        .ctx-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+            gap: .5rem;
+            margin-top: .8rem;
+        }
+
+        .ctx-item {
+            background: var(--card2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: .65rem .85rem;
+            font-size: .81rem;
+        }
+
+        .ctx-item strong {
+            display: block;
+            color: var(--teal);
+            font-weight: 500;
+            font-size: .73rem;
+            margin-bottom: .2rem;
+            font-family: var(--mono);
+        }
+
+        .ctx-item span {
+            color: var(--muted);
+        }
+
+        /* COMP CARD */
+        .comp-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.4rem 1.6rem;
+            margin-bottom: 1rem;
+        }
+
+        .comp-header {
+            display: flex;
+            align-items: center;
+            gap: .9rem;
+            margin-bottom: 1rem;
+            padding-bottom: .9rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .comp-emoji {
+            font-size: 1.5rem;
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            flex-shrink: 0;
+        }
+
+        .comp-header h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+        }
+
+        .comp-header span {
+            font-family: var(--mono);
+            font-size: .68rem;
+            color: var(--muted);
+            display: block;
+            margin-top: .1rem;
+        }
+
+        .comp-rows {
+            display: flex;
+            flex-direction: column;
+            gap: .45rem;
+        }
+
+        .comp-row {
+            display: grid;
+            grid-template-columns: 155px 1fr;
+            gap: .7rem;
+            align-items: baseline;
+            padding: .5rem .6rem;
+            border-radius: 7px;
+            background: var(--card2);
+            border: 1px solid var(--border);
+        }
+
+        .crl {
+            font-family: var(--mono);
+            font-size: .71rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .crd {
+            font-size: .82rem;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        /* FOOTER */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            border-top: 1px solid var(--border);
+            font-family: var(--mono);
+            font-size: .68rem;
+            color: var(--muted);
+        }
+
+        /* RESPONSIVE */
+        @media(max-width:640px) {
+
+            .compare-table,
+            .ctrl-grid,
+            .reason-cols {
+                grid-template-columns: 1fr
+            }
+
+            .comp-row {
+                grid-template-columns: 1fr;
+                gap: .15rem
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <a href="#def" class="active">Definition</a>
+        <a href="#example">Example</a>
+        <a href="#char">Characteristics</a>
+        <a href="#comp">Components</a>
+    </nav>
+
+    <div class="hero">
+        <div class="badge">LangGraph · Video 2 · CampusX · 26 June 2025</div>
+        <h1>What is <span>Agentic AI?</span></h1>
+        <p>Short, clear study notes from all lecture screenshots — definition, real-world walkthrough, key
+            characteristics, and system components.</p>
+    </div>
+
+    <main>
+
+        <!-- ── SECTION 1: DEFINITION ── -->
+        <div class="section-header" id="def">
+            <span class="section-num">01</span>
+            <h2 class="section-title">Definition</h2>
+            <div class="section-line"></div>
+        </div>
+
+        <div class="def-box">
+            Agentic AI is a type of AI that can take up a <strong>task or goal</strong> from a user and then work toward
+            completing it <strong>on its own</strong>, with <strong>minimal human guidance</strong>. It plans, takes
+            action, adapts to changes, and seeks help only when necessary.
+        </div>
+
+        <div class="compare-table">
+            <div class="compare-card gen">
+                <h3>GEN AI</h3>
+                <p>Responds to one prompt at a time. Waits for your next instruction after every response.</p>
+                <span class="tag">⚡ Reactive</span>
+            </div>
+            <div class="compare-card agn">
+                <h3>AGENTIC AI</h3>
+                <p>Takes one goal and autonomously drives itself to completion across many steps.</p>
+                <span class="tag">🚀 Proactive</span>
+            </div>
+        </div>
+
+        <!-- ── SECTION 2: EXAMPLE ── -->
+        <div class="section-header" id="example">
+            <span class="section-num">02</span>
+            <h2 class="section-title">Example — AI Recruiter</h2>
+            <div class="section-line"></div>
+        </div>
+
+        <p style="color:var(--muted);font-size:.88rem;margin-bottom:1.2rem">
+            Goal given: <span style="font-family:var(--mono);color:var(--gold);font-size:.8rem">"Hire a Backend Engineer
+                — remote, 2–4 yrs, Python / Django / Cloud"</span>
+        </p>
+
+        <div class="workflow">
+            <div class="step-card s1" data-n="1">
+                <p class="sn">STEP 01</p>
+                <h4>Drafting JD</h4>
+                <p>Reads company docs → drafts JD → presents to HR → asks for changes or approval.</p>
+            </div>
+            <div class="step-card s2" data-n="2">
+                <p class="sn">STEP 02</p>
+                <h4>Posting JD</h4>
+                <p>Uses APIs (tools) to post on LinkedIn &amp; Naukri. Automatically monitors applications.</p>
+            </div>
+            <div class="step-card s3" data-n="3">
+                <p class="sn">STEP 03</p>
+                <h4>Revising JD</h4>
+                <p>Only 2 apps — below expectations. Suggests broadening to full-stack → gets approval → revises &amp;
+                    reposts.</p>
+            </div>
+            <div class="step-card s4" data-n="4">
+                <p class="sn">STEP 04</p>
+                <h4>Shortlisting</h4>
+                <p>8 applications → parses resumes → 2 strong, 3 partial, 3 weak → asks to schedule top 2.</p>
+            </div>
+            <div class="step-card s5" data-n="5">
+                <p class="sn">STEP 05</p>
+                <h4>Scheduling</h4>
+                <p>Checks calendar → Friday free → drafts &amp; sends 45-min interview invite email to candidates.</p>
+            </div>
+            <div class="step-card s6" data-n="6">
+                <p class="sn">STEP 06</p>
+                <h4>Interviewing</h4>
+                <p>Sends reminder (2 interviews today) + emails interviewer a list of role-specific questions.</p>
+            </div>
+            <div class="step-card s7" data-n="7">
+                <p class="sn">STEP 07</p>
+                <h4>Offer Letter</h4>
+                <p>HR picks 1 candidate → agent drafts offer letter → HR approves → sends and tracks acceptance.</p>
+            </div>
+            <div class="step-card s8" data-n="8">
+                <p class="sn">STEP 08</p>
+                <h4>Onboarding</h4>
+                <p>Candidate accepts → welcome email sent, IT access submitted, laptop provisioned, intro meetings
+                    scheduled.</p>
+            </div>
+        </div>
+
+        <!-- ── SECTION 3: CHARACTERISTICS ── -->
+        <div class="section-header" id="char">
+            <span class="section-num">03</span>
+            <h2 class="section-title">Key Characteristics</h2>
+            <div class="section-line"></div>
+        </div>
+
+        <div class="trait-grid">
+            <span class="trait-pill tp-blue">Autonomous</span>
+            <span class="trait-pill tp-gold">Goal Oriented</span>
+            <span class="trait-pill tp-green">Planning</span>
+            <span class="trait-pill tp-purple">Reasoning</span>
+            <span class="trait-pill tp-orange">Adaptability</span>
+            <span class="trait-pill tp-teal">Context Awareness</span>
+        </div>
+
+        <!-- AUTONOMY -->
+        <div class="char-card">
+            <div class="char-head">
+                <div class="char-icon" style="background:rgba(91,168,245,.12)">🤖</div>
+                <h3 style="color:var(--blue)">Autonomy</h3>
+            </div>
+            <p class="char-def">The AI system's ability to <strong>make decisions</strong> and <strong>take actions on
+                    its own</strong> to achieve a given goal, without needing step-by-step human instructions. It is
+                proactive, not just reactive.</p>
+
+            <p
+                style="font-family:var(--mono);font-size:.7rem;color:var(--muted);margin-bottom:.45rem;letter-spacing:.04em">
+                AUTONOMY OPERATES IN THREE FACETS</p>
+            <div class="points">
+                <div class="pt">
+                    <div class="dot" style="background:var(--blue)"></div>
+                    <div><strong>Execution</strong> <span>— carries out tasks independently</span></div>
+                </div>
+                <div class="pt">
+                    <div class="dot" style="background:var(--blue)"></div>
+                    <div><strong>Decision Making</strong> <span>— chooses next action from options</span></div>
+                </div>
+                <div class="pt">
+                    <div class="dot" style="background:var(--blue)"></div>
+                    <div><strong>Tool Usage</strong> <span>— selects and calls the right tools</span></div>
+                </div>
+            </div>
+
+            <p
+                style="font-family:var(--mono);font-size:.7rem;color:var(--muted);margin:.9rem 0 .4rem;letter-spacing:.04em">
+                AUTONOMY CAN BE CONTROLLED</p>
+            <div class="ctrl-grid">
+                <div class="ctrl"><strong>Permission Scope</strong><span>Limit what actions the agent can do alone. (Can
+                        screen, but needs approval to reject anyone.)</span></div>
+                <div class="ctrl"><strong>HITL (Human-in-the-Loop)</strong><span>Insert checkpoints requiring human
+                        sign-off. ("Can I post this JD?")</span></div>
+                <div class="ctrl"><strong>Override Controls</strong><span>User can stop, pause, or change agent
+                        behaviour at any time.</span></div>
+                <div class="ctrl"><strong>Guardrails / Policies</strong><span>Hard rules the agent must always follow.
+                        (Never schedule interviews on weekends.)</span></div>
+            </div>
+
+            <div class="warn">
+                <strong>⚠ Autonomy can be dangerous — real risks</strong>
+                Sends offers with incorrect salaries · Shortlists by age or nationality (discrimination) · Overspends on
+                LinkedIn ads
+            </div>
+        </div>
+
+        <!-- GOAL ORIENTED -->
+        <div class="char-card">
+            <div class="char-head">
+                <div class="char-icon" style="background:rgba(240,192,96,.12)">🎯</div>
+                <h3 style="color:var(--gold)">Goal Oriented</h3>
+            </div>
+            <p class="char-def">The AI operates with a <strong>persistent objective</strong> in mind and continuously
+                directs all its actions to achieve that objective, rather than just responding to isolated prompts.</p>
+            <div class="points">
+                <div class="pt">
+                    <div class="dot" style="background:var(--gold)"></div>
+                    <div><strong>Goals act as a compass for Autonomy</strong> <span>— every decision is measured against
+                            the goal</span></div>
+                </div>
+                <div class="pt">
+                    <div class="dot" style="background:var(--gold)"></div>
+                    <div><strong>Goals can come with constraints</strong> <span>— remote-only, budget limit, specific
+                            tech stack</span></div>
+                </div>
+                <div class="pt">
+                    <div class="dot" style="background:var(--gold)"></div>
+                    <div><strong>Goals are stored in core memory</strong> <span>— as a JSON object (conceptual
+                            representation)</span></div>
+                </div>
+                <div class="pt">
+                    <div class="dot" style="background:var(--gold)"></div>
+                    <div><strong>Goals can be altered</strong> <span>— user can pivot mid-task (e.g. hire freelancer
+                            instead)</span></div>
+                </div>
+            </div>
+            <div class="code-block">
+                {
+                <span class="k">"main_goal"</span>: <span class="s">"Hire a backend engineer"</span>,
+                <span class="k">"constraints"</span>: {
+                <span class="k">"experience"</span>: <span class="s">"2-4 years"</span>,
+                <span class="k">"remote"</span>: <span class="b">true</span>,
+                <span class="k">"stack"</span>: [<span class="s">"Python"</span>, <span class="s">"Django"</span>, <span
+                    class="s">"Cloud"</span>]
+                },
+                <span class="k">"status"</span>: <span class="n">"active"</span>,
+                <span class="k">"progress"</span>: {
+                <span class="k">"JD_created"</span>: <span class="b">true</span>,
+                <span class="k">"posted_on"</span>: [<span class="s">"LinkedIn"</span>, <span
+                    class="s">"AngelList"</span>],
+                <span class="k">"applications_received"</span>: <span class="r">8</span>,
+                <span class="k">"interviews_scheduled"</span>: <span class="r">2</span>
+                }
+                }
+            </div>
+        </div>
+
+        <!-- PLANNING -->
+        <div class="char-card">
+            <div class="char-head">
+                <div class="char-icon" style="background:rgba(93,214,140,.12)">🗺️</div>
+                <h3 style="color:var(--green)">Planning</h3>
+            </div>
+            <p class="char-def">The agent's ability to <strong>break down a high-level goal</strong> into a structured
+                sequence of actions or subgoals and decide the best path to achieve the desired outcome.</p>
+            <div class="plan-steps">
+                <div class="plan-step">
+                    <span class="pn">S1</span>
+                    <div class="plan-step-body">
+                        <strong>Generate Multiple Candidate Plans</strong>
+                        <span>Plan A: Post JD on LinkedIn, GitHub Jobs, AngelList · Plan B: Internal referrals and
+                            hiring agencies</span>
+                    </div>
+                </div>
+                <div class="plan-step">
+                    <span class="pn">S2</span>
+                    <div class="plan-step-body">
+                        <strong>Evaluate Each Plan</strong>
+                        <span>Criteria — Efficiency · Tool Availability · Cost · Risk · Alignment with constraints
+                            (remote-only? budget?)</span>
+                    </div>
+                </div>
+                <div class="plan-step">
+                    <span class="pn">S3</span>
+                    <div class="plan-step-body">
+                        <strong>Select the Best Plan</strong>
+                        <span>Via HITL input ("Which option do you prefer?") or pre-programmed policy ("Favor low-cost
+                            channels first")</span>
+                    </div>
+                </div>
+            </div>
+            <p
+                style="font-size:.81rem;color:var(--muted);margin-top:.8rem;padding:.6rem .8rem;background:var(--card2);border-radius:7px;border:1px solid var(--border)">
+                📌 Planning is <span style="color:var(--text)">iterative</span> — the agent re-plans during execution if
+                a tool fails or results change.
+            </p>
+        </div>
+
+        <!-- REASONING -->
+        <div class="char-card">
+            <div class="char-head">
+                <div class="char-icon" style="background:rgba(168,126,245,.12)">🧠</div>
+                <h3 style="color:var(--purple)">Reasoning</h3>
+            </div>
+            <p class="char-def"><strong>Reasoning</strong> is the cognitive process through which the agent
+                <strong>interprets information</strong>, draws conclusions, and <strong>makes decisions</strong> — both
+                while planning ahead and while executing actions in real time.</p>
+            <div class="reason-cols">
+                <div class="reason-col">
+                    <h5>DURING PLANNING</h5>
+                    <div class="ri"><strong>Goal Decomposition</strong>Break abstract goals into concrete steps</div>
+                    <div class="ri" style="margin-top:.35rem"><strong>Tool Selection</strong>Decide which tools are
+                        needed for each step</div>
+                    <div class="ri" style="margin-top:.35rem"><strong>Resource Estimation</strong>Estimate time,
+                        dependencies, and risks</div>
+                </div>
+                <div class="reason-col">
+                    <h5>DURING EXECUTION</h5>
+                    <div class="ri"><strong>Decision-making</strong>3 candidates match → schedule 2 best, reject 1</div>
+                    <div class="ri" style="margin-top:.35rem"><strong>HITL Handling</strong>Know when to pause and ask
+                        for help (unsure about salary range)</div>
+                    <div class="ri" style="margin-top:.35rem"><strong>Error Handling</strong>Interpret tool/API failures
+                        and recover gracefully</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADAPTABILITY -->
+        <div class="char-card">
+            <div class="char-head">
+                <div class="char-icon" style="background:rgba(245,160,80,.12)">🔄</div>
+                <h3 style="color:var(--orange)">Adaptability</h3>
+            </div>
+            <p class="char-def">The agent's ability to <strong>modify its plans, strategies, or actions</strong> in
+                response to unexpected conditions — all while staying aligned with the goal.</p>
+            <div class="points">
+                <div class="pt">
+                    <div class="dot" style="background:var(--orange)"></div>
+                    <div><strong>Failures</strong> <span>— Calendar API down → switch to email-based scheduling</span>
+                    </div>
+                </div>
+                <div class="pt">
+                    <div class="dot" style="background:var(--orange)"></div>
+                    <div><strong>External Feedback</strong> <span>— Only 2 applicants → broaden JD scope to
+                            full-stack</span></div>
+                </div>
+                <div class="pt">
+                    <div class="dot" style="background:var(--orange)"></div>
+                    <div><strong>Changing Goals</strong> <span>— Hiring a full-time engineer → switching to a
+                            freelancer</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTEXT AWARENESS -->
+        <div class="char-card">
+            <div class="char-head">
+                <div class="char-icon" style="background:rgba(80,212,200,.12)">🗂️</div>
+                <h3 style="color:var(--teal)">Context Awareness</h3>
+            </div>
+            <p class="char-def">The agent's ability to <strong>understand, retain, and utilize</strong> relevant
+                information from the ongoing task, past interactions, user preferences, and environmental cues to make
+                better decisions throughout a multi-step process.</p>
+            <p
+                style="font-family:var(--mono);font-size:.7rem;color:var(--muted);margin:.7rem 0 .4rem;letter-spacing:.04em">
+                TYPES OF CONTEXT</p>
+            <div class="ctx-grid">
+                <div class="ctx-item"><strong>Original Goal</strong><span>The main objective driving all actions</span>
+                </div>
+                <div class="ctx-item"><strong>Interaction History</strong><span>JD finalized and posted to LinkedIn
+                        &amp; GitHub Jobs</span></div>
+                <div class="ctx-item"><strong>Environment State</strong><span>Applicants so far = 8, LinkedIn promo ends
+                        in 2 days</span></div>
+                <div class="ctx-item"><strong>Tool Responses</strong><span>Resume parser → "Candidate B has 3y Django +
+                        AWS experience"</span></div>
+                <div class="ctx-item"><strong>User Preferences</strong><span>Prefers remote-first, likes questions in a
+                        Google Doc</span></div>
+                <div class="ctx-item"><strong>Guardrails</strong><span>Do not send offer without explicit user
+                        approval</span></div>
+            </div>
+            <div class="points" style="margin-top:.8rem">
+                <div class="pt">
+                    <div class="dot" style="background:var(--teal)"></div>
+                    <div><strong>Implemented through Memory</strong> <span>— the agent stores and retrieves
+                            context</span></div>
+                </div>
+                <div class="pt">
+                    <div class="dot" style="background:var(--teal)"></div>
+                    <div><strong>Short-term memory</strong> <span>→ current session context (active conversation)</span>
+                    </div>
+                </div>
+                <div class="pt">
+                    <div class="dot" style="background:var(--teal)"></div>
+                    <div><strong>Long-term memory</strong> <span>→ persists across sessions</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── SECTION 4: COMPONENTS ── -->
+        <div class="section-header" id="comp">
+            <span class="section-num">04</span>
+            <h2 class="section-title">Components of Agentic AI</h2>
+            <div class="section-line"></div>
+        </div>
+
+        <p style="color:var(--muted);font-size:.88rem;margin-bottom:1.4rem">Five components work together to power an
+            agentic system.</p>
+
+        <!-- BRAIN -->
+        <div class="comp-card">
+            <div class="comp-header">
+                <div class="comp-emoji" style="background:rgba(168,126,245,.12)">🧠</div>
+                <div>
+                    <h3 style="color:var(--purple)">Brain</h3>
+                    <span>Powered by LLM (e.g., GPT-4, Claude)</span>
+                </div>
+            </div>
+            <div class="comp-rows">
+                <div class="comp-row"><span class="crl" style="color:var(--purple)">Goal Interpretation</span><span
+                        class="crd">Understands user instructions and translates them into objectives.</span></div>
+                <div class="comp-row"><span class="crl" style="color:var(--purple)">Planning</span><span
+                        class="crd">Breaks down high-level goals into subgoals and ordered steps.</span></div>
+                <div class="comp-row"><span class="crl" style="color:var(--purple)">Reasoning</span><span
+                        class="crd">Makes decisions, resolves ambiguity, and evaluates trade-offs.</span></div>
+                <div class="comp-row"><span class="crl" style="color:var(--purple)">Tool Selection</span><span
+                        class="crd">Chooses which tool(s) to use at a given step.</span></div>
+                <div class="comp-row"><span class="crl" style="color:var(--purple)">Communication</span><span
+                        class="crd">Generates natural language outputs for humans or other agents.</span></div>
+            </div>
+        </div>
+
+        <!-- ORCHESTRATOR -->
+        <div class="comp-card">
+            <div class="comp-header">
+                <div class="comp-emoji" style="background:rgba(240,192,96,.12)">🎼</div>
+                <div>
+                    <h3 style="color:var(--gold)">Orchestrator</h3>
+                    <span>Implemented with LangGraph</span>
+                </div>
+            </div>
+            <div class="comp-rows">
+                <div class="comp-row"><span class="crl" style="color:var(--gold)">Task Sequencing</span><span
+                        class="crd">Determines the order of actions (step 1 → step 2 → …).</span></div>
+                <div class="comp-row"><span class="crl" style="color:var(--gold)">Conditional Routing</span><span
+                        class="crd">Directs flow based on context (e.g., if failure → retry or escalate).</span></div>
+                <div class="comp-row"><span class="crl" style="color:var(--gold)">Retry Logic</span><span
+                        class="crd">Handles failed tool calls or reasoning attempts with backoff.</span></div>
+                <div class="comp-row"><span class="crl" style="color:var(--gold)">Looping &amp; Iteration</span><span
+                        class="crd">Repeats steps (e.g., keep checking job apps until 10 are received).</span></div>
+                <div class="comp-row"><span class="crl" style="color:var(--gold)">Delegation</span><span
+                        class="crd">Decides whether to hand off work to tools, LLM, or human.</span></div>
+            </div>
+        </div>
+
+        <!-- TOOLS -->
+        <div class="comp-card">
+            <div class="comp-header">
+                <div class="comp-emoji" style="background:rgba(93,214,140,.12)">🔧</div>
+                <div>
+                    <h3 style="color:var(--green)">Tools</h3>
+                    <span>APIs and knowledge sources the agent can call</span>
+                </div>
+            </div>
+            <div class="comp-rows">
+                <div class="comp-row"><span class="crl" style="color:var(--green)">External Actions</span><span
+                        class="crd">Perform API calls — post a job, send an email, trigger onboarding on external
+                        platforms.</span></div>
+                <div class="comp-row"><span class="crl" style="color:var(--green)">Knowledge Base Access</span><span
+                        class="crd">Retrieve factual or domain-specific information using RAG or search tools to ground
+                        responses.</span></div>
+            </div>
+        </div>
+
+        <!-- MEMORY -->
+        <div class="comp-card">
+            <div class="comp-header">
+                <div class="comp-emoji" style="background:rgba(91,168,245,.12)">💾</div>
+                <div>
+                    <h3 style="color:var(--blue)">Memory</h3>
+                    <span>Stores and retrieves context within and across sessions</span>
+                </div>
+            </div>
+            <div class="comp-rows">
+                <div class="comp-row"><span class="crl" style="color:var(--blue)">Short-Term Memory</span><span
+                        class="crd">Maintains the active session's context — recent user messages, tool calls, and
+                        immediate decisions.</span></div>
+                <div class="comp-row"><span class="crl" style="color:var(--blue)">Long-Term Memory</span><span
+                        class="crd">Persists high-level goals, past interactions, user preferences, and decisions across
+                        sessions.</span></div>
+                <div class="comp-row"><span class="crl" style="color:var(--blue)">State Tracking</span><span
+                        class="crd">Monitors progress: what's completed, what's pending (e.g., "JD posted", "Offer
+                        sent").</span></div>
+            </div>
+        </div>
+
+        <!-- SUPERVISOR -->
+        <div class="comp-card">
+            <div class="comp-header">
+                <div class="comp-emoji" style="background:rgba(240,96,112,.12)">👤</div>
+                <div>
+                    <h3 style="color:var(--red)">Supervisor</h3>
+                    <span>Human oversight — Agent + Human collaboration (HITL)</span>
+                </div>
+            </div>
+            <div class="comp-rows">
+                <div class="comp-row"><span class="crl" style="color:var(--red)">Approval Requests</span><span
+                        class="crd">Agent checks with human before high-risk actions — e.g., sending an offer
+                        letter.</span></div>
+                <div class="comp-row"><span class="crl" style="color:var(--red)">Guardrails Enforcement</span><span
+                        class="crd">Blocks unsafe or non-compliant behaviour automatically.</span></div>
+                <div class="comp-row"><span class="crl" style="color:var(--red)">Edge Case Escalation</span><span
+                        class="crd">Alerts humans when uncertainty or conflict arises (e.g., ambiguous candidate
+                        ranking).</span></div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer>
+        Agentic AI · LangGraph Series · Video 2 · CampusX &nbsp;|&nbsp; Study Notes compiled from 23 screenshots
+    </footer>
+
+    <script>
+        const secs = document.querySelectorAll('[id]');
+        const links = document.querySelectorAll('nav a');
+        const io = new IntersectionObserver(entries => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    links.forEach(l => l.classList.remove('active'));
+                    const a = document.querySelector(`nav a[href="#${e.target.id}"]`);
+                    if (a) a.classList.add('active');
+                }
+            });
+        }, { rootMargin: '-35% 0px -60% 0px' });
+        secs.forEach(s => io.observe(s));
+    </script>
+</body>
+
+</html>
