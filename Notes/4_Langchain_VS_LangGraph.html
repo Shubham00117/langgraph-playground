@@ -602,14 +602,15 @@
             border-radius: 3px;
         }
     </style>
+    <title>Module 4: LangChain vs LangGraph</title>
 </head>
 
 <body>
 
     <header>
-        <div class="badge">CampusX · Video 3 · Agentic AI</div>
+        <div class="badge">CampusX · Module 4 · Agentic AI</div>
         <h1>LangChain <span>vs</span> LangGraph</h1>
-        <div class="subtitle">03 July 2025 · Complete Study Notes</div>
+        <div class="subtitle">Complete Study Notes</div>
     </header>
 
     <div class="container">
@@ -617,6 +618,7 @@
         <!-- NAV -->
         <nav class="nav-pills">
             <a href="#langchain">What is LangChain</a>
+            <a href="#langgraph">What is LangGraph</a>
             <a href="#workflow">Hiring Workflow</a>
             <a href="#agents">Agents vs Workflows</a>
             <a href="#challenges">Challenges</a>
@@ -628,7 +630,7 @@
         <!-- ═══════════════════════════════════════════ -->
         <section class="section" id="langchain">
             <div class="section-header">
-                <span class="section-num">01</span>
+                <span class="section-num">20</span>
                 <h2>What is LangChain?</h2>
             </div>
 
@@ -684,11 +686,48 @@
         </section>
 
         <!-- ═══════════════════════════════════════════ -->
-        <!-- SECTION 2: Automated Hiring Workflow -->
+        <!-- SECTION 2: LangGraph -->
+        <!-- ═══════════════════════════════════════════ -->
+        <section class="section" id="langgraph">
+            <div class="section-header">
+                <span class="section-num">21</span>
+                <h2>What is LangGraph?</h2>
+            </div>
+
+            <div class="insight">
+                LangGraph is an orchestration framework built <strong>on top of LangChain</strong> that enables the
+                creation of <strong>stateful, multi-actor, and agentic</strong> applications using LLMs. Think of it as
+                a <em>flowchart engine</em> where you define nodes (actions) and edges (control flow logic).
+            </div>
+
+            <div
+                style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap:12px; margin:16px 0;">
+                <div class="card">
+                    <div class="card-title">Core Principles</div>
+                    <ul>
+                        <li><strong>Graphs</strong> — models complex workflows as graphs instead of linear chains</li>
+                        <li><strong>State</strong> — robust state management via Pydantic/TypedDict</li>
+                        <li><strong>Control Flow</strong> — supports cycles, conditional branching, and looping</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <div class="card-title">Key Capabilities</div>
+                    <ul>
+                        <li>Human-in-the-loop (pause/resume)</li>
+                        <li>Fault tolerance and check-pointing</li>
+                        <li>Multi-agent orchestration</li>
+                        <li>Event-driven architecture</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- SECTION 3: Automated Hiring Workflow -->
         <!-- ═══════════════════════════════════════════ -->
         <section class="section" id="workflow">
             <div class="section-header">
-                <span class="section-num">02</span>
+                <span class="section-num">22</span>
                 <h2>Use Case: Automated Hiring Workflow</h2>
             </div>
 
@@ -699,46 +738,58 @@
                 <div class="flow" style="flex-direction:column; align-items:flex-start; gap:4px;">
                     <div class="flow-box">START</div>
                     <span class="flow-arrow" style="padding-left:10px;">↓</span>
-                    <div class="flow-box">Hiring Request</div>
+                    <div class="flow-box">Drafting JD <span style="color:#8888a0; font-size:11px;">(Reads docs → creates
+                            JD)</span></div>
                     <span class="flow-arrow" style="padding-left:10px;">↓</span>
-                    <div class="flow-box">Create JD (LLM)</div>
-                    <span class="flow-arrow" style="padding-left:10px;">↓</span>
-                    <div class="flow-diamond">JD Approved? <span style="color:#8888a0; font-size:11px;">(No → loop
-                            back)</span></div>
+                    <div class="flow-diamond">HR Approval? <span style="color:#8888a0; font-size:11px;">(No → Ask for
+                            Changes / Loop)</span></div>
                     <span class="flow-arrow" style="padding-left:10px;">↓ Yes</span>
-                    <div class="flow-box">Post JD <span style="color:#8888a0; font-size:11px;">(LinkedIn API
-                            tool)</span></div>
-                    <span class="flow-arrow" style="padding-left:10px;">↓</span>
-                    <div class="flow-box">Wait 7 Days</div>
+                    <div class="flow-box">Posting JD <span style="color:#8888a0; font-size:11px;">(LinkedIn & Naukri
+                            APIs)</span></div>
                     <span class="flow-arrow" style="padding-left:10px;">↓</span>
                     <div class="flow-box">Monitor Applications</div>
                     <span class="flow-arrow" style="padding-left:10px;">↓</span>
-                    <div class="flow-diamond">Enough Applications? (e.g. 20) <span
-                            style="color:#8888a0; font-size:11px;">(No → Modify JD → Wait 48hrs → loop)</span></div>
-                    <span class="flow-arrow" style="padding-left:10px;">↓ Yes</span>
-                    <div class="flow-box">Shortlist Candidates</div>
+                    <div class="flow-diamond">Revising JD? <span style="color:#8888a0; font-size:11px;">(Apps low? →
+                            Broaden to Full-Stack → Repost)</span></div>
+                    <span class="flow-arrow" style="padding-left:10px;">↓ Apps sufficient</span>
+                    <div class="flow-box">Shortlisting <span style="color:#8888a0; font-size:11px;">(Parses resumes →
+                            Top 2)</span></div>
                     <span class="flow-arrow" style="padding-left:10px;">↓</span>
-                    <div class="flow-box">Schedule Interviews <span style="color:#8888a0; font-size:11px;">(Calendar +
-                            Mail tools)</span></div>
+                    <div class="flow-box">Scheduling <span style="color:#8888a0; font-size:11px;">(Checks Friday
+                            calendar → Invites)</span></div>
                     <span class="flow-arrow" style="padding-left:10px;">↓</span>
-                    <div class="flow-box">Conduct Interview</div>
+                    <div class="flow-box">Interviewing <span style="color:#8888a0; font-size:11px;">(Sends reminders +
+                            questions)</span></div>
                     <span class="flow-arrow" style="padding-left:10px;">↓</span>
-                    <div class="flow-diamond">Selected?</div>
-                    <span class="flow-arrow" style="padding-left:10px;">↓ Yes → Send Offer Letter</span>
-                    <div class="flow-diamond">Accepted? <span style="color:#8888a0; font-size:11px;">(No → Renegotiate
-                            (human) | Yes → Onboarding)</span></div>
-                    <span class="flow-arrow" style="padding-left:10px;">↓ No (from Selected)</span>
-                    <div class="flow-box">Regret Email → END</div>
+                    <div class="flow-box">Offer Letter <span style="color:#8888a0; font-size:11px;">(HR Picks 1 → Draft
+                            → Approve → Send)</span></div>
+                    <span class="flow-arrow" style="padding-left:10px;">↓ Accepted</span>
+                    <div class="flow-box">Onboarding <span style="color:#8888a0; font-size:11px;">(IT Access, Laptop,
+                            Meetings)</span> → END</div>
                 </div>
+            </div>
+
+            <div class="card" style="margin-top:20px;">
+                <div class="card-title" style="color:var(--text)">The Theory: Why Simple Chains Fail Here</div>
+                <ul>
+                    <li><strong>Non-Linear Execution:</strong> Demands loops and conditional branching for retries and
+                        feedback.</li>
+                    <li><strong>Event-Driven Delays:</strong> Must pause execution to wait for external events and wake
+                        up reliably.</li>
+                    <li><strong>Human-in-the-Loop (HITL):</strong> Gracefully waits for human sign-off on critical
+                        business decisions.</li>
+                    <li><strong>Persistent Global State:</strong> Requires robust, shared memory to track data across
+                        disconnected steps.</li>
+                </ul>
             </div>
         </section>
 
         <!-- ═══════════════════════════════════════════ -->
-        <!-- SECTION 3: Agents vs Workflows -->
+        <!-- SECTION 4: Agents vs Workflows -->
         <!-- ═══════════════════════════════════════════ -->
         <section class="section" id="agents">
             <div class="section-header">
-                <span class="section-num">03</span>
+                <span class="section-num">23</span>
                 <h2>Agents vs Workflows (Anthropic)</h2>
             </div>
             <div class="insight">
@@ -767,11 +818,11 @@
         </section>
 
         <!-- ═══════════════════════════════════════════ -->
-        <!-- SECTION 4: Challenges -->
+        <!-- SECTION 5: Challenges -->
         <!-- ═══════════════════════════════════════════ -->
         <section class="section" id="challenges">
             <div class="section-header">
-                <span class="section-num">04</span>
+                <span class="section-num">24</span>
                 <h2>LangChain Challenges → LangGraph Solutions</h2>
             </div>
 
@@ -952,8 +1003,13 @@ graph.add_edge(<span class="str">"PostJD"</span>, END)</pre>
                         </div>
                     </div>
                     <div class="insight" style="margin-top:12px;">
-                        <strong>LangGraph HIL Patterns:</strong> Approve/Reject · Edit Graph State · Review Tool Calls ·
-                        Persistent execution state (pause indefinitely — minutes, hours, days)
+                        <strong>LangGraph HIL Patterns:</strong>
+                        <ul style="margin: 8px 0 0 20px; list-style-type: '•  ';">
+                            <li>Approve or Reject actions</li>
+                            <li>Edit Graph State mid-execution</li>
+                            <li>Review Tool Calls before execution</li>
+                            <li>Persistent state (pause for minutes, hours, or days)</li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -1024,11 +1080,11 @@ graph.add_edge(<span class="str">"PostJD"</span>, END)</pre>
         </section>
 
         <!-- ═══════════════════════════════════════════ -->
-        <!-- SECTION 5: Conclusion -->
+        <!-- SECTION 6: Conclusion -->
         <!-- ═══════════════════════════════════════════ -->
         <section class="section" id="conclusion">
             <div class="section-header">
-                <span class="section-num">05</span>
+                <span class="section-num">25</span>
                 <h2>Conclusion</h2>
             </div>
 

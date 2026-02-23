@@ -165,7 +165,7 @@
         }
 
         .def strong {
-            color: #1e3a8a;
+            color: var(--blue);
         }
 
         .tags {
@@ -176,12 +176,12 @@
         }
 
         .tag {
-            background: #f1f5f9;
-            border: 1px solid #cbd5e1;
+            background: var(--surface2);
+            border: 1px solid var(--border);
             border-radius: 20px;
             padding: 4px 12px;
             font-size: 12.5px;
-            color: #475569;
+            color: var(--text);
             font-weight: 500;
         }
 
@@ -192,9 +192,9 @@
         }
 
         .tag.green {
-            background: #dcfce7;
-            border-color: #86efac;
-            color: #166534;
+            background: rgba(167, 192, 128, 0.1);
+            border-color: var(--green);
+            color: var(--green);
         }
 
         table.cmp {
@@ -293,7 +293,7 @@
 
         .wf-label {
             font-weight: 600;
-            color: #334155;
+            color: var(--blue);
             min-width: 100px;
             font-size: 13px;
             flex-shrink: 0;
@@ -301,7 +301,7 @@
         }
 
         .wf-info {
-            color: #64748b;
+            color: var(--muted);
             font-size: 13px;
             line-height: 1.5;
         }
@@ -319,7 +319,7 @@
             align-items: center;
             gap: 10px;
             font-size: 13.5px;
-            color: #334155;
+            color: var(--text);
         }
 
         .ok {
@@ -358,7 +358,7 @@
 
         .kb ul li {
             padding: 2px 0;
-            color: #475569;
+            color: var(--text);
         }
 
         .kb ul li::before {
@@ -401,13 +401,13 @@
         }
 
         .tool {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
+            background: var(--surface2);
+            border: 1px solid var(--border);
             border-radius: 8px;
             padding: 9px 12px;
             font-size: 13px;
             font-weight: 600;
-            color: #334155;
+            color: var(--text);
             text-align: center;
         }
 
@@ -435,8 +435,8 @@
         }
 
         .bb {
-            background: #fef9c3;
-            color: #3f3200;
+            background: rgba(219, 188, 127, 0.1);
+            color: var(--yellow);
         }
 
         .conc-grid {
@@ -447,16 +447,16 @@
         }
 
         .conc {
-            background: #f8fafc;
+            background: var(--surface);
             border-radius: 10px;
-            border-left: 4px solid #2d6a9f;
+            border-left: 4px solid var(--blue);
             padding: 14px 16px;
             font-size: 13.5px;
-            color: #334155;
+            color: var(--text);
         }
 
         .conc strong {
-            color: #1e3a5f;
+            color: var(--blue);
             display: block;
             margin-bottom: 4px;
         }
@@ -494,12 +494,9 @@
             table.cmp {
                 font-size: 12px;
             }
-
-            .section {
-                padding: 20px 16px;
-            }
         }
     </style>
+    <title>Module 2: Generative AI vs Agentic AI</title>
 </head>
 
 <body>
@@ -507,30 +504,30 @@
 
         <!-- HEADER -->
         <div class="header">
-            <div class="course-tag">Agentic AI using LangGraph · CampusX · Video 1</div>
+            <div class="course-tag">Agentic AI using LangGraph · CampusX · Module 2</div>
             <h1>Generative AI vs Agentic AI</h1>
-            <div class="subtitle">From Basic LLM → RAG → Tool-Augmented → Full Agentic AI &nbsp;|&nbsp; 42 slides
-                covered</div>
+            <div class="subtitle">From Basic LLM → RAG → Tool-Augmented → Full Agentic AI</div>
         </div>
 
         <!-- TOC -->
         <div class="toc">
             <h3>Contents</h3>
             <div class="toc-grid">
-                <a href="#s1">1. What is Generative AI</a>
-                <a href="#s5">5. Chatbot 2 — RAG Based</a>
-                <a href="#s2">2. Gen AI vs Traditional AI</a>
-                <a href="#s6">6. Chatbot 3 — Tool Augmented</a>
-                <a href="#s3">3. Application Areas</a>
-                <a href="#s7">7. Chatbot 4 — Agentic AI</a>
-                <a href="#s4">4. Chatbot 1 — Basic LLM</a>
-                <a href="#s8">8. Conclusion &amp; Evolution</a>
+                <a href="#s1">Topic 07. What is Generative AI</a>
+                <a href="#s5">Topic 11. Chatbot 2 — RAG Based</a>
+                <a href="#s2">Topic 08. Gen AI vs Traditional AI</a>
+                <a href="#s6">Topic 12. Chatbot 3 — Tool Augmented</a>
+                <a href="#s3">Topic 09. Application Areas</a>
+                <a href="#s7">Topic 13. Chatbot 4 — Agentic AI</a>
+                <a href="#s4">Topic 10. Chatbot 1 — Basic LLM</a>
+                <a href="#uc">Topic 14. Use Case — Hiring</a>
+                <a href="#s8">Topic 15. Conclusion &amp; Evolution</a>
             </div>
         </div>
 
         <!-- 1. WHAT IS GENAI -->
         <div class="section" id="s1">
-            <div class="section-title"><span class="num">1</span> What is Generative AI</div>
+            <div class="section-title"><span class="num">07</span> What is Generative AI</div>
             <div class="def">
                 <strong>Generative AI</strong> refers to a class of artificial intelligence models that can create new
                 content — such as text, images, audio, code, or video — that resembles human-created data.
@@ -549,7 +546,7 @@
 
         <!-- 2. GEN AI VS TRADITIONAL -->
         <div class="section" id="s2">
-            <div class="section-title"><span class="num">2</span> Generative AI vs Traditional AI</div>
+            <div class="section-title"><span class="num">08</span> Generative AI vs Traditional AI</div>
             <table class="cmp">
                 <tr>
                     <th>Traditional AI</th>
@@ -568,7 +565,7 @@
 
         <!-- 3. APPLICATION AREAS -->
         <div class="section" id="s3">
-            <div class="section-title"><span class="num">3</span> Application Areas</div>
+            <div class="section-title"><span class="num">09</span> Application Areas</div>
             <div class="tags">
                 <span class="tag green">Creative &amp; Business Writing</span>
                 <span class="tag green">Software Development</span>
@@ -581,8 +578,8 @@
         </div>
 
         <!-- USE CASE SETUP -->
-        <div class="section">
-            <div class="section-title"><span class="num" style="background:#059669;">🎯</span> Use Case — Hire a Backend
+        <div class="section" id="uc">
+            <div class="section-title"><span class="num" style="background:#059669;">10</span> Use Case — Hire a Backend
                 Engineer</div>
             <p style="color:#475569; margin-bottom:14px;">The video uses a <strong>hiring workflow</strong> to show how
                 each generation of chatbot handles the same real-world goal. The process has 6 stages:</p>
@@ -604,7 +601,7 @@
 
         <!-- CHATBOT 1 -->
         <div class="section" id="s4">
-            <div class="section-title"><span class="num">4</span> Chatbot 1 — Basic LLM Chatbot</div>
+            <div class="section-title"><span class="num">11</span> Chatbot 1 — Basic LLM Chatbot</div>
             <div class="chatbot-card cb1">
                 <div class="chatbot-header">🤖 Plain LLM &nbsp;|&nbsp; No tools · No memory · No knowledge base</div>
                 <div class="chatbot-body">
@@ -649,7 +646,7 @@
 
         <!-- CHATBOT 2 -->
         <div class="section" id="s5">
-            <div class="section-title"><span class="num">5</span> Chatbot 2 — RAG-Based Chatbot</div>
+            <div class="section-title"><span class="num">12</span> Chatbot 2 — RAG-Based Chatbot</div>
             <div class="chatbot-card cb2">
                 <div class="chatbot-header">📚 RAG (Retrieval-Augmented Generation) &nbsp;|&nbsp; Adds company knowledge
                     base</div>
@@ -715,7 +712,7 @@
 
         <!-- CHATBOT 3 -->
         <div class="section" id="s6">
-            <div class="section-title"><span class="num">6</span> Chatbot 3 — Tool Augmented Chatbot</div>
+            <div class="section-title"><span class="num">13</span> Chatbot 3 — Tool Augmented Chatbot</div>
             <div class="chatbot-card cb3">
                 <div class="chatbot-header">🔧 Tool Augmented &nbsp;|&nbsp; RAG + API Tools = Can execute tasks</div>
                 <div class="chatbot-body">
@@ -772,7 +769,7 @@
 
         <!-- CHATBOT 4 -->
         <div class="section" id="s7">
-            <div class="section-title"><span class="num">7</span> Chatbot 4 — Agentic AI</div>
+            <div class="section-title"><span class="num">14</span> Chatbot 4 — Agentic AI</div>
             <div class="chatbot-card cb4">
                 <div class="chatbot-header">🧠 Agentic AI &nbsp;|&nbsp; Proactive · Adaptive · Autonomous</div>
                 <div class="chatbot-body">
