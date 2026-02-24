@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parallel Workflows in LangGraph</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@400;500;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f5f0e8;
+            --surface: #fffef9;
+            --border: #d4c9b0;
+            --ink: #1a1612;
+            --muted: #7a6e5f;
+            --a1: #c0392b;
+            /* red */
+            --a2: #1a6b3c;
+            /* green */
+            --a3: #1a3a6b;
+            /* blue */
+            --a4: #7b4f00;
+            /* amber */
+            --a5: #5b1a6b;
+            /* purple */
+            --rule: #c8bfa8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--ink);
+            font-family: 'DM Sans', sans-serif;
+            padding: 48px 20px 80px;
+            background-image: repeating-linear-gradient(transparent, transparent 27px, var(--rule) 27px, var(--rule) 28px);
+            background-attachment: local;
+        }
+
+        .page {
+            max-width: 860px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        /* Red margin line */
+        .page::before {
+            content: '';
+            position: fixed;
+            left: calc(50% - 430px + 56px);
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: rgba(192, 57, 43, 0.25);
+            pointer-events: none;
+        }
+
+        header {
+            margin-bottom: 48px;
+            padding-left: 24px;
+            border-left: 4px solid var(--a1);
+        }
+
+        header .badge {
+            display: inline-block;
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            background: var(--a1);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 2px;
+            margin-bottom: 10px;
+        }
+
+        header h1 {
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            font-weight: 800;
+            color: var(--ink);
+            line-height: 1.1;
+        }
+
+        header h1 em {
+            font-style: normal;
+            color: var(--a1);
+        }
+
+        header p {
+            margin-top: 8px;
+            color: var(--muted);
+            font-size: 13px;
+            font-family: 'Space Mono', monospace;
+        }
+
+        /* Section */
+        .sec {
+            margin-bottom: 44px;
+        }
+
+        .sec-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .sec-title .num {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            color: var(--muted);
+            width: 20px;
+            flex-shrink: 0;
+        }
+
+        .sec-title h2 {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--a1);
+        }
+
+        .sec-title .line {
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* Card */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 22px 26px;
+            margin-bottom: 14px;
+            box-shadow: 2px 3px 0 var(--border);
+            position: relative;
+        }
+
+        .card.red {
+            border-left: 4px solid var(--a1);
+        }
+
+        .card.green {
+            border-left: 4px solid var(--a2);
+        }
+
+        .card.blue {
+            border-left: 4px solid var(--a3);
+        }
+
+        .card.amber {
+            border-left: 4px solid var(--a4);
+        }
+
+        .card.purple {
+            border-left: 4px solid var(--a5);
+        }
+
+        .card h3 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--ink);
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            font-size: 13.5px;
+            line-height: 1.75;
+            color: #3a342a;
+            margin-bottom: 6px;
+        }
+
+        .card p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Flow diagram */
+        .flow {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 14px 0;
+            font-family: 'Space Mono', monospace;
+        }
+
+        .fn {
+            border: 1.5px solid var(--a3);
+            color: var(--a3);
+            font-size: 11px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            white-space: nowrap;
+            background: rgba(26, 58, 107, 0.05);
+        }
+
+        .fn.red {
+            border-color: var(--a1);
+            color: var(--a1);
+            background: rgba(192, 57, 43, 0.05);
+        }
+
+        .fn.green {
+            border-color: var(--a2);
+            color: var(--a2);
+            background: rgba(26, 107, 60, 0.05);
+        }
+
+        .fn.amber {
+            border-color: var(--a4);
+            color: var(--a4);
+            background: rgba(123, 79, 0, 0.05);
+        }
+
+        .arr {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .parallel-block {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            border: 1px dashed var(--border);
+            padding: 10px 14px;
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .parallel-label {
+            font-size: 9px;
+            font-family: 'Space Mono', monospace;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 4px;
+        }
+
+        /* Code */
+        pre {
+            background: #1a1612;
+            border-radius: 6px;
+            padding: 16px 18px;
+            overflow-x: auto;
+            font-family: 'Space Mono', monospace;
+            font-size: 11.5px;
+            line-height: 1.7;
+            margin: 12px 0;
+            color: #c8bfaa;
+        }
+
+        .kw {
+            color: #e06c75;
+        }
+
+        .fn2 {
+            color: #61afef;
+        }
+
+        .str {
+            color: #98c379;
+        }
+
+        .cm {
+            color: #5a5040;
+            font-style: italic;
+        }
+
+        .nb {
+            color: #e5c07b;
+        }
+
+        .tp {
+            color: #c678dd;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12.5px;
+            margin-top: 10px;
+        }
+
+        th {
+            background: #1a1612;
+            color: #c8bfaa;
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 1px;
+            text-align: left;
+            padding: 8px 12px;
+        }
+
+        td {
+            border-bottom: 1px solid var(--border);
+            padding: 9px 12px;
+            vertical-align: top;
+            line-height: 1.5;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:nth-child(even) td {
+            background: rgba(0, 0, 0, 0.025);
+        }
+
+        /* Pills */
+        .pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .pill {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            padding: 3px 9px;
+            border-radius: 3px;
+            border: 1px solid;
+        }
+
+        .pill.r {
+            color: var(--a1);
+            border-color: var(--a1);
+            background: rgba(192, 57, 43, 0.08);
+        }
+
+        .pill.g {
+            color: var(--a2);
+            border-color: var(--a2);
+            background: rgba(26, 107, 60, 0.08);
+        }
+
+        .pill.b {
+            color: var(--a3);
+            border-color: var(--a3);
+            background: rgba(26, 58, 107, 0.08);
+        }
+
+        .pill.a {
+            color: var(--a4);
+            border-color: var(--a4);
+            background: rgba(123, 79, 0, 0.08);
+        }
+
+        /* Result box */
+        .result {
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            background: #0d1117;
+            color: #7ee787;
+            border-radius: 6px;
+            padding: 14px 16px;
+            margin-top: 10px;
+            line-height: 1.8;
+        }
+
+        .result .key {
+            color: #79c0ff;
+        }
+
+        .result .val {
+            color: #a5d6ff;
+        }
+
+        .result .hl {
+            color: #ffa657;
+            font-weight: 700;
+        }
+
+        /* Grid */
+        .grid2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        @media (max-width: 580px) {
+            .grid2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Key concept box */
+        .key-box {
+            background: #fff8e1;
+            border: 1px solid #f0d060;
+            border-radius: 6px;
+            padding: 14px 18px;
+            margin-top: 12px;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .key-box strong {
+            color: var(--a4);
+        }
+
+        /* Steps */
+        .steps {
+            margin-top: 10px;
+        }
+
+        .step {
+            display: flex;
+            gap: 14px;
+            padding: 9px 0;
+            border-bottom: 1px dashed var(--border);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .step:last-child {
+            border-bottom: none;
+        }
+
+        .sn {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            color: var(--a1);
+            min-width: 20px;
+            padding-top: 2px;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+
+        <header>
+            <div class="badge">CampusX · Module 7 · Parallel Workflow</div>
+            <h1>Parallel Workflows<br>in <em>LangGraph</em></h1>
+            <p>// Agentic AI · Fan-Out · Fan-In · Reduce Function · Structured Output</p>
+        </header>
+
+        <!-- 1. Core Idea -->
+        <div class="sec">
+            <div class="sec-title">
+                <span class="num">39</span>
+                <h2>What is a Parallel Workflow?</h2>
+                <div class="line"></div>
+            </div>
+            <div class="card red">
+                <h3>Fan-Out → Fan-In Pattern</h3>
+                <p>Multiple nodes execute <strong>simultaneously</strong> from a single START point (fan-out), then
+                    their results are <strong>merged</strong> into one node (fan-in). This is faster than sequential
+                    when tasks are independent.</p>
+                <div class="flow">
+                    <span class="fn green">START</span>
+                    <span class="arr">→</span>
+                    <div class="parallel-block">
+                        <span class="parallel-label">parallel fan-out</span>
+                        <span class="fn">node_A</span>
+                        <span class="fn">node_B</span>
+                        <span class="fn">node_C</span>
+                    </div>
+                    <span class="arr">→</span>
+                    <span class="fn amber">summary / merge</span>
+                    <span class="arr">→</span>
+                    <span class="fn red">END</span>
+                </div>
+                <div class="pills">
+                    <span class="pill r">add_edge(START, node_A)</span>
+                    <span class="pill r">add_edge(START, node_B)</span>
+                    <span class="pill r">add_edge(START, node_C)</span>
+                    <span class="pill g">all → merge node</span>
+                </div>
+            </div>
+            <div class="card amber">
+                <h3>3 Key Concepts</h3>
+                <div class="steps">
+                    <div class="step"><span class="sn">①</span><span><strong>Parallel works</strong> — multiple nodes
+                            run concurrently from START</span></div>
+                    <div class="step"><span class="sn">②</span><span><strong>Structured output</strong> — LLM returns
+                            typed objects (Pydantic BaseModel) instead of plain text</span></div>
+                    <div class="step"><span class="sn">③</span><span><strong>Reduce function</strong> — merges values
+                            from parallel nodes into a single list using <code>operator.add</code></span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Example 1 – Batsman Stats -->
+        <div class="sec">
+            <div class="sec-title">
+                <span class="num">40</span>
+                <h2>Example 1 — Cricket Batsman Stats</h2>
+                <div class="line"></div>
+            </div>
+            <div class="card green">
+                <h3>Problem: Compute 3 stats in parallel from raw data</h3>
+                <div class="flow">
+                    <span class="fn green">START</span>
+                    <span class="arr">→</span>
+                    <div class="parallel-block">
+                        <span class="parallel-label">runs parallel</span>
+                        <span class="fn">calculate_sr</span>
+                        <span class="fn">calculate_bpb</span>
+                        <span class="fn">calculate_boundary_%</span>
+                    </div>
+                    <span class="arr">→</span>
+                    <span class="fn amber">summary</span>
+                    <span class="arr">→</span>
+                    <span class="fn red">END</span>
+                </div>
+            </div>
+            <div class="card blue">
+                <h3>State & Node Functions</h3>
+                <pre><span class="kw">class</span> <span class="tp">BatsmanState</span>(TypedDict):
+    runs: <span class="nb">int</span>;  balls: <span class="nb">int</span>
+    fours: <span class="nb">int</span>; sixes: <span class="nb">int</span>
+    sr: <span class="nb">float</span>;  bpb: <span class="nb">float</span>;  boundary_percent: <span class="nb">float</span>
+    summary: <span class="nb">str</span>
+
+<span class="cm"># Strike Rate  (runs/balls × 100)</span>
+<span class="kw">def</span> <span class="fn2">calculate_sr</span>(state):
+    sr = (state[<span class="str">'runs'</span>] / state[<span class="str">'balls'</span>]) * <span class="nb">100</span>
+    <span class="kw">return</span> {<span class="str">'sr'</span>: sr}
+
+<span class="cm"># Balls per boundary  (balls / fours+sixes)</span>
+<span class="kw">def</span> <span class="fn2">calculate_bpb</span>(state):
+    bpb = state[<span class="str">'balls'</span>] / (state[<span class="str">'fours'</span>] + state[<span class="str">'sixes'</span>])
+    <span class="kw">return</span> {<span class="str">'bpb'</span>: bpb}
+
+<span class="cm"># Boundary %  ((4s×4 + 6s×6) / runs × 100)</span>
+<span class="kw">def</span> <span class="fn2">calculate_boundary_percent</span>(state):
+    bp = ((state[<span class="str">'fours'</span>]*<span class="nb">4</span> + state[<span class="str">'sixes'</span>]*<span class="nb">6</span>) / state[<span class="str">'runs'</span>]) * <span class="nb">100</span>
+    <span class="kw">return</span> {<span class="str">'boundary_percent'</span>: bp}
+
+<span class="kw">def</span> <span class="fn2">summary</span>(state):
+    s = <span class="str">f"""Strike Rate - {state['sr']}
+Balls per boundary - {state['bpb']}
+Boundary percent - {state['boundary_percent']}"""</span>
+    <span class="kw">return</span> {<span class="str">'summary'</span>: s}</pre>
+            </div>
+            <div class="card red">
+                <h3>Graph Construction — Parallel Edges</h3>
+                <pre><span class="cm"># All 3 nodes start from START simultaneously</span>
+graph.add_edge(START, <span class="str">'calculate_sr'</span>)
+graph.add_edge(START, <span class="str">'calculate_bpb'</span>)
+graph.add_edge(START, <span class="str">'calculate_boundary_percent'</span>)
+
+<span class="cm"># All 3 merge into summary</span>
+graph.add_edge(<span class="str">'calculate_sr'</span>, <span class="str">'summary'</span>)
+graph.add_edge(<span class="str">'calculate_bpb'</span>, <span class="str">'summary'</span>)
+graph.add_edge(<span class="str">'calculate_boundary_percent'</span>, <span class="str">'summary'</span>)
+graph.add_edge(<span class="str">'summary'</span>, END)</pre>
+                <div class="result">
+                    <span class="key">Input:</span> <span class="val">runs=100, balls=50, fours=6, sixes=4</span><br>
+                    <span class="key">sr:</span> <span class="hl">200.0</span> &nbsp;|&nbsp;
+                    <span class="key">bpb:</span> <span class="hl">5.0</span> &nbsp;|&nbsp;
+                    <span class="key">boundary_percent:</span> <span class="hl">48.0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Structured Output -->
+        <div class="sec">
+            <div class="sec-title">
+                <span class="num">41</span>
+                <h2>Structured Output with Pydantic</h2>
+                <div class="line"></div>
+            </div>
+            <div class="card purple">
+                <h3>Why? Force LLM to return typed fields, not raw text</h3>
+                <pre><span class="kw">from</span> pydantic <span class="kw">import</span> BaseModel, Field
+
+<span class="kw">class</span> <span class="tp">EvaluationSchema</span>(BaseModel):
+    feedback: <span class="nb">str</span> = Field(description=<span class="str">'Detailed feedback for the essay'</span>)
+    score:    <span class="nb">int</span> = Field(description=<span class="str">'Score out of 10'</span>, ge=<span class="nb">0</span>, le=<span class="nb">10</span>)
+
+<span class="cm"># Bind schema to model</span>
+structured_model = model.with_structured_output(<span class="tp">EvaluationSchema</span>)
+
+<span class="cm"># Usage inside node:</span>
+output = structured_model.invoke(prompt)
+output.feedback  <span class="cm"># → str</span>
+output.score     <span class="cm"># → int (0-10)</span></pre>
+                <div class="key-box">
+                    <strong>Key:</strong> Each parallel evaluator node returns
+                    <code>{'feedback_key': output.feedback, 'individual_scores': [output.score]}</code> — the score is
+                    wrapped in a list so the <strong>reduce function</strong> can accumulate scores from all parallel
+                    nodes.
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Example 2 – UPSC Essay Evaluator -->
+        <div class="sec">
+            <div class="sec-title">
+                <span class="num">42</span>
+                <h2>Example 2 — UPSC Essay Evaluator (LLM)</h2>
+                <div class="line"></div>
+            </div>
+            <div class="card green">
+                <h3>3 LLM judges evaluate an essay in parallel</h3>
+                <div class="flow">
+                    <span class="fn green">START</span>
+                    <span class="arr">→</span>
+                    <div class="parallel-block">
+                        <span class="parallel-label">3 LLM judges (0-10 each)</span>
+                        <span class="fn">evaluate_language</span>
+                        <span class="fn">evaluate_analysis</span>
+                        <span class="fn">evaluate_thought</span>
+                    </div>
+                    <span class="arr">→</span>
+                    <span class="fn amber">final_evaluation</span>
+                    <span class="arr">→</span>
+                    <span class="fn red">END</span>
+                </div>
+            </div>
+            <div class="card blue">
+                <h3>UPSCState — with Reduce Function</h3>
+                <pre><span class="kw">from</span> typing <span class="kw">import</span> Annotated
+<span class="kw">import</span> operator
+
+<span class="kw">class</span> <span class="tp">UPSCState</span>(TypedDict):
+    essay:             <span class="nb">str</span>
+    language_feedback: <span class="nb">str</span>
+    analysis_feedback: <span class="nb">str</span>
+    clarity_feedback:  <span class="nb">str</span>
+    overall_feedback:  <span class="nb">str</span>
+    <span class="cm"># Annotated with operator.add → list is ACCUMULATED, not replaced</span>
+    individual_scores: Annotated[list[<span class="nb">int</span>], operator.add]
+    avg_score:         <span class="nb">float</span></pre>
+                <div class="key-box">
+                    <strong>operator.add</strong> is the reduce function. When parallel nodes each return
+                    <code>{'individual_scores': [8]}</code>, LangGraph merges them by adding lists:
+                    <code>[8] + [7] + [6]</code> → <code>[8, 7, 6]</code>
+                </div>
+            </div>
+            <div class="card red">
+                <h3>3 Parallel Node Functions</h3>
+                <pre><span class="cm"># Node 1 — Language quality</span>
+<span class="kw">def</span> <span class="fn2">evaluate_language</span>(state: <span class="tp">UPSCState</span>):
+    prompt = <span class="str">f'Evaluate the language quality of the essay...'</span>
+    output = structured_model.invoke(prompt)
+    <span class="kw">return</span> {<span class="str">'language_feedback'</span>: output.feedback,
+            <span class="str">'individual_scores'</span>: [output.score]}
+
+<span class="cm"># Node 2 — Depth of analysis</span>
+<span class="kw">def</span> <span class="fn2">evaluate_analysis</span>(state: <span class="tp">UPSCState</span>):
+    prompt = <span class="str">f'Evaluate the depth of analysis of the essay...'</span>
+    output = structured_model.invoke(prompt)
+    <span class="kw">return</span> {<span class="str">'analysis_feedback'</span>: output.feedback,
+            <span class="str">'individual_scores'</span>: [output.score]}
+
+<span class="cm"># Node 3 — Clarity of thought</span>
+<span class="kw">def</span> <span class="fn2">evaluate_thought</span>(state: <span class="tp">UPSCState</span>):
+    prompt = <span class="str">f'Evaluate the clarity of thought of the essay...'</span>
+    output = structured_model.invoke(prompt)
+    <span class="kw">return</span> {<span class="str">'clarity_feedback'</span>: output.feedback,
+            <span class="str">'individual_scores'</span>: [output.score]}</pre>
+            </div>
+            <div class="card amber">
+                <h3>Final Evaluation Node — Merge + Summarize</h3>
+                <pre><span class="kw">def</span> <span class="fn2">final_evaluation</span>(state: <span class="tp">UPSCState</span>):
+    <span class="cm"># Summarize all feedbacks using LLM</span>
+    prompt = <span class="str">f'Based on the following feedbacks create a summarized feedback...'</span>
+    overall_feedback = model.invoke(prompt).content
+
+    <span class="cm"># Compute average from accumulated list</span>
+    avg_score = <span class="nb">sum</span>(state[<span class="str">'individual_scores'</span>]) / <span class="nb">len</span>(state[<span class="str">'individual_scores'</span>])
+
+    <span class="kw">return</span> {<span class="str">'overall_feedback'</span>: overall_feedback, <span class="str">'avg_score'</span>: avg_score}</pre>
+            </div>
+            <div class="card green">
+                <h3>Graph Construction</h3>
+                <pre>graph = <span class="fn2">StateGraph</span>(<span class="tp">UPSCState</span>)
+
+<span class="cm"># Add 4 nodes</span>
+graph.add_node(<span class="str">'evaluate_language'</span>, evaluate_language)
+graph.add_node(<span class="str">'evaluate_analysis'</span>, evaluate_analysis)
+graph.add_node(<span class="str">'evaluate_thought'</span>,  evaluate_thought)
+graph.add_node(<span class="str">'final_evaluation'</span>,  final_evaluation)
+
+<span class="cm"># Fan-out: START → 3 parallel judges</span>
+graph.add_edge(START, <span class="str">'evaluate_language'</span>)
+graph.add_edge(START, <span class="str">'evaluate_analysis'</span>)
+graph.add_edge(START, <span class="str">'evaluate_thought'</span>)
+
+<span class="cm"># Fan-in: all judges → final_evaluation</span>
+graph.add_edge(<span class="str">'evaluate_language'</span>, <span class="str">'final_evaluation'</span>)
+graph.add_edge(<span class="str">'evaluate_analysis'</span>, <span class="str">'final_evaluation'</span>)
+graph.add_edge(<span class="str">'evaluate_thought'</span>,  <span class="str">'final_evaluation'</span>)
+graph.add_edge(<span class="str">'final_evaluation'</span>,  END)
+
+workflow = graph.compile()</pre>
+            </div>
+        </div>
+
+        <!-- 5. Results -->
+        <div class="sec">
+            <div class="sec-title">
+                <span class="num">43</span>
+                <h2>Results — Two Essays Compared</h2>
+                <div class="line"></div>
+            </div>
+            <div class="grid2">
+                <div class="card green" style="padding:16px 18px;">
+                    <h3 style="font-size:13px;">✅ Good Essay</h3>
+                    <p style="font-size:12px;margin-top:4px;">"India in the Age of AI" — well-structured</p>
+                    <div class="result" style="margin-top:10px;font-size:10.5px;">
+                        <span class="key">individual_scores:</span> <span class="hl">[7, 8, 8]</span><br>
+                        <span class="key">avg_score:</span> <span class="hl">7.67</span>
+                    </div>
+                </div>
+                <div class="card red" style="padding:16px 18px;">
+                    <h3 style="font-size:13px;">❌ Poor Essay</h3>
+                    <p style="font-size:12px;margin-top:4px;">"India and AI Time" — basic/low quality</p>
+                    <div class="result" style="margin-top:10px;font-size:10.5px;">
+                        <span class="key">individual_scores:</span> <span class="hl">[4, 3, 4]</span><br>
+                        <span class="key">avg_score:</span> <span class="hl">3.57</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. Comparison Table -->
+        <div class="sec">
+            <div class="sec-title">
+                <span class="num">44</span>
+                <h2>Sequential vs Parallel — Key Differences</h2>
+                <div class="line"></div>
+            </div>
+            <div class="card blue" style="padding: 0; overflow:hidden;">
+                <table>
+                    <tr>
+                        <th>Aspect</th>
+                        <th>Sequential</th>
+                        <th>Parallel</th>
+                    </tr>
+                    <tr>
+                        <td>Edges from START</td>
+                        <td>One node</td>
+                        <td>Multiple nodes</td>
+                    </tr>
+                    <tr>
+                        <td>State merging</td>
+                        <td>Replace (default)</td>
+                        <td>Reduce / operator.add</td>
+                    </tr>
+                    <tr>
+                        <td>Use Annotated?</td>
+                        <td>No</td>
+                        <td>Yes — for accumulation</td>
+                    </tr>
+                    <tr>
+                        <td>Speed</td>
+                        <td>Slower (one by one)</td>
+                        <td>Faster (concurrent)</td>
+                    </tr>
+                    <tr>
+                        <td>Best for</td>
+                        <td>Dependent steps</td>
+                        <td>Independent tasks</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- 7. Quick Reference -->
+        <div class="sec">
+            <div class="sec-title">
+                <span class="num">45</span>
+                <h2>Quick Reference</h2>
+                <div class="line"></div>
+            </div>
+            <div class="grid2">
+                <div class="card amber" style="padding:16px 18px;">
+                    <h3 style="font-size:13px;">Reduce Function Pattern</h3>
+                    <pre style="font-size:10.5px;margin-top:8px;">field: Annotated[
+  list[int],
+  operator.add   <span class="cm"># merge by adding</span>
+]
+<span class="cm"># [8] + [7] + [6] = [8,7,6]</span></pre>
+                </div>
+                <div class="card purple" style="padding:16px 18px;">
+                    <h3 style="font-size:13px;">Structured Output Pattern</h3>
+                    <pre style="font-size:10.5px;margin-top:8px;"><span class="kw">class</span> <span class="tp">Schema</span>(BaseModel):
+    feedback: <span class="nb">str</span>
+    score: <span class="nb">int</span>
+
+m = model.with_structured_output(<span class="tp">Schema</span>)
+out = m.invoke(prompt)
+out.score  <span class="cm"># typed int</span></pre>
+                </div>
+            </div>
+            <div class="card red" style="margin-top:0;">
+                <h3>The Universal Parallel Recipe</h3>
+                <p><code>State (with Annotated reduce)</code> → <code>N parallel nodes</code> → each returns
+                    <code>{'field': val, 'list_field': [item]}</code> → merge node computes avg/summary →
+                    <code>END</code>
+                </p>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>

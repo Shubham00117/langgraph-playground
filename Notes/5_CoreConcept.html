@@ -763,26 +763,26 @@
     <div class="wrap">
 
         <header>
-            <div class="eyebrow">CampusX · Agentic AI · Video 4</div>
+            <div class="eyebrow">CampusX · Module 5 · LangGraph</div>
             <h1>LangGraph <em>Core Concepts</em></h1>
             <p class="tagline">Complete lecture notes · all 7 topics · 15 screenshots</p>
         </header>
 
         <nav class="toc">
             <div class="toc-label">Jump to section</div>
-            <a href="#s1">01 · What is LangGraph</a>
-            <a href="#s2">02 · LLM Workflows</a>
-            <a href="#s3">03 · Workflow Patterns</a>
-            <a href="#s4">04 · Graphs, Nodes &amp; Edges</a>
-            <a href="#s5">05 · State</a>
-            <a href="#s6">06 · Reducers</a>
-            <a href="#s7">07 · Execution Model</a>
+            <a href="#s1">26 · What is LangGraph</a>
+            <a href="#s2">27 · LLM Workflows</a>
+            <a href="#s3">28 · Workflow Patterns</a>
+            <a href="#s4">29 · Graphs, Nodes &amp; Edges</a>
+            <a href="#s5">30 · State</a>
+            <a href="#s6">31 · Reducers</a>
+            <a href="#s7">32 · Execution Model</a>
         </nav>
 
         <!-- ── 01 WHAT IS LANGGRAPH ── -->
         <section class="sec" id="s1">
             <div class="sec-head">
-                <div class="chip">01</div>
+                <div class="chip">26</div>
                 <h2>What is LangGraph?</h2>
             </div>
             <div class="sec-body">
@@ -806,7 +806,7 @@
         <!-- ── 02 LLM WORKFLOWS ── -->
         <section class="sec" id="s2">
             <div class="sec-head">
-                <div class="chip blue">02</div>
+                <div class="chip blue">27</div>
                 <h2>LLM Workflows</h2>
             </div>
             <div class="sec-body">
@@ -829,7 +829,7 @@
         <!-- ── 03 WORKFLOW PATTERNS ── -->
         <section class="sec" id="s3">
             <div class="sec-head">
-                <div class="chip orange">03</div>
+                <div class="chip orange">28</div>
                 <h2>Common Workflow Patterns</h2>
             </div>
             <div class="sec-body">
@@ -838,60 +838,46 @@
                     <div class="wf">
                         <div class="wf-name"><span class="dot"></span>Prompt Chaining</div>
                         <div class="wf-body">
-                            A <strong>linear sequence</strong> of LLM calls. A <strong>Gate</strong> node checks output
-                            quality after the first call:<br>
-                            • <strong>Pass</strong> → continues chain → Out<br>
-                            • <strong>Fail</strong> → exits early (Exit node)<br>
-                            Subsequent LLM calls build on previous outputs.
+                            Linear LLM calls using a <strong>Gate node</strong> to validate quality. Subsequent steps
+                            build on predecessor outputs.
                         </div>
-                        <div class="wf-ex">topic → outline → LLM 2 → 5 000-word detailed report → LLM 3</div>
+                        <div class="wf-ex">topic → outline → draft → final refinement</div>
                     </div>
 
                     <div class="wf">
                         <div class="wf-name bn"><span class="dot"></span>Routing</div>
                         <div class="wf-body">
-                            An <strong>LLM Router</strong> acts as a <strong>decision-maker</strong> (routing policy).
-                            It classifies the input and directs it to the appropriate specialist LLM.<br>
-                            In → <strong>LLM Router</strong> → LLM 1 / LLM 2 / LLM 3 → Out
+                            An <strong>LLM Router</strong> classifies input to direct it to the correct specialist
+                            agent. `In → Router → Specialist → Out`
                         </div>
-                        <div class="wf-ex">customer chatbot → router classifies query type → routes to correct LLM agent
-                        </div>
+                        <div class="wf-ex">Query → Router (Billing/Tech) → Specialist Agent</div>
                     </div>
 
                     <div class="wf">
                         <div class="wf-name gn"><span class="dot"></span>Parallelization</div>
                         <div class="wf-body">
-                            A task is split into <strong>independent subtasks</strong> that run
-                            <strong>simultaneously</strong>. An <strong>Aggregator</strong> merges all results at the
-                            end.<br>
-                            In → [LLM 1 ‖ LLM 2 ‖ LLM 3] → Aggregator → Out
+                            Splits task into <strong>independent subtasks</strong> running simultaneously, merged by an
+                            <strong>Aggregator</strong>.
                         </div>
-                        <div class="wf-ex">YouTube content moderation: community guidelines + misinformation + sexual
-                            content — all checked in parallel</div>
+                        <div class="wf-ex">Content → Parallel (Audit, Logic, Style) → Final Review</div>
                     </div>
 
                     <div class="wf">
                         <div class="wf-name pn"><span class="dot"></span>Orchestrator–Workers</div>
                         <div class="wf-body">
-                            An <strong>Orchestrator LLM</strong> dynamically decomposes a task into
-                            <strong>subtasks</strong>, assigns to worker LLMs, and a <strong>Synthesizer</strong>
-                            combines results.<br>
-                            In → Orchestrator → [Workers] → Synthesizer → Out
+                            An <strong>Orchestrator</strong> dynamically assigns subtasks to <strong>Workers</strong>,
+                            compiled by a <strong>Synthesizer</strong>.
                         </div>
-                        <div class="wf-ex">research assistant: query → workers search Google Scholar → synthesizer
-                            compiles research report</div>
+                        <div class="wf-ex">Request → Orchestrator → (Search, Code, Write) → Final Response</div>
                     </div>
 
                     <div class="wf">
                         <div class="wf-name rn"><span class="dot"></span>Evaluator–Optimizer</div>
                         <div class="wf-body">
-                            A <strong>Generator LLM</strong> produces a solution; an <strong>Evaluator LLM</strong>
-                            scores it.<br>
-                            • <strong>Accepted</strong> → Out<br>
-                            • <strong>Rejected + Feedback</strong> → loops back to Generator<br>
-                            Enables iterative <strong>creativity + refinement</strong>.
+                            A <strong>Generator</strong> produces work and an <strong>Evaluator</strong> provides
+                            feedback, looping until quality is accepted.
                         </div>
-                        <div class="wf-ex">task → email draft / blog → loops until quality is accepted</div>
+                        <div class="wf-ex">Coding → Generator → (Test & Feedback) → Refined Code</div>
                     </div>
 
                 </div>
@@ -901,7 +887,7 @@
         <!-- ── 04 GRAPHS, NODES & EDGES ── -->
         <section class="sec" id="s4">
             <div class="sec-head">
-                <div class="chip green">04</div>
+                <div class="chip green">29</div>
                 <h2>Graphs, Nodes &amp; Edges</h2>
             </div>
             <div class="sec-body">
@@ -912,10 +898,9 @@
 
                 <div class="lbl">Case Study — UPSC Essay Evaluator System</div>
                 <p style="color:var(--sub);font-size:13.5px;margin-bottom:16px;">
-                    The system generates an essay topic, collects the student's submission, and evaluates it
-                    <em>in parallel</em> on Depth of Analysis, Language Quality, and Clarity of Thought (5 pts each,
-                    total 15).
-                    Based on the combined score it either gives feedback or approves the essay. Students may retry.
+                    An automated system that generates UPSC topics, collects student essays, and evaluates them
+                    using parallel agents (Depth, Language, Clarity). Passing requires 10/15 points; otherwise,
+                    feedback is given for revision.
                 </p>
 
                 <table class="node-table">
@@ -930,59 +915,46 @@
                         <tr>
                             <td><span class="nn">1</span></td>
                             <td><span class="nn">GenerateTopic</span></td>
-                            <td class="nd">System generates a relevant UPSC-style essay topic and presents it to the
-                                student.</td>
+                            <td class="nd">Creates a UPSC-style essay prompt.</td>
                         </tr>
                         <tr>
                             <td><span class="nn">2</span></td>
                             <td><span class="nn">CollectEssay</span></td>
-                            <td class="nd">Student writes and submits the essay based on the generated topic.</td>
+                            <td class="nd">Receives student's written submission.</td>
                         </tr>
                         <tr>
                             <td><span class="nn">3</span></td>
-                            <td><span class="nn">EvaluateEssay <span class="tag par">parallel block</span></span></td>
+                            <td><span class="nn">EvaluateEssay <span class="tag par">parallel</span></span></td>
                             <td class="nd">
-                                Three sub-nodes run <strong>simultaneously</strong>:<br>
-                                • <strong>EvaluateDepth</strong> — argument strength &amp; critical thinking <em
-                                    style="color:var(--accent)">(5 pts)</em><br>
-                                • <strong>EvaluateLanguage</strong> — grammar, vocabulary, fluency <em
-                                    style="color:var(--accent)">(5 pts)</em><br>
-                                • <strong>EvaluateClarity</strong> — coherence &amp; logical flow <em
-                                    style="color:var(--accent)">(5 pts)</em>
+                                Simultaneous evaluation of <strong>Depth</strong>, <strong>Language</strong>, and
+                                <strong>Clarity</strong> (5 pts each).
                             </td>
                         </tr>
                         <tr>
                             <td><span class="nn">4</span></td>
                             <td><span class="nn">AggregateResults</span></td>
-                            <td class="nd">Combines the three scores → <strong>total out of 15</strong>. Passing
-                                threshold = <strong>10 / 15</strong>.</td>
+                            <td class="nd">Sums the 3 scores (Target: 10/15).</td>
                         </tr>
                         <tr>
                             <td><span class="nn">5</span></td>
-                            <td><span class="nn">ConditionalRouting <span class="tag cond">conditional</span></span>
-                            </td>
-                            <td class="nd">
-                                Score ≥ 10 → <strong>ShowSuccess</strong><br>
-                                Score &lt; 10 → <strong>GiveFeedback</strong>
-                            </td>
+                            <td><span class="nn">Routing <span class="tag cond">conditional</span></span></td>
+                            <td class="nd">Branches to <strong>Success</strong> (≥10) or <strong>Feedback</strong> (
+                                <10).< /td>
                         </tr>
                         <tr>
                             <td><span class="nn">6</span></td>
                             <td><span class="nn">GiveFeedback</span></td>
-                            <td class="nd">Provides targeted improvement suggestions for each weak area.</td>
+                            <td class="nd">Provides targeted improvement suggestions.</td>
                         </tr>
                         <tr>
                             <td><span class="nn">7</span></td>
-                            <td><span class="nn">CollectRevision <span class="tag loop">optional loop</span></span></td>
-                            <td class="nd">
-                                Student resubmits revised essay → loops back to <strong>EvaluateEssay</strong>.<br>
-                                If student chooses <strong>No Retake</strong> → END.
-                            </td>
+                            <td><span class="nn">CollectRevision <span class="tag loop">loop</span></span></td>
+                            <td class="nd">Accepts revised essay to loop back to evaluation.</td>
                         </tr>
                         <tr>
                             <td><span class="nn">8</span></td>
                             <td><span class="nn">ShowSuccess</span></td>
-                            <td class="nd">Congratulates the student and ends the flow → END.</td>
+                            <td class="nd">Confirms passing status and ends flow.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -1005,7 +977,7 @@
         <!-- ── 05 STATE ── -->
         <section class="sec" id="s5">
             <div class="sec-head">
-                <div class="chip purple">05</div>
+                <div class="chip purple">30</div>
                 <h2>State</h2>
             </div>
             <div class="sec-body">
@@ -1014,44 +986,47 @@
                     being passed between nodes as your graph runs.
                 </div>
                 <ul class="pts">
-                    <li><span class="ar">→</span><span>Defined as a <strong>TypedDict class</strong> (not a plain dict)
-                            — provides structure and type safety.</span></li>
-                    <li><span class="ar">→</span><span>State is <strong>accessible by all nodes</strong>. Every node
-                            reads from it and writes partial updates back.</span></li>
-                    <li><span class="ar">→</span><span>State is <strong>mutable</strong> — it <em>evolves</em> as each
-                            node in the graph processes and updates its fields.</span></li>
-                    <li><span class="ar">→</span><span>Each node only returns the <strong>fields it changed</strong>;
-                            unchanged fields persist as-is.</span></li>
-                    <li><span class="ar">→</span><span>Think: <code>dict → TypedDict class</code> that travels through
-                            the entire graph accumulating changes (like a baton in a relay).</span></li>
+                    <li><span class="ar">→</span><span><strong>TypedDict Class</strong>: Provides structure and type
+                            safety beyond plain dicts.</span></li>
+                    <li><span class="ar">→</span><span><strong>Shared Memory</strong>: Accessible by all nodes for
+                            reading and partial updates.</span></li>
+                    <li><span class="ar">→</span><span><strong>Evolving State</strong>: Only changed fields are updated;
+                            unchanged data persists.</span></li>
+                    <li><span class="ar">→</span><span><strong>Relay Model</strong>: Travels through the graph,
+                            accumulating updates round-by-round.</span></li>
                 </ul>
-
                 <div class="lbl">Essay Evaluator — State Schema (TypedDict)</div>
                 <div class="fields">
-                    <div class="field"><span class="fname">essay_text</span><span class="fsep">:</span><span
-                            class="ftype">str</span><span class="fnote">student's submitted essay</span></div>
+                    <div class="field"><span class="fname">essay</span><span class="fsep">:</span><span
+                            class="ftype">str</span><span class="fnote">the actual student submission text</span></div>
                     <div class="field"><span class="fname">topic</span><span class="fsep">:</span><span
-                            class="ftype">str</span><span class="fnote">generated UPSC topic</span></div>
-                    <div class="field"><span class="fname">depth_score</span><span class="fsep">:</span><span
-                            class="ftype">int</span><span class="fnote">0–5 · argument strength</span></div>
-                    <div class="field"><span class="fname">language_score</span><span class="fsep">:</span><span
-                            class="ftype">int</span><span class="fnote">0–5 · grammar &amp; fluency</span></div>
-                    <div class="field"><span class="fname">clarity_score</span><span class="fsep">:</span><span
-                            class="ftype">int</span><span class="fnote">0–5 · logical flow</span></div>
+                            class="ftype">str</span><span class="fnote">the specific UPSC prompt assigned</span></div>
+                    <div class="field"><span class="fname">rubric</span><span class="fsep">:</span><span
+                            class="ftype">dict[str, str]</span><span class="fnote">grading criteria used</span></div>
+                    <div class="field"><span class="fname">scores</span><span class="fsep">:</span><span
+                            class="ftype">dict[str, int]</span><span class="fnote">category marks (depth, language,
+                            etc.)</span></div>
                     <div class="field"><span class="fname">total_score</span><span class="fsep">:</span><span
-                            class="ftype">int</span><span class="fnote">aggregate /15</span></div>
+                            class="ftype">int</span><span class="fnote">aggregate marks /15</span></div>
                     <div class="field"><span class="fname">feedback</span><span class="fsep">:</span><span
-                            class="ftype">Annotated[list[str], add]</span><span class="fnote">accumulated across all
-                            rounds</span></div>
-                    <div class="field"><span class="fname">evaluation_round</span><span class="fsep">:</span><span
-                            class="ftype">int</span><span class="fnote">tracks how many retries</span></div>
+                            class="ftype">Annotated[list[str], add]</span><span class="fnote">accumulated feedback
+                            stream</span></div>
+                    <div class="field"><span class="fname">llm_critique</span><span class="fsep">:</span><span
+                            class="ftype">str</span><span class="fnote">raw qualitative feedback from the model</span>
+                    </div>
+                    <div class="field"><span class="fname">is_passing</span><span class="fsep">:</span><span
+                            class="ftype">bool</span><span class="fnote">final result (True if Score >= 10)</span></div>
+                    <div class="field"><span class="fname">revision_count</span><span class="fsep">:</span><span
+                            class="ftype">int</span><span class="fnote">total retry attempts</span></div>
+                    <div class="field"><span class="fname">metadata</span><span class="fsep">:</span><span
+                            class="ftype">dict</span><span class="fnote">internal info (model, tokens, timestamp)</span>
+                    </div>
                 </div>
 
                 <div class="callout" style="margin-top:20px;">
                     <span class="icon">💡</span>
-                    <div><strong>Why TypedDict?</strong> It lets LangGraph know the full structure of state at compile
-                        time, enabling validation, IDE auto-complete, and clear contracts between nodes. A plain dict
-                        would lose all type information.</div>
+                    <div><strong>Why TypedDict?</strong> Enables compile-time validation, IDE support, and explicit node
+                        contracts. Essential for production-grade graph stability.</div>
                 </div>
             </div>
         </section>
@@ -1059,45 +1034,40 @@
         <!-- ── 06 REDUCERS ── -->
         <section class="sec" id="s6">
             <div class="sec-head">
-                <div class="chip red">06</div>
+                <div class="chip red">31</div>
                 <h2>Reducers</h2>
             </div>
             <div class="sec-body">
                 <div class="def red-t">
-                    Reducers define <strong>how updates from nodes are applied to the shared state</strong>.<br>
-                    Each key in the state can have its own reducer — determining whether new data <em>replaces,
-                        adds,</em> or <em>merges</em> with the existing value.
+                    Reducers define <strong>how node updates merge with state</strong>. Each key can have a custom
+                    strategy: <em>replace, add,</em> or <em>merge</em>.
                 </div>
 
                 <div class="lbl">Three Reducer Strategies</div>
                 <div class="red-grid">
                     <div class="rc">
                         <div class="rc-title r">Replace (default)</div>
-                        <div class="rc-desc">New value <strong>overwrites</strong> the old one entirely. Default
-                            behaviour when no reducer is specified. Used for scalars like scores and strings.</div>
-                        <div class="rc-ex">total_score: 8 → overwrites to 12</div>
+                        <div class="rc-desc">Overwrites old values. Used for scalars like <code>scores</code> and
+                            <code>strings</code>.
+                        </div>
                     </div>
                     <div class="rc">
                         <div class="rc-title g">Add / Append</div>
-                        <div class="rc-desc">New value is <strong>appended</strong> to an existing list. Declared with
-                            <code>Annotated[list[str], add]</code>. Essential for accumulating data across rounds.
-                        </div>
-                        <div class="rc-ex">feedback: ["weak arg"] + ["improve vocab"] → both kept</div>
+                        <div class="rc-desc">Appends updates to a list via <code>Annotated[list, add]</code>. For
+                            accumulation across rounds.</div>
                     </div>
                     <div class="rc">
                         <div class="rc-title b">Merge / Custom</div>
-                        <div class="rc-desc">Custom reducer function to <strong>combine</strong> old and new values —
-                            e.g., summing integers, merging dicts, or taking max/min.</div>
-                        <div class="rc-ex">custom reducer function passed as second arg in Annotated</div>
+                        <div class="rc-desc">Custom functions to combine data (e.g., dict merging or taking max/min).
+                        </div>
                     </div>
                 </div>
 
                 <ul class="pts">
-                    <li><span class="ar">→</span><span>Without a reducer, when <strong>two parallel nodes</strong> write
-                            to the same state key simultaneously → <strong>conflict</strong>. Reducer resolves this
-                            safely.</span></li>
-                    <li><span class="ar">→</span><span><code>feedback</code> uses <strong>add</strong> reducer so each
-                            evaluation round's feedback is accumulated, not overwritten by the next round.</span></li>
+                    <li><span class="ar">→</span><span><strong>Conflict Resolution</strong>: Resolves overlapping
+                            writes from parallel nodes safely.</span></li>
+                    <li><span class="ar">→</span><span><strong>History Retention</strong>: Ensures feedback is
+                            accumulated across multiple evaluation rounds.</span></li>
                 </ul>
 
                 <div class="lbl">Simple Reducer Example</div>
@@ -1111,8 +1081,7 @@
                     <span class="fn g">State: result = 22</span>
                 </div>
                 <p style="font-size:12.5px;color:var(--dim);margin-top:6px;">
-                    ⚠ If both <em>sum</em> and <em>×2</em> write to the same key without a reducer → last-write-wins
-                    (incorrect). A proper reducer combines both updates correctly.
+                    ⚠ Prevents "last-write-wins" data loss by correctly merging updates from independent nodes.
                 </p>
             </div>
         </section>
@@ -1120,13 +1089,13 @@
         <!-- ── 07 EXECUTION MODEL ── -->
         <section class="sec" id="s7">
             <div class="sec-head">
-                <div class="chip">07</div>
+                <div class="chip">32</div>
                 <h2>LangGraph Execution Model</h2>
             </div>
             <div class="sec-body">
                 <div class="def">
-                    LangGraph uses a <strong>Pregel-style message-passing</strong> model. Execution proceeds in discrete
-                    <strong>super-steps (rounds)</strong> until no work remains.
+                    Execution follows a <strong>Pregel-style message-passing</strong> model, proceeding in discrete
+                    <strong>super-steps (rounds)</strong> until work is complete.
                 </div>
 
                 <div class="exec-steps">
@@ -1136,9 +1105,9 @@
                             <div class="estep-line"></div>
                         </div>
                         <div class="estep-body">
-                            <div class="estep-title">Graph Compilation</div>
-                            <div class="estep-desc">All <strong>nodes and edges</strong> are registered. LangGraph
-                                validates the graph structure and builds the execution plan before any run.</div>
+                            <div class="estep-title">Compilation</div>
+                            <div class="estep-desc">Registers nodes/edges and validates the graph structure before
+                                execution.</div>
                         </div>
                     </div>
                     <div class="estep">
@@ -1147,9 +1116,9 @@
                             <div class="estep-line"></div>
                         </div>
                         <div class="estep-body">
-                            <div class="estep-title">Input Injection</div>
-                            <div class="estep-desc">The <strong>initial state</strong> is populated with the user's
-                                input values. This is the starting snapshot of shared memory.</div>
+                            <div class="estep-title">Injection</div>
+                            <div class="estep-desc">User values populate the <strong>initial state</strong> snapshot.
+                            </div>
                         </div>
                     </div>
                     <div class="estep">
@@ -1158,9 +1127,8 @@
                             <div class="estep-line"></div>
                         </div>
                         <div class="estep-body">
-                            <div class="estep-title">Entry Nodes Activated</div>
-                            <div class="estep-desc">The <strong>entry/start node(s)</strong> receive the first message
-                                and become <em>active</em> for the first super-step.</div>
+                            <div class="estep-title">Activation</div>
+                            <div class="estep-desc">Entry nodes receive initial messages and become active.</div>
                         </div>
                     </div>
                     <div class="estep">
@@ -1169,13 +1137,10 @@
                             <div class="estep-line"></div>
                         </div>
                         <div class="estep-body">
-                            <div class="estep-title">Super-Steps Begin (Rounds)</div>
+                            <div class="estep-title">Super-Steps</div>
                             <div class="estep-desc">
-                                Execution proceeds in <strong>rounds</strong>. In each round:<br>
-                                • All <strong>active nodes</strong> (those that received messages) run <strong>in
-                                    parallel</strong>.<br>
-                                • Each active node processes the state and returns an <strong>update (message)</strong>
-                                back to state.
+                                All <strong>active nodes</strong> run in parallel, process state, and return updates
+                                (messages).
                             </div>
                         </div>
                     </div>
@@ -1185,11 +1150,10 @@
                             <div class="estep-line"></div>
                         </div>
                         <div class="estep-body">
-                            <div class="estep-title">Message Passing &amp; Node Activation</div>
+                            <div class="estep-title">Propagation</div>
                             <div class="estep-desc">
-                                State updates are passed <strong>via edges</strong> to downstream nodes.<br>
-                                Nodes that receive messages become <strong>active for the next round</strong>. Nodes
-                                that receive no messages remain idle.
+                                Updates flow via edges. Nodes receiving messages activate for the next round; others
+                                remain idle.
                             </div>
                         </div>
                     </div>
@@ -1199,12 +1163,9 @@
                             <div class="estep-line"></div>
                         </div>
                         <div class="estep-body">
-                            <div class="estep-title">Halting Condition — STOP</div>
+                            <div class="estep-title">Halting</div>
                             <div class="estep-desc">
-                                Execution <strong>stops</strong> when <em>both</em> conditions are true
-                                simultaneously:<br>
-                                ✓ <strong>No nodes are active</strong> (none received messages)<br>
-                                ✓ <strong>No messages are in transit</strong> (no pending updates on edges)
+                                Stops when no nodes are active and no messages are in transit.
                             </div>
                         </div>
                     </div>
@@ -1213,15 +1174,14 @@
                 <div class="callout">
                     <span class="icon">⚡</span>
                     <div>
-                        <strong>Key insight:</strong> All active nodes in a round run <em>in parallel
-                            automatically</em>. This means the 3-evaluator parallel block in the essay system requires
-                        no special parallel code — it emerges naturally from the execution model.
+                        <strong>Key insight:</strong> Parallelism is native. Multiple active nodes in a round run
+                        simultaneously by default—no special "parallel code" required.
                     </div>
                 </div>
             </div>
         </section>
 
-        <footer>LangGraph Core Concepts &nbsp;·&nbsp; CampusX Video 4 &nbsp;·&nbsp; 15 screenshots · 7 topics</footer>
+        <footer>LangGraph Core Concepts &nbsp;·&nbsp; CampusX Module 5 &nbsp;·&nbsp; 7 topics</footer>
     </div>
 </body>
 
