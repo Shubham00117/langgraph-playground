@@ -46,6 +46,9 @@ Install the core libraries along with any necessary dependencies.
 ```bash
 pip install langgraph
 pip install langchain
+pip install python-dotenv
+pip install openai
+pip install langchain-huggingface
 ```
 
 ---
