@@ -453,6 +453,10 @@
                 <h2>What is a Parallel Workflow?</h2>
                 <div class="line"></div>
             </div>
+            <p
+                style="font-family: 'Space Mono', monospace; font-size: 13px; color: var(--muted); margin: -10px 0 20px 30px;">
+                // A design pattern where multiple nodes execute concurrently, significantly reducing execution time.
+            </p>
             <div class="card red">
                 <h3>Fan-Out → Fan-In Pattern</h3>
                 <p>Multiple nodes execute <strong>simultaneously</strong> from a single START point (fan-out), then
@@ -508,7 +512,7 @@
                         <span class="parallel-label">runs parallel</span>
                         <span class="fn">calculate_sr</span>
                         <span class="fn">calculate_bpb</span>
-                        <span class="fn">calculate_boundary_%</span>
+                        <span class="fn">calculate_boundary_percent</span>
                     </div>
                     <span class="arr">→</span>
                     <span class="fn amber">summary</span>
@@ -519,30 +523,36 @@
             <div class="card blue">
                 <h3>State & Node Functions</h3>
                 <pre><span class="kw">class</span> <span class="tp">BatsmanState</span>(TypedDict):
-    runs: <span class="nb">int</span>;  balls: <span class="nb">int</span>
-    fours: <span class="nb">int</span>; sixes: <span class="nb">int</span>
-    sr: <span class="nb">float</span>;  bpb: <span class="nb">float</span>;  boundary_percent: <span class="nb">float</span>
-    summary: <span class="nb">str</span>
+    runs:             <span class="nb">int</span>
+    balls:            <span class="nb">int</span>
+    fours:            <span class="nb">int</span>
+    sixes:            <span class="nb">int</span>
+    sr:               <span class="nb">float</span>
+    bpb:              <span class="nb">float</span>
+    boundary_percent: <span class="nb">float</span>
+    summary:          <span class="nb">str</span>
 
-<span class="cm"># Strike Rate  (runs/balls × 100)</span>
+<span class="cm"># Strike Rate (runs / balls * 100)</span>
 <span class="kw">def</span> <span class="fn2">calculate_sr</span>(state):
     sr = (state[<span class="str">'runs'</span>] / state[<span class="str">'balls'</span>]) * <span class="nb">100</span>
     <span class="kw">return</span> {<span class="str">'sr'</span>: sr}
 
-<span class="cm"># Balls per boundary  (balls / fours+sixes)</span>
+<span class="cm"># Balls per boundary (balls / (fours + sixes))</span>
 <span class="kw">def</span> <span class="fn2">calculate_bpb</span>(state):
     bpb = state[<span class="str">'balls'</span>] / (state[<span class="str">'fours'</span>] + state[<span class="str">'sixes'</span>])
     <span class="kw">return</span> {<span class="str">'bpb'</span>: bpb}
 
-<span class="cm"># Boundary %  ((4s×4 + 6s×6) / runs × 100)</span>
+<span class="cm"># Boundary % ((fours*4 + sixes*6) / runs * 100)</span>
 <span class="kw">def</span> <span class="fn2">calculate_boundary_percent</span>(state):
     bp = ((state[<span class="str">'fours'</span>]*<span class="nb">4</span> + state[<span class="str">'sixes'</span>]*<span class="nb">6</span>) / state[<span class="str">'runs'</span>]) * <span class="nb">100</span>
     <span class="kw">return</span> {<span class="str">'boundary_percent'</span>: bp}
 
 <span class="kw">def</span> <span class="fn2">summary</span>(state):
-    s = <span class="str">f"""Strike Rate - {state['sr']}
-Balls per boundary - {state['bpb']}
-Boundary percent - {state['boundary_percent']}"""</span>
+    <span class="cm"># Create summary of all stats</span>
+    sr_str = <span class="str">f"Strike Rate - {state['sr']}"</span>
+    bpb_str = <span class="str">f"Balls per boundary - {state['bpb']}"</span>
+    bp_str = <span class="str">f"Boundary percent - {state['boundary_percent']}"</span>
+    s = <span class="str">f"{sr_str}\n{bpb_str}\n{bp_str}"</span>
     <span class="kw">return</span> {<span class="str">'summary'</span>: s}</pre>
             </div>
             <div class="card red">
