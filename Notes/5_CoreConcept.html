@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LangGraph Core Concepts — Complete Notes</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&family=Figtree:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0b0e14;
+            --surface: #13171f;
+            --card: #181d28;
+            --border: #252d3d;
+            --accent: #fbbf24;
+            --accent2: #f97316;
+            --blue: #60a5fa;
+            --green: #34d399;
+            --purple: #a78bfa;
+            --red: #f87171;
+            --text: #e2e8f0;
+            --sub: #94a3b8;
+            --dim: #475569;
+            --mono: 'JetBrains Mono', monospace;
+            --sans: 'Figtree', sans-serif;
+            --display: 'Syne', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--sans);
+            font-size: 14.5px;
+            line-height: 1.7;
+            padding: 48px 20px 100px;
+        }
+
+        ::selection {
+            background: rgba(251, 191, 36, .25);
+        }
+
+        .wrap {
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        /* HEADER */
+        header {
+            margin-bottom: 60px;
+        }
+
+        .eyebrow {
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .eyebrow::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        h1 {
+            font-family: var(--display);
+            font-size: clamp(36px, 5.5vw, 56px);
+            font-weight: 800;
+            line-height: 1.08;
+            color: #fff;
+            margin-bottom: 14px;
+        }
+
+        h1 em {
+            font-style: normal;
+            color: var(--accent);
+        }
+
+        .tagline {
+            color: var(--sub);
+            font-size: 15px;
+            font-weight: 300;
+        }
+
+        /* TOC */
+        .toc {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 40px 0 60px;
+            padding: 24px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+        }
+
+        .toc-label {
+            width: 100%;
+            font-family: var(--mono);
+            font-size: 10px;
+            letter-spacing: .15em;
+            text-transform: uppercase;
+            color: var(--dim);
+            margin-bottom: 8px;
+        }
+
+        .toc a {
+            font-family: var(--mono);
+            font-size: 11.5px;
+            color: var(--sub);
+            text-decoration: none;
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 5px 16px;
+            border-radius: 20px;
+            transition: all .18s;
+        }
+
+        .toc a:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+            background: rgba(251, 191, 36, .06);
+        }
+
+        /* SECTION */
+        .sec {
+            margin-bottom: 52px;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(18px);
+            animation: rise .5s ease forwards;
+        }
+
+        @keyframes rise {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .sec:nth-child(1) {
+            animation-delay: .05s
+        }
+
+        .sec:nth-child(2) {
+            animation-delay: .10s
+        }
+
+        .sec:nth-child(3) {
+            animation-delay: .15s
+        }
+
+        .sec:nth-child(4) {
+            animation-delay: .20s
+        }
+
+        .sec:nth-child(5) {
+            animation-delay: .25s
+        }
+
+        .sec:nth-child(6) {
+            animation-delay: .30s
+        }
+
+        .sec:nth-child(7) {
+            animation-delay: .35s
+        }
+
+        .sec-head {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 20px 28px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .chip {
+            font-family: var(--mono);
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--bg);
+            background: var(--accent);
+            padding: 3px 10px;
+            border-radius: 6px;
+            flex-shrink: 0;
+        }
+
+        .chip.blue {
+            background: var(--blue);
+        }
+
+        .chip.green {
+            background: var(--green);
+        }
+
+        .chip.purple {
+            background: var(--purple);
+        }
+
+        .chip.red {
+            background: var(--red);
+        }
+
+        .chip.orange {
+            background: var(--accent2);
+            color: #fff;
+        }
+
+        h2 {
+            font-family: var(--display);
+            font-size: 19px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .sec-body {
+            padding: 28px;
+        }
+
+        /* DEF BOX */
+        .def {
+            background: linear-gradient(135deg, rgba(251, 191, 36, .07), rgba(249, 115, 22, .04));
+            border: 1px solid rgba(251, 191, 36, .2);
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin-bottom: 22px;
+            font-size: 14.5px;
+            color: #c8d3e8;
+        }
+
+        .def strong {
+            color: var(--accent);
+        }
+
+        .def.blue-t {
+            background: linear-gradient(135deg, rgba(96, 165, 250, .07), rgba(96, 165, 250, .02));
+            border-color: rgba(96, 165, 250, .2);
+        }
+
+        .def.blue-t strong {
+            color: var(--blue);
+        }
+
+        .def.green-t {
+            background: linear-gradient(135deg, rgba(52, 211, 153, .07), rgba(52, 211, 153, .02));
+            border-color: rgba(52, 211, 153, .2);
+        }
+
+        .def.green-t strong {
+            color: var(--green);
+        }
+
+        .def.purple-t {
+            background: linear-gradient(135deg, rgba(167, 139, 250, .07), rgba(167, 139, 250, .02));
+            border-color: rgba(167, 139, 250, .2);
+        }
+
+        .def.purple-t strong {
+            color: var(--purple);
+        }
+
+        .def.red-t {
+            background: linear-gradient(135deg, rgba(248, 113, 113, .07), rgba(248, 113, 113, .02));
+            border-color: rgba(248, 113, 113, .2);
+        }
+
+        .def.red-t strong {
+            color: var(--red);
+        }
+
+        /* BULLETS */
+        .pts {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .pts li {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 14px;
+            color: #9eadcc;
+        }
+
+        .pts li .ar {
+            color: var(--accent);
+            flex-shrink: 0;
+            margin-top: 2px;
+            font-weight: 700;
+        }
+
+        .pts li strong {
+            color: var(--text);
+        }
+
+        /* WORKFLOW GRID */
+        .wf-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 14px;
+            margin-top: 22px;
+        }
+
+        .wf {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px;
+            transition: border-color .2s, transform .2s;
+        }
+
+        .wf:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .wf-name {
+            font-family: var(--display);
+            font-size: 13.5px;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .wf-name .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .wf-name.bn {
+            color: var(--blue);
+        }
+
+        .wf-name.bn .dot {
+            background: var(--blue);
+        }
+
+        .wf-name.gn {
+            color: var(--green);
+        }
+
+        .wf-name.gn .dot {
+            background: var(--green);
+        }
+
+        .wf-name.pn {
+            color: var(--purple);
+        }
+
+        .wf-name.pn .dot {
+            background: var(--purple);
+        }
+
+        .wf-name.rn {
+            color: var(--red);
+        }
+
+        .wf-name.rn .dot {
+            background: var(--red);
+        }
+
+        .wf-body {
+            font-size: 13px;
+            color: var(--sub);
+            line-height: 1.6;
+        }
+
+        .wf-body strong {
+            color: var(--text);
+        }
+
+        .wf-ex {
+            margin-top: 9px;
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--dim);
+            border-top: 1px solid var(--border);
+            padding-top: 8px;
+        }
+
+        .wf-ex::before {
+            content: 'eg · ';
+        }
+
+        /* FLOW BAR */
+        .flow {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+            margin: 14px 0;
+        }
+
+        .fn {
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 5px 12px;
+            border-radius: 7px;
+            font-family: var(--mono);
+            font-size: 11.5px;
+            color: var(--blue);
+            white-space: nowrap;
+        }
+
+        .fn.y {
+            color: var(--accent);
+            border-color: rgba(251, 191, 36, .3);
+        }
+
+        .fn.g {
+            color: var(--green);
+            border-color: rgba(52, 211, 153, .3);
+        }
+
+        .fn.r {
+            color: var(--red);
+            border-color: rgba(248, 113, 113, .3);
+        }
+
+        .fa {
+            color: var(--dim);
+            font-size: 13px;
+        }
+
+        /* LABEL */
+        .lbl {
+            font-family: var(--mono);
+            font-size: 10.5px;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: var(--dim);
+            margin: 22px 0 10px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* NODE TABLE */
+        .node-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+            font-size: 13.5px;
+        }
+
+        .node-table th {
+            text-align: left;
+            padding: 9px 14px;
+            font-family: var(--mono);
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--dim);
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .node-table td {
+            padding: 10px 14px;
+            border-bottom: 1px solid rgba(37, 45, 61, .6);
+            vertical-align: top;
+        }
+
+        .node-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .node-table tr:hover td {
+            background: rgba(255, 255, 255, .02);
+        }
+
+        .nn {
+            font-family: var(--mono);
+            font-size: 12.5px;
+            color: var(--blue);
+        }
+
+        .nd {
+            color: var(--sub);
+            font-size: 13px;
+        }
+
+        .tag {
+            display: inline-block;
+            font-family: var(--mono);
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-left: 6px;
+            background: rgba(52, 211, 153, .1);
+            border: 1px solid rgba(52, 211, 153, .2);
+            color: var(--green);
+        }
+
+        .tag.loop {
+            background: rgba(167, 139, 250, .1);
+            border-color: rgba(167, 139, 250, .2);
+            color: var(--purple);
+        }
+
+        .tag.cond {
+            background: rgba(251, 191, 36, .1);
+            border-color: rgba(251, 191, 36, .2);
+            color: var(--accent);
+        }
+
+        .tag.par {
+            background: rgba(96, 165, 250, .1);
+            border-color: rgba(96, 165, 250, .2);
+            color: var(--blue);
+        }
+
+        /* STATE FIELDS */
+        .fields {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .field {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            padding: 11px 14px;
+            font-family: var(--mono);
+            font-size: 12.5px;
+            transition: border-color .2s;
+        }
+
+        .field:hover {
+            border-color: var(--green);
+        }
+
+        .fname {
+            color: var(--green);
+        }
+
+        .fsep {
+            color: var(--dim);
+            margin: 0 3px;
+        }
+
+        .ftype {
+            color: var(--purple);
+        }
+
+        .fnote {
+            display: block;
+            font-size: 11px;
+            color: var(--dim);
+            margin-top: 4px;
+        }
+
+        /* REDUCER CARDS */
+        .red-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin: 18px 0;
+        }
+
+        @media(max-width:600px) {
+            .red-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .rc {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 11px;
+            padding: 16px;
+        }
+
+        .rc-title {
+            font-family: var(--display);
+            font-size: 13.5px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .rc-title.r {
+            color: var(--red);
+        }
+
+        .rc-title.g {
+            color: var(--green);
+        }
+
+        .rc-title.b {
+            color: var(--blue);
+        }
+
+        .rc-desc {
+            font-size: 12.5px;
+            color: var(--sub);
+            line-height: 1.55;
+        }
+
+        .rc-ex {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--dim);
+            margin-top: 6px;
+        }
+
+        /* EXEC STEPS */
+        .exec-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            margin-top: 20px;
+        }
+
+        .estep {
+            display: flex;
+            gap: 0;
+            position: relative;
+        }
+
+        .estep-left {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 46px;
+            flex-shrink: 0;
+        }
+
+        .estep-num {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: var(--bg);
+            font-family: var(--display);
+            font-weight: 800;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            z-index: 1;
+        }
+
+        .estep-num.b {
+            background: var(--blue);
+        }
+
+        .estep-num.g {
+            background: var(--green);
+        }
+
+        .estep-num.r {
+            background: var(--red);
+        }
+
+        .estep-line {
+            flex: 1;
+            width: 2px;
+            background: var(--border);
+            margin-top: 4px;
+            min-height: 20px;
+        }
+
+        .estep:last-child .estep-line {
+            display: none;
+        }
+
+        .estep-body {
+            padding: 2px 0 26px 18px;
+            flex: 1;
+        }
+
+        .estep-title {
+            font-family: var(--display);
+            font-weight: 700;
+            font-size: 14.5px;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .estep-desc {
+            font-size: 13.5px;
+            color: var(--sub);
+        }
+
+        .estep-desc strong {
+            color: var(--text);
+        }
+
+        /* CALLOUT */
+        .callout {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            background: rgba(52, 211, 153, .06);
+            border: 1px solid rgba(52, 211, 153, .2);
+            border-radius: 10px;
+            padding: 14px 18px;
+            margin: 16px 0;
+            font-size: 13.5px;
+            color: var(--sub);
+        }
+
+        .callout .icon {
+            font-size: 16px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .callout strong {
+            color: var(--green);
+        }
+
+        code {
+            font-family: var(--mono);
+            font-size: 12px;
+            background: rgba(96, 165, 250, .1);
+            border: 1px solid rgba(96, 165, 250, .18);
+            color: var(--blue);
+            padding: 1px 7px;
+            border-radius: 4px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 72px;
+            color: var(--dim);
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: .1em;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+
+        <header>
+            <div class="eyebrow">CampusX · Agentic AI · Video 4</div>
+            <h1>LangGraph <em>Core Concepts</em></h1>
+            <p class="tagline">Complete lecture notes · all 7 topics · 15 screenshots</p>
+        </header>
+
+        <nav class="toc">
+            <div class="toc-label">Jump to section</div>
+            <a href="#s1">01 · What is LangGraph</a>
+            <a href="#s2">02 · LLM Workflows</a>
+            <a href="#s3">03 · Workflow Patterns</a>
+            <a href="#s4">04 · Graphs, Nodes &amp; Edges</a>
+            <a href="#s5">05 · State</a>
+            <a href="#s6">06 · Reducers</a>
+            <a href="#s7">07 · Execution Model</a>
+        </nav>
+
+        <!-- ── 01 WHAT IS LANGGRAPH ── -->
+        <section class="sec" id="s1">
+            <div class="sec-head">
+                <div class="chip">01</div>
+                <h2>What is LangGraph?</h2>
+            </div>
+            <div class="sec-body">
+                <div class="def">
+                    LangGraph is an <strong>orchestration framework</strong> for building <strong>intelligent, stateful,
+                        and multi-step LLM workflows</strong>.
+                </div>
+                <ul class="pts">
+                    <li><span class="ar">→</span><span>Models logic as a <strong>graph of nodes</strong> (tasks) and
+                            <strong>edges</strong> (routing) — not a linear chain.</span></li>
+                    <li><span class="ar">→</span><span>Enables: <strong>parallelism, loops, branching, memory,</strong>
+                            and <strong>resumability</strong>.</span></li>
+                    <li><span class="ar">→</span><span>Ideal for <strong>agentic</strong> and
+                            <strong>production-grade</strong> AI applications.</span></li>
+                    <li><span class="ar">→</span><span>Mental model: <em>LLM workflow → graph → flowchart that
+                                executes</em>. Input enters a node; nodes route via edges to produce output.</span></li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- ── 02 LLM WORKFLOWS ── -->
+        <section class="sec" id="s2">
+            <div class="sec-head">
+                <div class="chip blue">02</div>
+                <h2>LLM Workflows</h2>
+            </div>
+            <div class="sec-body">
+                <div class="def blue-t">
+                    An LLM workflow is a <strong>step-by-step process</strong> (series of tasks → goal) used to build
+                    complex LLM applications.
+                </div>
+                <ul class="pts">
+                    <li><span class="ar">→</span><span>Each step performs a <strong>distinct task</strong>: prompting,
+                            reasoning, tool calling, memory access, or decision-making.</span></li>
+                    <li><span class="ar">→</span><span>Workflows can be <strong>linear, parallel, branched,</strong> or
+                            <strong>looped</strong> — enabling retries, multi-agent communication, and tool-augmented
+                            reasoning.</span></li>
+                    <li><span class="ar">→</span><span>Combining steps enables complex behaviours impossible with a
+                            single LLM call.</span></li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- ── 03 WORKFLOW PATTERNS ── -->
+        <section class="sec" id="s3">
+            <div class="sec-head">
+                <div class="chip orange">03</div>
+                <h2>Common Workflow Patterns</h2>
+            </div>
+            <div class="sec-body">
+                <div class="wf-grid">
+
+                    <div class="wf">
+                        <div class="wf-name"><span class="dot"></span>Prompt Chaining</div>
+                        <div class="wf-body">
+                            A <strong>linear sequence</strong> of LLM calls. A <strong>Gate</strong> node checks output
+                            quality after the first call:<br>
+                            • <strong>Pass</strong> → continues chain → Out<br>
+                            • <strong>Fail</strong> → exits early (Exit node)<br>
+                            Subsequent LLM calls build on previous outputs.
+                        </div>
+                        <div class="wf-ex">topic → outline → LLM 2 → 5 000-word detailed report → LLM 3</div>
+                    </div>
+
+                    <div class="wf">
+                        <div class="wf-name bn"><span class="dot"></span>Routing</div>
+                        <div class="wf-body">
+                            An <strong>LLM Router</strong> acts as a <strong>decision-maker</strong> (routing policy).
+                            It classifies the input and directs it to the appropriate specialist LLM.<br>
+                            In → <strong>LLM Router</strong> → LLM 1 / LLM 2 / LLM 3 → Out
+                        </div>
+                        <div class="wf-ex">customer chatbot → router classifies query type → routes to correct LLM agent
+                        </div>
+                    </div>
+
+                    <div class="wf">
+                        <div class="wf-name gn"><span class="dot"></span>Parallelization</div>
+                        <div class="wf-body">
+                            A task is split into <strong>independent subtasks</strong> that run
+                            <strong>simultaneously</strong>. An <strong>Aggregator</strong> merges all results at the
+                            end.<br>
+                            In → [LLM 1 ‖ LLM 2 ‖ LLM 3] → Aggregator → Out
+                        </div>
+                        <div class="wf-ex">YouTube content moderation: community guidelines + misinformation + sexual
+                            content — all checked in parallel</div>
+                    </div>
+
+                    <div class="wf">
+                        <div class="wf-name pn"><span class="dot"></span>Orchestrator–Workers</div>
+                        <div class="wf-body">
+                            An <strong>Orchestrator LLM</strong> dynamically decomposes a task into
+                            <strong>subtasks</strong>, assigns to worker LLMs, and a <strong>Synthesizer</strong>
+                            combines results.<br>
+                            In → Orchestrator → [Workers] → Synthesizer → Out
+                        </div>
+                        <div class="wf-ex">research assistant: query → workers search Google Scholar → synthesizer
+                            compiles research report</div>
+                    </div>
+
+                    <div class="wf">
+                        <div class="wf-name rn"><span class="dot"></span>Evaluator–Optimizer</div>
+                        <div class="wf-body">
+                            A <strong>Generator LLM</strong> produces a solution; an <strong>Evaluator LLM</strong>
+                            scores it.<br>
+                            • <strong>Accepted</strong> → Out<br>
+                            • <strong>Rejected + Feedback</strong> → loops back to Generator<br>
+                            Enables iterative <strong>creativity + refinement</strong>.
+                        </div>
+                        <div class="wf-ex">task → email draft / blog → loops until quality is accepted</div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ── 04 GRAPHS, NODES & EDGES ── -->
+        <section class="sec" id="s4">
+            <div class="sec-head">
+                <div class="chip green">04</div>
+                <h2>Graphs, Nodes &amp; Edges</h2>
+            </div>
+            <div class="sec-body">
+                <div class="def green-t">
+                    <strong>Nodes</strong> = individual task/function units. <strong>Edges</strong> = connections and
+                    routing logic between nodes. Together they define the computation graph.
+                </div>
+
+                <div class="lbl">Case Study — UPSC Essay Evaluator System</div>
+                <p style="color:var(--sub);font-size:13.5px;margin-bottom:16px;">
+                    The system generates an essay topic, collects the student's submission, and evaluates it
+                    <em>in parallel</em> on Depth of Analysis, Language Quality, and Clarity of Thought (5 pts each,
+                    total 15).
+                    Based on the combined score it either gives feedback or approves the essay. Students may retry.
+                </p>
+
+                <table class="node-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Node</th>
+                            <th>What it does</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="nn">1</span></td>
+                            <td><span class="nn">GenerateTopic</span></td>
+                            <td class="nd">System generates a relevant UPSC-style essay topic and presents it to the
+                                student.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="nn">2</span></td>
+                            <td><span class="nn">CollectEssay</span></td>
+                            <td class="nd">Student writes and submits the essay based on the generated topic.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="nn">3</span></td>
+                            <td><span class="nn">EvaluateEssay <span class="tag par">parallel block</span></span></td>
+                            <td class="nd">
+                                Three sub-nodes run <strong>simultaneously</strong>:<br>
+                                • <strong>EvaluateDepth</strong> — argument strength &amp; critical thinking <em
+                                    style="color:var(--accent)">(5 pts)</em><br>
+                                • <strong>EvaluateLanguage</strong> — grammar, vocabulary, fluency <em
+                                    style="color:var(--accent)">(5 pts)</em><br>
+                                • <strong>EvaluateClarity</strong> — coherence &amp; logical flow <em
+                                    style="color:var(--accent)">(5 pts)</em>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="nn">4</span></td>
+                            <td><span class="nn">AggregateResults</span></td>
+                            <td class="nd">Combines the three scores → <strong>total out of 15</strong>. Passing
+                                threshold = <strong>10 / 15</strong>.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="nn">5</span></td>
+                            <td><span class="nn">ConditionalRouting <span class="tag cond">conditional</span></span>
+                            </td>
+                            <td class="nd">
+                                Score ≥ 10 → <strong>ShowSuccess</strong><br>
+                                Score &lt; 10 → <strong>GiveFeedback</strong>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="nn">6</span></td>
+                            <td><span class="nn">GiveFeedback</span></td>
+                            <td class="nd">Provides targeted improvement suggestions for each weak area.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="nn">7</span></td>
+                            <td><span class="nn">CollectRevision <span class="tag loop">optional loop</span></span></td>
+                            <td class="nd">
+                                Student resubmits revised essay → loops back to <strong>EvaluateEssay</strong>.<br>
+                                If student chooses <strong>No Retake</strong> → END.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="nn">8</span></td>
+                            <td><span class="nn">ShowSuccess</span></td>
+                            <td class="nd">Congratulates the student and ends the flow → END.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="lbl">Execution Flow Summary</div>
+                <div class="flow">
+                    <span class="fn y">GenerateTopic</span><span class="fa">→</span>
+                    <span class="fn y">WriteEssay</span><span class="fa">→</span>
+                    <span class="fn">Depth(5)</span><span class="fa">‖</span>
+                    <span class="fn">Language(5)</span><span class="fa">‖</span>
+                    <span class="fn">Clarity(5)</span><span class="fa">→</span>
+                    <span class="fn y">FinalEval [10/15]</span><span class="fa">→</span>
+                    <span class="fn g">Success → END</span>
+                    <span class="fa">or</span>
+                    <span class="fn r">Feedback → Retake?</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── 05 STATE ── -->
+        <section class="sec" id="s5">
+            <div class="sec-head">
+                <div class="chip purple">05</div>
+                <h2>State</h2>
+            </div>
+            <div class="sec-body">
+                <div class="def purple-t">
+                    State is the <strong>shared memory</strong> that flows through your workflow — it holds all data
+                    being passed between nodes as your graph runs.
+                </div>
+                <ul class="pts">
+                    <li><span class="ar">→</span><span>Defined as a <strong>TypedDict class</strong> (not a plain dict)
+                            — provides structure and type safety.</span></li>
+                    <li><span class="ar">→</span><span>State is <strong>accessible by all nodes</strong>. Every node
+                            reads from it and writes partial updates back.</span></li>
+                    <li><span class="ar">→</span><span>State is <strong>mutable</strong> — it <em>evolves</em> as each
+                            node in the graph processes and updates its fields.</span></li>
+                    <li><span class="ar">→</span><span>Each node only returns the <strong>fields it changed</strong>;
+                            unchanged fields persist as-is.</span></li>
+                    <li><span class="ar">→</span><span>Think: <code>dict → TypedDict class</code> that travels through
+                            the entire graph accumulating changes (like a baton in a relay).</span></li>
+                </ul>
+
+                <div class="lbl">Essay Evaluator — State Schema (TypedDict)</div>
+                <div class="fields">
+                    <div class="field"><span class="fname">essay_text</span><span class="fsep">:</span><span
+                            class="ftype">str</span><span class="fnote">student's submitted essay</span></div>
+                    <div class="field"><span class="fname">topic</span><span class="fsep">:</span><span
+                            class="ftype">str</span><span class="fnote">generated UPSC topic</span></div>
+                    <div class="field"><span class="fname">depth_score</span><span class="fsep">:</span><span
+                            class="ftype">int</span><span class="fnote">0–5 · argument strength</span></div>
+                    <div class="field"><span class="fname">language_score</span><span class="fsep">:</span><span
+                            class="ftype">int</span><span class="fnote">0–5 · grammar &amp; fluency</span></div>
+                    <div class="field"><span class="fname">clarity_score</span><span class="fsep">:</span><span
+                            class="ftype">int</span><span class="fnote">0–5 · logical flow</span></div>
+                    <div class="field"><span class="fname">total_score</span><span class="fsep">:</span><span
+                            class="ftype">int</span><span class="fnote">aggregate /15</span></div>
+                    <div class="field"><span class="fname">feedback</span><span class="fsep">:</span><span
+                            class="ftype">Annotated[list[str], add]</span><span class="fnote">accumulated across all
+                            rounds</span></div>
+                    <div class="field"><span class="fname">evaluation_round</span><span class="fsep">:</span><span
+                            class="ftype">int</span><span class="fnote">tracks how many retries</span></div>
+                </div>
+
+                <div class="callout" style="margin-top:20px;">
+                    <span class="icon">💡</span>
+                    <div><strong>Why TypedDict?</strong> It lets LangGraph know the full structure of state at compile
+                        time, enabling validation, IDE auto-complete, and clear contracts between nodes. A plain dict
+                        would lose all type information.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── 06 REDUCERS ── -->
+        <section class="sec" id="s6">
+            <div class="sec-head">
+                <div class="chip red">06</div>
+                <h2>Reducers</h2>
+            </div>
+            <div class="sec-body">
+                <div class="def red-t">
+                    Reducers define <strong>how updates from nodes are applied to the shared state</strong>.<br>
+                    Each key in the state can have its own reducer — determining whether new data <em>replaces,
+                        adds,</em> or <em>merges</em> with the existing value.
+                </div>
+
+                <div class="lbl">Three Reducer Strategies</div>
+                <div class="red-grid">
+                    <div class="rc">
+                        <div class="rc-title r">Replace (default)</div>
+                        <div class="rc-desc">New value <strong>overwrites</strong> the old one entirely. Default
+                            behaviour when no reducer is specified. Used for scalars like scores and strings.</div>
+                        <div class="rc-ex">total_score: 8 → overwrites to 12</div>
+                    </div>
+                    <div class="rc">
+                        <div class="rc-title g">Add / Append</div>
+                        <div class="rc-desc">New value is <strong>appended</strong> to an existing list. Declared with
+                            <code>Annotated[list[str], add]</code>. Essential for accumulating data across rounds.
+                        </div>
+                        <div class="rc-ex">feedback: ["weak arg"] + ["improve vocab"] → both kept</div>
+                    </div>
+                    <div class="rc">
+                        <div class="rc-title b">Merge / Custom</div>
+                        <div class="rc-desc">Custom reducer function to <strong>combine</strong> old and new values —
+                            e.g., summing integers, merging dicts, or taking max/min.</div>
+                        <div class="rc-ex">custom reducer function passed as second arg in Annotated</div>
+                    </div>
+                </div>
+
+                <ul class="pts">
+                    <li><span class="ar">→</span><span>Without a reducer, when <strong>two parallel nodes</strong> write
+                            to the same state key simultaneously → <strong>conflict</strong>. Reducer resolves this
+                            safely.</span></li>
+                    <li><span class="ar">→</span><span><code>feedback</code> uses <strong>add</strong> reducer so each
+                            evaluation round's feedback is accumulated, not overwritten by the next round.</span></li>
+                </ul>
+
+                <div class="lbl">Simple Reducer Example</div>
+                <div class="flow">
+                    <span class="fn y">Input: a=5, b=6</span>
+                    <span class="fa">→</span>
+                    <span class="fn">sum node</span>
+                    <span class="fa">→</span>
+                    <span class="fn">×2 node</span>
+                    <span class="fa">→</span>
+                    <span class="fn g">State: result = 22</span>
+                </div>
+                <p style="font-size:12.5px;color:var(--dim);margin-top:6px;">
+                    ⚠ If both <em>sum</em> and <em>×2</em> write to the same key without a reducer → last-write-wins
+                    (incorrect). A proper reducer combines both updates correctly.
+                </p>
+            </div>
+        </section>
+
+        <!-- ── 07 EXECUTION MODEL ── -->
+        <section class="sec" id="s7">
+            <div class="sec-head">
+                <div class="chip">07</div>
+                <h2>LangGraph Execution Model</h2>
+            </div>
+            <div class="sec-body">
+                <div class="def">
+                    LangGraph uses a <strong>Pregel-style message-passing</strong> model. Execution proceeds in discrete
+                    <strong>super-steps (rounds)</strong> until no work remains.
+                </div>
+
+                <div class="exec-steps">
+                    <div class="estep">
+                        <div class="estep-left">
+                            <div class="estep-num">1</div>
+                            <div class="estep-line"></div>
+                        </div>
+                        <div class="estep-body">
+                            <div class="estep-title">Graph Compilation</div>
+                            <div class="estep-desc">All <strong>nodes and edges</strong> are registered. LangGraph
+                                validates the graph structure and builds the execution plan before any run.</div>
+                        </div>
+                    </div>
+                    <div class="estep">
+                        <div class="estep-left">
+                            <div class="estep-num b">2</div>
+                            <div class="estep-line"></div>
+                        </div>
+                        <div class="estep-body">
+                            <div class="estep-title">Input Injection</div>
+                            <div class="estep-desc">The <strong>initial state</strong> is populated with the user's
+                                input values. This is the starting snapshot of shared memory.</div>
+                        </div>
+                    </div>
+                    <div class="estep">
+                        <div class="estep-left">
+                            <div class="estep-num b">3</div>
+                            <div class="estep-line"></div>
+                        </div>
+                        <div class="estep-body">
+                            <div class="estep-title">Entry Nodes Activated</div>
+                            <div class="estep-desc">The <strong>entry/start node(s)</strong> receive the first message
+                                and become <em>active</em> for the first super-step.</div>
+                        </div>
+                    </div>
+                    <div class="estep">
+                        <div class="estep-left">
+                            <div class="estep-num g">4</div>
+                            <div class="estep-line"></div>
+                        </div>
+                        <div class="estep-body">
+                            <div class="estep-title">Super-Steps Begin (Rounds)</div>
+                            <div class="estep-desc">
+                                Execution proceeds in <strong>rounds</strong>. In each round:<br>
+                                • All <strong>active nodes</strong> (those that received messages) run <strong>in
+                                    parallel</strong>.<br>
+                                • Each active node processes the state and returns an <strong>update (message)</strong>
+                                back to state.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="estep">
+                        <div class="estep-left">
+                            <div class="estep-num g">5</div>
+                            <div class="estep-line"></div>
+                        </div>
+                        <div class="estep-body">
+                            <div class="estep-title">Message Passing &amp; Node Activation</div>
+                            <div class="estep-desc">
+                                State updates are passed <strong>via edges</strong> to downstream nodes.<br>
+                                Nodes that receive messages become <strong>active for the next round</strong>. Nodes
+                                that receive no messages remain idle.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="estep">
+                        <div class="estep-left">
+                            <div class="estep-num r">6</div>
+                            <div class="estep-line"></div>
+                        </div>
+                        <div class="estep-body">
+                            <div class="estep-title">Halting Condition — STOP</div>
+                            <div class="estep-desc">
+                                Execution <strong>stops</strong> when <em>both</em> conditions are true
+                                simultaneously:<br>
+                                ✓ <strong>No nodes are active</strong> (none received messages)<br>
+                                ✓ <strong>No messages are in transit</strong> (no pending updates on edges)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="callout">
+                    <span class="icon">⚡</span>
+                    <div>
+                        <strong>Key insight:</strong> All active nodes in a round run <em>in parallel
+                            automatically</em>. This means the 3-evaluator parallel block in the essay system requires
+                        no special parallel code — it emerges naturally from the execution model.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer>LangGraph Core Concepts &nbsp;·&nbsp; CampusX Video 4 &nbsp;·&nbsp; 15 screenshots · 7 topics</footer>
+    </div>
+</body>
+
+</html>
