@@ -455,23 +455,22 @@
 
         <!-- HEADER -->
         <header>
-            <div class="badge">📹 Video 8 · CampusX · Agentic AI</div>
-            <h1>Iterative Workflows<br>in <span>LangGraph</span></h1>
-            <p class="subtitle">// loops · evaluation · self-improvement · max_iteration guard</p>
+            <div class="badge">CampusX · Module 9 · Iterative Workflow</div>
+            <h1>Iterative Workflows<br>in <em>LangGraph</em></h1>
+            <p class="subtitle">// Feedback loops · Self-Correction · Review & Refinement</p>
         </header>
 
         <!-- SECTION 1: Concept -->
         <div class="section">
             <div class="section-header">
-                <div class="section-num">01</div>
+                <div class="section-num">51</div>
                 <h2>What is an Iterative Workflow?</h2>
             </div>
             <div class="card">
-                <p>An iterative workflow creates a <strong style="color:var(--accent2)">feedback loop</strong> in the
-                    graph — a node generates output, another evaluates it, and if not good enough, an optimizer improves
-                    it and <strong style="color:var(--accent)">loops back</strong> to the evaluator. This repeats until
-                    the output is <strong style="color:var(--accent2)">approved</strong> or a <strong
-                        style="color:var(--accent3)">max iteration limit</strong> is hit.</p>
+                <p>An <strong style="color:var(--accent2)">iterative workflow</strong> repeatedly generates, evaluates,
+                    and refines output in a <strong style="color:var(--accent2)">feedback loop</strong> until it is
+                    <strong style="color:var(--accent2)">approved</strong> or a
+                    <strong style="color:var(--accent3)">max iteration limit</strong> is reached.</p>
             </div>
             <div class="highlight orange">
                 <p><strong>New concept:</strong> <code>graph.add_conditional_edges(node, fn, mapping_dict)</code> — a
@@ -488,7 +487,7 @@
         <!-- SECTION 2: Flowchart -->
         <div class="section">
             <div class="section-header">
-                <div class="section-num green">02</div>
+                <div class="section-num green">52</div>
                 <h2>X (Twitter) Post Generator — Workflow Design</h2>
             </div>
 
@@ -624,7 +623,7 @@ optimizer_llm  = ChatOpenAI(model=<span class="str">'gpt-4o'</span>)      <span 
         <!-- SECTION 3: State -->
         <div class="section">
             <div class="section-header">
-                <div class="section-num orange">03</div>
+                <div class="section-num orange">53</div>
                 <h2>State Design</h2>
             </div>
 
@@ -664,17 +663,11 @@ optimizer_llm  = ChatOpenAI(model=<span class="str">'gpt-4o'</span>)      <span 
 
             <div class="card">
                 <h3>Pydantic Schema for Structured Evaluator Output</h3>
-                <pre><code><span class="kw">from</span> pydantic <span class="kw">import</span> BaseModel, Field
+                <pre><code><span class="kw">class</span> <span class="ty">TweetEvaluation</span>(BaseModel):                    <span class="cm"># Pydantic schema</span>
+    evaluation: Literal[<span class="str">"approved"</span>, <span class="str">"needs_improvement"</span>]  <span class="cm"># verdict</span>
+    feedback:   <span class="ty">str</span>                                       <span class="cm"># why</span>
 
-<span class="kw">class</span> <span class="ty">TweetEvaluation</span>(BaseModel):
-    evaluation: Literal[<span class="str">"approved"</span>, <span class="str">"needs_improvement"</span>] = Field(
-        ..., description=<span class="str">"Final evaluation verdict"</span>
-    )
-    feedback: <span class="ty">str</span> = Field(
-        ..., description=<span class="str">"Constructive feedback for the tweet"</span>
-    )
-
-structured_evaluator_llm = evaluator_llm.with_structured_output(TweetEvaluation)</code></pre>
+structured_evaluator_llm = evaluator_llm.with_structured_output(TweetEvaluation)  <span class="cm"># ⭐ key line</span></code></pre>
             </div>
         </div>
 
@@ -683,73 +676,38 @@ structured_evaluator_llm = evaluator_llm.with_structured_output(TweetEvaluation)
         <!-- SECTION 4: Node Functions -->
         <div class="section">
             <div class="section-header">
-                <div class="section-num blue">04</div>
+                <div class="section-num blue">54</div>
                 <h2>Node Functions</h2>
             </div>
 
             <div class="card">
                 <h3>generate_tweet — LLM: gpt-4o</h3>
-                <pre><code><span class="kw">def</span> <span class="fn">generate_tweet</span>(state: TweetState):
+                <pre><code><span class="kw">def</span> <span class="fn">generate_tweet</span>(state):
     messages = [
-        SystemMessage(content=<span class="str">"You are a funny and clever Twitter/X influencer."</span>),
-        HumanMessage(content=<span class="str">f"""
-Write a short, original, and hilarious tweet on the topic: "{state['topic']}".
-Rules:
-- Do NOT use question-answer format.
-- Max 280 characters.
-- Use observational humor, irony, sarcasm, or cultural references.
-- Think in meme logic, punchlines, or relatable takes.
-- Use simple, day to day english"""</span>)
+        SystemMessage(content=<span class="str">"You are a funny Twitter/X influencer."</span>),
+        HumanMessage(content=<span class="str">f'Write a funny tweet on: "{state["topic"]}"'</span>)
     ]
-    response = generator_llm.invoke(messages).content
-    <span class="kw">return</span> {<span class="str">'tweet'</span>: response, <span class="str">'tweet_history'</span>: [response]}  <span class="cm"># [response] appends to list</span></code></pre>
+    response = generator_llm.invoke(messages).content    <span class="cm"># LLM generates tweet</span>
+    <span class="kw">return</span> {<span class="str">'tweet'</span>: response, <span class="str">'tweet_history'</span>: [response]}  <span class="cm"># [x] appends to list</span></code></pre>
             </div>
 
             <div class="card">
                 <h3>evaluate_tweet — LLM: gpt-4o-mini (structured output)</h3>
-                <pre><code><span class="kw">def</span> <span class="fn">evaluate_tweet</span>(state: TweetState):
+                <pre><code><span class="kw">def</span> <span class="fn">evaluate_tweet</span>(state):
     messages = [
-        SystemMessage(content=<span class="str">"You are a ruthless, no-laugh-given Twitter critic."</span>),
-        HumanMessage(content=<span class="str">f"""
-Evaluate the following tweet: "{state['tweet']}"
-
-Criteria:
-1. Originality  - Is this fresh?
-2. Humor        - Did it make you smile?
-3. Punchiness   - Is it short and scroll-stopping?
-4. Virality     - Would people retweet it?
-5. Format       - Well-formed, under 280 chars?
-
-Auto-reject if:
-- Written in Q&A format
-- Exceeds 280 characters
-- Setup-punchline joke format
-
-Respond ONLY as structured JSON:
-- evaluation: "approved" or "needs_improvement"
-- feedback: One paragraph on strengths and weaknesses"""</span>)
+        SystemMessage(content=<span class="str">"You are a ruthless Twitter critic."</span>),
+        HumanMessage(content=<span class="str">f'Evaluate this tweet: "{state["tweet"]}"'</span>)
     ]
-    response = structured_evaluator_llm.invoke(messages)
+    response = structured_evaluator_llm.invoke(messages)  <span class="cm"># ⭐ key line — structured output</span>
     <span class="kw">return</span> {<span class="str">'evaluation'</span>: response.evaluation, <span class="str">'feedback'</span>: response.feedback}</code></pre>
             </div>
 
             <div class="card">
                 <h3>optimize_tweet — LLM: gpt-4o</h3>
-                <pre><code><span class="kw">def</span> <span class="fn">optimize_tweet</span>(state: TweetState):
-    messages = [
-        SystemMessage(content=<span class="str">"You punch up tweets for virality and humor based on given feedback."</span>),
-        HumanMessage(content=<span class="str">f"""
-Improve the tweet based on this feedback:
-"{state['feedback']}"
-
-Topic: "{state['topic']}"
-Original Tweet:
-{state['tweet']}
-
-Re-write as short, viral-worthy tweet. Avoid Q&A style. Under 280 chars."""</span>)
-    ]
-    response  = optimizer_llm.invoke(messages).content
-    iteration = state[<span class="str">'iteration'</span>] + <span class="num">1</span>
+                <pre><code><span class="kw">def</span> <span class="fn">optimize_tweet</span>(state):                    <span class="cm"># rewrites tweet using feedback</span>
+    prompt = <span class="str">f'Improve tweet: "{state["tweet"]}"\nFeedback: {state["feedback"]}'</span>
+    response  = optimizer_llm.invoke(prompt).content
+    iteration = state[<span class="str">'iteration'</span>] + <span class="num">1</span>              <span class="cm"># ⭐ key line — increment counter</span>
     <span class="kw">return</span> {<span class="str">'tweet'</span>: response, <span class="str">'iteration'</span>: iteration, <span class="str">'tweet_history'</span>: [response]}</code></pre>
             </div>
         </div>
@@ -759,7 +717,7 @@ Re-write as short, viral-worthy tweet. Avoid Q&A style. Under 280 chars."""</spa
         <!-- SECTION 5: Routing + Graph Build -->
         <div class="section">
             <div class="section-header">
-                <div class="section-num">05</div>
+                <div class="section-num">55</div>
                 <h2>Routing Function + Graph Build</h2>
             </div>
 
@@ -780,23 +738,16 @@ Re-write as short, viral-worthy tweet. Avoid Q&A style. Under 280 chars."""</spa
             <div class="card">
                 <h3 class="orange">New API — add_conditional_edges with Mapping Dict</h3>
                 <pre><code>graph = StateGraph(TweetState)
-
-graph.add_node(<span class="str">'generate'</span>,  generate_tweet)
-graph.add_node(<span class="str">'evaluate'</span>,  evaluate_tweet)
-graph.add_node(<span class="str">'optimize'</span>,  optimize_tweet)
-
+<span class="cm"># ... add_node for generate, evaluate, optimize ...</span>
 graph.add_edge(START, <span class="str">'generate'</span>)
 graph.add_edge(<span class="str">'generate'</span>, <span class="str">'evaluate'</span>)
 
 <span class="cm"># 3-argument version: explicit mapping dict</span>
 graph.add_conditional_edges(
-    <span class="str">'evaluate'</span>,
-    route_evaluation,
-    {<span class="str">'approved'</span>: END, <span class="str">'needs_improvement'</span>: <span class="str">'optimize'</span>}  <span class="cm"># 🔑 mapping dict</span>
+    <span class="str">'evaluate'</span>, route_evaluation,
+    {<span class="str">'approved'</span>: END, <span class="str">'needs_improvement'</span>: <span class="str">'optimize'</span>}  <span class="cm"># ⭐ key line — mapping dict</span>
 )
-
 graph.add_edge(<span class="str">'optimize'</span>, <span class="str">'evaluate'</span>)  <span class="cm"># 🔁 loop-back edge — creates the cycle</span>
-
 workflow = graph.compile()</code></pre>
             </div>
 
@@ -812,7 +763,7 @@ workflow = graph.compile()</code></pre>
         <!-- SECTION 6: Key APIs -->
         <div class="section">
             <div class="section-header">
-                <div class="section-num orange">06</div>
+                <div class="section-num orange">56</div>
                 <h2>Key APIs &amp; Concepts Summary</h2>
             </div>
             <div class="table-wrap">
@@ -873,7 +824,7 @@ workflow = graph.compile()</code></pre>
         <!-- SECTION 7: Pattern -->
         <div class="section">
             <div class="section-header">
-                <div class="section-num">07</div>
+                <div class="section-num">57</div>
                 <h2>Iterative Workflow Recipe</h2>
             </div>
             <div class="card">

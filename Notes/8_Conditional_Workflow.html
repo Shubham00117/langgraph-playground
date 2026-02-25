@@ -355,16 +355,16 @@
 
         <!-- HEADER -->
         <header>
-            <div class="badge">Video 7 · CampusX · Agentic AI</div>
-            <h1>Conditional Workflows<br>in <span>LangGraph</span></h1>
-            <p class="subtitle">// routing · conditions · structured LLM output</p>
+            <div class="badge">CampusX · Module 8 · Conditional Workflow</div>
+            <h1>Conditional Workflows<br>in <em>LangGraph</em></h1>
+            <p class="subtitle">// Nodes · Edges · Conditional Edges · Logic Routing · State Management</p>
         </header>
 
         <!-- SECTION 1 -->
         <div class="section">
             <div class="section-header">
-                <div class="section-num">01</div>
-                <h2>What is a Conditional Workflow?</h2>
+                <div class="section-num">46</div>
+                <h2>The Concept</h2>
             </div>
             <div class="card">
                 <p>A conditional workflow routes execution to <strong style="color:var(--accent)">different
@@ -383,8 +383,8 @@
         <!-- SECTION 2 -->
         <div class="section">
             <div class="section-header">
-                <div class="section-num">02</div>
-                <h2>Example 1 — Quadratic Equation Workflow</h2>
+                <div class="section-num">47</div>
+                <h2>Example 1 — Quadratic Equation Solver</h2>
             </div>
 
             <div class="card">
@@ -537,47 +537,33 @@
 
             <div class="card">
                 <h3>Node Functions</h3>
-                <pre><code><span class="kw">def</span> <span class="fn">show_equation</span>(state: QuadState):
-    eq = <span class="str">f'{state["a"]}x² + {state["b"]}x + {state["c"]}'</span>
-    <span class="kw">return</span> {<span class="str">'equation'</span>: eq}
+                <pre><code><span class="kw">def</span> <span class="fn">show_equation</span>(state):            <span class="cm"># formats "ax²+bx+c" string</span>
+    <span class="kw">return</span> {<span class="str">'equation'</span>: <span class="str">f'{state["a"]}x² + {state["b"]}x + {state["c"]}'</span>}
 
-<span class="kw">def</span> <span class="fn">calculate_discriminant</span>(state: QuadState):
-    d = state[<span class="str">"b"</span>]**<span class="num">2</span> - (<span class="num">4</span> * state[<span class="str">"a"</span>] * state[<span class="str">"c"</span>])
-    <span class="kw">return</span> {<span class="str">'discriminant'</span>: d}
+<span class="kw">def</span> <span class="fn">calculate_discriminant</span>(state):   <span class="cm"># ⭐ key line — computes b²−4ac</span>
+    <span class="kw">return</span> {<span class="str">'discriminant'</span>: state[<span class="str">"b"</span>]**<span class="num">2</span> - <span class="num">4</span>*state[<span class="str">"a"</span>]*state[<span class="str">"c"</span>]}
 
-<span class="kw">def</span> <span class="fn">real_roots</span>(state: QuadState):
+<span class="kw">def</span> <span class="fn">real_roots</span>(state):               <span class="cm"># each branch returns {'result': ...}</span>
     r1 = (-state[<span class="str">"b"</span>] + state[<span class="str">"discriminant"</span>]**<span class="num">0.5</span>) / (<span class="num">2</span>*state[<span class="str">"a"</span>])
-    r2 = (-state[<span class="str">"b"</span>] - state[<span class="str">"discriminant"</span>]**<span class="num">0.5</span>) / (<span class="num">2</span>*state[<span class="str">"a"</span>])
-    <span class="kw">return</span> {<span class="str">'result'</span>: <span class="str">f'Roots: {r1} and {r2}'</span>}
+    <span class="kw">return</span> {<span class="str">'result'</span>: <span class="str">f'Roots: {r1} ...'</span>}
 
-<span class="kw">def</span> <span class="fn">repeated_roots</span>(state: QuadState):
-    r = -state[<span class="str">"b"</span>] / (<span class="num">2</span> * state[<span class="str">"a"</span>])
-    <span class="kw">return</span> {<span class="str">'result'</span>: <span class="str">f'Only repeating root: {r}'</span>}
-
-<span class="kw">def</span> <span class="fn">no_real_roots</span>(state: QuadState):
-    <span class="kw">return</span> {<span class="str">'result'</span>: <span class="str">'No real roots'</span>}</code></pre>
+<span class="cm"># repeated_roots → root = −b/2a  |  no_real_roots → 'No real roots'</span></code></pre>
             </div>
 
             <div class="card">
                 <h3>Condition Function + Graph Build</h3>
-                <pre><code><span class="kw">def</span> <span class="fn">check_condition</span>(state: QuadState) -> Literal[<span class="str">"real_roots"</span>, <span class="str">"repeated_roots"</span>, <span class="str">"no_real_roots"</span>]:
+                <pre><code><span class="cm"># condition fn — returns Literal node name based on state</span>
+<span class="kw">def</span> <span class="fn">check_condition</span>(state) -> Literal[<span class="str">"real_roots"</span>, <span class="str">"repeated_roots"</span>, <span class="str">"no_real_roots"</span>]:
     <span class="kw">if</span>   state[<span class="str">'discriminant'</span>] > <span class="num">0</span>:  <span class="kw">return</span> <span class="str">"real_roots"</span>
     <span class="kw">elif</span> state[<span class="str">'discriminant'</span>] == <span class="num">0</span>: <span class="kw">return</span> <span class="str">"repeated_roots"</span>
     <span class="kw">else</span>:                             <span class="kw">return</span> <span class="str">"no_real_roots"</span>
 
 graph = StateGraph(QuadState)
-graph.add_node(<span class="str">'show_equation'</span>,        show_equation)
-graph.add_node(<span class="str">'calculate_discriminant'</span>, calculate_discriminant)
-graph.add_node(<span class="str">'real_roots'</span>,            real_roots)
-graph.add_node(<span class="str">'repeated_roots'</span>,        repeated_roots)
-graph.add_node(<span class="str">'no_real_roots'</span>,         no_real_roots)
-
+<span class="cm"># ... add_node for each node function ...</span>
 graph.add_edge(START, <span class="str">'show_equation'</span>)
 graph.add_edge(<span class="str">'show_equation'</span>, <span class="str">'calculate_discriminant'</span>)
-graph.add_conditional_edges(<span class="str">'calculate_discriminant'</span>, check_condition) <span class="cm"># key line</span>
-graph.add_edge(<span class="str">'real_roots'</span>,    END)
-graph.add_edge(<span class="str">'repeated_roots'</span>, END)
-graph.add_edge(<span class="str">'no_real_roots'</span>,  END)
+graph.add_conditional_edges(<span class="str">'calculate_discriminant'</span>, check_condition)  <span class="cm"># ⭐ key line</span>
+graph.add_edge(<span class="str">'real_roots'</span>, END)  <span class="cm"># all 3 branches → END</span>
 workflow = graph.compile()</code></pre>
             </div>
         </div>
@@ -587,8 +573,8 @@ workflow = graph.compile()</code></pre>
         <!-- SECTION 3 -->
         <div class="section">
             <div class="section-header">
-                <div class="section-num green">03</div>
-                <h2>Example 2 — LLM Review Handling Workflow</h2>
+                <div class="section-num green">48</div>
+                <h2>Example 2 — LLM Verification Design</h2>
             </div>
 
             <div class="card">
@@ -737,48 +723,33 @@ structured_model2 = model.with_structured_output(DiagnosisSchema)</code></pre>
 
             <div class="card">
                 <h3>Node Functions</h3>
-                <pre><code><span class="kw">def</span> <span class="fn">find_sentiment</span>(state: ReviewState):
-    prompt = <span class="str">f'Find sentiment of: \n{state["review"]}'</span>
-    sentiment = structured_model.invoke(prompt).sentiment
-    <span class="kw">return</span> {<span class="str">'sentiment'</span>: sentiment}
+                <pre><code><span class="kw">def</span> <span class="fn">find_sentiment</span>(state):         <span class="cm"># ⭐ key line — structured LLM → sentiment</span>
+    result = structured_model.invoke(<span class="str">f'Find sentiment: {state["review"]}'</span>)
+    <span class="kw">return</span> {<span class="str">'sentiment'</span>: result.sentiment}
 
-<span class="kw">def</span> <span class="fn">positive_response</span>(state: ReviewState):
-    prompt = <span class="str">f"""Write a warm thank-you for this review:
-    "{state['review']}"
-Also ask user to leave feedback on our website."""</span>
-    <span class="kw">return</span> {<span class="str">'response'</span>: model.invoke(prompt).content}
+<span class="kw">def</span> <span class="fn">run_diagnosis</span>(state):           <span class="cm"># structured LLM → DiagnosisSchema</span>
+    result = structured_model2.invoke(<span class="str">f'Diagnose: {state["review"]}'</span>)
+    <span class="kw">return</span> {<span class="str">'diagnosis'</span>: result.model_dump()}  <span class="cm"># Pydantic → dict</span>
 
-<span class="kw">def</span> <span class="fn">run_diagnosis</span>(state: ReviewState):
-    prompt = <span class="str">f"""Diagnose this negative review:
-{state['review']}
-Return issue_type, tone, and urgency."""</span>
-    response = structured_model2.invoke(prompt)
-    <span class="kw">return</span> {<span class="str">'diagnosis'</span>: response.model_dump()}  <span class="cm"># Pydantic → dict for state</span>
+<span class="kw">def</span> <span class="fn">positive_response</span>(state):      <span class="cm"># LLM writes warm thank-you</span>
+    <span class="kw">return</span> {<span class="str">'response'</span>: model.invoke(<span class="str">f'Thank user: {state["review"]}'</span>).content}
 
-<span class="kw">def</span> <span class="fn">negative_response</span>(state: ReviewState):
-    d = state[<span class="str">'diagnosis'</span>]
-    prompt = <span class="str">f"""You are a support assistant.
-User had a '{d['issue_type']}' issue, sounded '{d['tone']}', urgency '{d['urgency']}'.
-Write an empathetic, helpful resolution message."""</span>
-    <span class="kw">return</span> {<span class="str">'response'</span>: model.invoke(prompt).content}</code></pre>
+<span class="kw">def</span> <span class="fn">negative_response</span>(state):      <span class="cm"># LLM writes empathetic reply using diagnosis</span>
+    <span class="kw">return</span> {<span class="str">'response'</span>: model.invoke(<span class="str">f'Support reply for: {state["diagnosis"]}'</span>).content}</code></pre>
             </div>
 
             <div class="card">
                 <h3>Condition Function + Graph Build</h3>
-                <pre><code><span class="kw">def</span> <span class="fn">check_sentiment</span>(state: ReviewState) -> Literal[<span class="str">"positive_response"</span>, <span class="str">"run_diagnosis"</span>]:
+                <pre><code><span class="kw">def</span> <span class="fn">check_sentiment</span>(state) -> Literal[<span class="str">"positive_response"</span>, <span class="str">"run_diagnosis"</span>]:
     <span class="kw">if</span> state[<span class="str">'sentiment'</span>] == <span class="str">'positive'</span>: <span class="kw">return</span> <span class="str">'positive_response'</span>
     <span class="kw">else</span>:                                  <span class="kw">return</span> <span class="str">'run_diagnosis'</span>
 
 graph = StateGraph(ReviewState)
-graph.add_node(<span class="str">'find_sentiment'</span>,    find_sentiment)
-graph.add_node(<span class="str">'positive_response'</span>, positive_response)
-graph.add_node(<span class="str">'run_diagnosis'</span>,     run_diagnosis)
-graph.add_node(<span class="str">'negative_response'</span>, negative_response)
-
+<span class="cm"># ... add_node for all 4 node functions ...</span>
 graph.add_edge(START, <span class="str">'find_sentiment'</span>)
-graph.add_conditional_edges(<span class="str">'find_sentiment'</span>, check_sentiment)  <span class="cm"># key line</span>
+graph.add_conditional_edges(<span class="str">'find_sentiment'</span>, check_sentiment)  <span class="cm"># ⭐ key line</span>
+graph.add_edge(<span class="str">'run_diagnosis'</span>, <span class="str">'negative_response'</span>)             <span class="cm"># chain neg. path</span>
 graph.add_edge(<span class="str">'positive_response'</span>, END)
-graph.add_edge(<span class="str">'run_diagnosis'</span>,     <span class="str">'negative_response'</span>)
 graph.add_edge(<span class="str">'negative_response'</span>, END)
 workflow = graph.compile()</code></pre>
             </div>
@@ -789,7 +760,7 @@ workflow = graph.compile()</code></pre>
         <!-- SECTION 4 -->
         <div class="section">
             <div class="section-header">
-                <div class="section-num orange">04</div>
+                <div class="section-num orange">49</div>
                 <h2>Key APIs &amp; Concepts Summary</h2>
             </div>
             <div class="table-wrap">
@@ -851,7 +822,7 @@ workflow = graph.compile()</code></pre>
         <!-- SECTION 5 -->
         <div class="section">
             <div class="section-header">
-                <div class="section-num">05</div>
+                <div class="section-num">50</div>
                 <h2>Reusable Pattern</h2>
             </div>
             <div class="card">

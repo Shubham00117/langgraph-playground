@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LangGraph Persistence & Time Travel</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@300;400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0d0f14;
+            --surface: #13161e;
+            --card: #181c26;
+            --border: #252a38;
+            --accent: #00d4ff;
+            --accent2: #7c3aed;
+            --accent3: #10b981;
+            --accent4: #f59e0b;
+            --accent5: #ef4444;
+            --text: #e2e8f0;
+            --muted: #64748b;
+            --code-bg: #0a0c12;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            font-weight: 300;
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        /* Animated background grid */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 60px 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 64px;
+            animation: fadeDown 0.8s ease both;
+        }
+
+        .badge {
+            display: inline-block;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.15), rgba(124, 58, 237, 0.15));
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            color: var(--accent);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            padding: 6px 16px;
+            border-radius: 100px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 30%, var(--accent) 70%, var(--accent2) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+            margin-bottom: 12px;
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+        }
+
+        /* Section Labels */
+        .section-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px 32px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+            animation: fadeUp 0.6s ease both;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+        }
+
+        .card.blue::before {
+            background: linear-gradient(90deg, var(--accent), transparent);
+        }
+
+        .card.purple::before {
+            background: linear-gradient(90deg, var(--accent2), transparent);
+        }
+
+        .card.green::before {
+            background: linear-gradient(90deg, var(--accent3), transparent);
+        }
+
+        .card.amber::before {
+            background: linear-gradient(90deg, var(--accent4), transparent);
+        }
+
+        .card.red::before {
+            background: linear-gradient(90deg, var(--accent5), transparent);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+        .icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .icon.blue {
+            background: rgba(0, 212, 255, 0.12);
+        }
+
+        .icon.purple {
+            background: rgba(124, 58, 237, 0.12);
+        }
+
+        .icon.green {
+            background: rgba(16, 185, 129, 0.12);
+        }
+
+        .icon.amber {
+            background: rgba(245, 158, 11, 0.12);
+        }
+
+        .icon.red {
+            background: rgba(239, 68, 68, 0.12);
+        }
+
+        .card-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .card-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        /* Definition box */
+        .definition {
+            background: rgba(0, 212, 255, 0.05);
+            border-left: 3px solid var(--accent);
+            border-radius: 0 8px 8px 0;
+            padding: 14px 18px;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+            color: #a0b4c8;
+        }
+
+        /* Bullet points */
+        .points {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .points li {
+            font-size: 0.88rem;
+            color: #94a3b8;
+            padding-left: 18px;
+            position: relative;
+        }
+
+        .points li::before {
+            content: '›';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .points li.green::before {
+            color: var(--accent3);
+        }
+
+        .points li.amber::before {
+            color: var(--accent4);
+        }
+
+        .points li.purple::before {
+            color: var(--accent2);
+        }
+
+        .points li.red::before {
+            color: var(--accent5);
+        }
+
+        strong {
+            color: #e2e8f0;
+            font-weight: 500;
+        }
+
+        /* Code block */
+        .code-block {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: #7dd3fc;
+            overflow-x: auto;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .code-block .kw {
+            color: #c084fc;
+        }
+
+        .code-block .fn {
+            color: #34d399;
+        }
+
+        .code-block .str {
+            color: #fbbf24;
+        }
+
+        .code-block .cm {
+            color: #475569;
+            font-style: italic;
+        }
+
+        /* Tags / Pills */
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        .tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            padding: 4px 10px;
+            border-radius: 100px;
+            letter-spacing: 1px;
+        }
+
+        .tag.blue {
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--accent);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .tag.green {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent3);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .tag.purple {
+            background: rgba(124, 58, 237, 0.1);
+            color: #a78bfa;
+            border: 1px solid rgba(124, 58, 237, 0.2);
+        }
+
+        .tag.amber {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--accent4);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .tag.red {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--accent5);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        /* Flow diagram */
+        .flow {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
+        .flow-node {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 6px 14px;
+            font-size: 0.78rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: #cbd5e1;
+        }
+
+        .flow-node.start {
+            border-color: var(--accent3);
+            color: var(--accent3);
+        }
+
+        .flow-node.end {
+            border-color: var(--accent5);
+            color: var(--accent5);
+        }
+
+        .flow-node.active {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(0, 212, 255, 0.08);
+        }
+
+        .flow-arrow {
+            color: var(--muted);
+            font-size: 0.8rem;
+        }
+
+        /* Benefits grid */
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 14px;
+        }
+
+        .benefit-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .benefit-item .b-icon {
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+
+        .benefit-item .b-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+
+        .benefit-item .b-sub {
+            font-size: 0.72rem;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        /* Two-col layout */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .mini-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 16px;
+        }
+
+        .mini-card .mc-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--muted);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .mini-card .mc-val {
+            font-size: 0.82rem;
+            color: #94a3b8;
+        }
+
+        /* Animations */
+        @keyframes fadeDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card:nth-child(2) {
+            animation-delay: 0.05s;
+        }
+
+        .card:nth-child(3) {
+            animation-delay: 0.1s;
+        }
+
+        .card:nth-child(4) {
+            animation-delay: 0.15s;
+        }
+
+        .card:nth-child(5) {
+            animation-delay: 0.2s;
+        }
+
+        /* Divider */
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border), transparent);
+            margin: 40px 0;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        @media (max-width: 600px) {
+            .benefits-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .two-col {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 40px 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <!-- Header -->
+        <header>
+            <div class="badge">CampusX · Module 11 · Persistence</div>
+            <h1>Persistence & <span>Time Travel</span></h1>
+            <p class="subtitle">// checkpoints · threads · fault tolerance · human-in-the-loop</p>
+        </header>
+
+        <!-- SET 1 -->
+        <div class="section-label">Set 1 — Core Concepts</div>
+
+        <!-- 1. What is Persistence -->
+        <div class="card blue">
+            <div class="card-header">
+                <div class="icon blue">💾</div>
+                <div>
+                    <div class="card-title">What is Persistence</div>
+                    <div class="card-num">Topic 65</div>
+                </div>
+            </div>
+            <div class="definition">
+                Persistence in LangGraph = the ability to <strong>save and restore</strong> the state of a workflow over
+                time.
+            </div>
+            <ul class="points">
+                <li>Built on two core concepts: <strong>Graph</strong> (execution flow) and <strong>State</strong> (data
+                    as dict)</li>
+                <li>State is read/written at each node; changes tracked as a dictionary</li>
+                <li>Workflow runs: START → NODE 1 → NODE 2 → END (final state)</li>
+                <li>Important data is <strong>stored</strong>; unneeded data can be <strong>erased</strong></li>
+                <li>Enables saving <strong>state values</strong> — both intermediate and final</li>
+            </ul>
+            <div class="flow">
+                <div class="flow-node start">START</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-node active">NODE 1</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-node">NODE 2</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-node end">END</div>
+            </div>
+        </div>
+
+        <!-- 2. Fault Tolerance -->
+        <div class="card red">
+            <div class="card-header">
+                <div class="icon red">🛡️</div>
+                <div>
+                    <div class="card-title">Fault Tolerance</div>
+                    <div class="card-num">Topic 66</div>
+                </div>
+            </div>
+            <div class="definition">
+                If a workflow crashes mid-execution, it can <strong>resume from the last saved checkpoint</strong> — not
+                from scratch.
+            </div>
+            <ul class="points">
+                <li class="red">Intermediate state values are saved, not just final values</li>
+                <li>Example: state <code style="font-family:JetBrains Mono;font-size:0.8em;color:#fca5a5">name: C</code>
+                    persists even after a node crash</li>
+                <li>Re-invoke with same <strong>thread_id</strong> + <code
+                        style="font-family:JetBrains Mono;font-size:0.8em;color:#fca5a5">None</code> input to resume
+                </li>
+            </ul>
+        </div>
+
+        <!-- 3. Checkpointers -->
+        <div class="card green">
+            <div class="card-header">
+                <div class="icon green">📍</div>
+                <div>
+                    <div class="card-title">Checkpointers</div>
+                    <div class="card-num">Topic 67</div>
+                </div>
+            </div>
+            <div class="definition">
+                A <strong>checkpoint</strong> = saved snapshot of the graph state at a specific execution point (super
+                step).
+            </div>
+            <ul class="points">
+                <li class="green">Each <strong>super step</strong> automatically creates one checkpoint</li>
+                <li>Checkpoints are stored to a <strong>database / memory saver</strong></li>
+                <li>State example: <code
+                        style="font-family:JetBrains Mono;font-size:0.8em;color:#6ee7b7">numbers: [list[int], add]</code>
+                </li>
+            </ul>
+            <div class="two-col" style="margin-top:14px">
+                <div class="mini-card">
+                    <div class="mc-label">CP1 — after START</div>
+                    <div class="mc-val">numbers: [1]</div>
+                </div>
+                <div class="mini-card">
+                    <div class="mc-label">CP2 — after Node 1</div>
+                    <div class="mc-val">numbers: [1, 2]</div>
+                </div>
+                <div class="mini-card">
+                    <div class="mc-label">CP3 — after parallel</div>
+                    <div class="mc-val">numbers: [1,2,3,4,5]</div>
+                </div>
+                <div class="mini-card">
+                    <div class="mc-label">CP4 — END</div>
+                    <div class="mc-val">numbers: [1,2,3,4,5]</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Threads -->
+        <div class="card purple">
+            <div class="card-header">
+                <div class="icon purple">🧵</div>
+                <div>
+                    <div class="card-title">Threads in Persistence</div>
+                    <div class="card-num">Topic 68</div>
+                </div>
+            </div>
+            <div class="definition">
+                A <strong>thread</strong> = a unique, isolated execution run identified by a <code
+                    style="font-family:JetBrains Mono;font-size:0.8em">thread_id</code>.
+            </div>
+            <ul class="points">
+                <li class="purple">Multiple threads run <strong>independently</strong> with separate state</li>
+                <li>Each thread's checkpoints saved to DB under its own thread_id</li>
+                <li class="purple">Thread 1: <code
+                        style="font-family:JetBrains Mono;font-size:0.8em">numbers [1] → [1,2] → [1,2,3,4,5]</code></li>
+                <li>Thread 2: <code
+                        style="font-family:JetBrains Mono;font-size:0.8em">numbers [6] → [6,7] → [6,7,8,9,10]</code>
+                </li>
+                <li>Execution can be <strong>resumed</strong> from any thread's last checkpoint</li>
+            </ul>
+        </div>
+
+        <!-- 5. Code Setup -->
+        <div class="card blue">
+            <div class="card-header">
+                <div class="icon blue">⚙️</div>
+                <div>
+                    <div class="card-title">Code Implementation</div>
+                    <div class="card-num">Topic 69</div>
+                </div>
+            </div>
+            <ul class="points">
+                <li>State class: <code
+                        style="font-family:JetBrains Mono;font-size:0.8em;color:#7dd3fc">JokeState(TypedDict)</code> →
+                    fields: topic, joke, explanation</li>
+                <li>Nodes: <code style="font-family:JetBrains Mono;font-size:0.8em;color:#7dd3fc">generate_joke</code>
+                    (LLM → joke), <code
+                        style="font-family:JetBrains Mono;font-size:0.8em;color:#7dd3fc">generate_explanation</code>
+                </li>
+                <li>Config uses <code
+                        style="font-family:JetBrains Mono;font-size:0.8em;color:#7dd3fc">{"configurable": {"thread_id": "1"}}</code>
+                </li>
+            </ul>
+            <div class="code-block"><span class="kw">from</span> langgraph.checkpoint.memory <span
+                    class="kw">import</span> InMemorySaver
+
+                checkpointer = <span class="fn">InMemorySaver</span>() <span class="cm"># in-RAM checkpoint store</span>
+                workflow = graph.<span class="fn">compile</span>(checkpointer=checkpointer) <span class="cm"># ⭐ key
+                    line — attach persistence</span>
+
+                config = {<span class="str">"configurable"</span>: {<span class="str">"thread_id"</span>: <span
+                    class="str">"1"</span>}} <span class="cm"># unique session identifier</span>
+                workflow.<span class="fn">invoke</span>({<span class="str">'topic'</span>: <span
+                    class="str">'pizza'</span>}, config=config) <span class="cm"># run with thread</span>
+                workflow.<span class="fn">get_state</span>(config) <span class="cm"># → StateSnapshot (current values +
+                    next node)</span>
+                workflow.<span class="fn">get_state_history</span>(config) <span class="cm"># → all checkpoints for this
+                    thread</span></div>
+            <div class="tags">
+                <span class="tag blue">InMemorySaver</span>
+                <span class="tag green">StateSnapshot</span>
+                <span class="tag purple">get_state_history</span>
+            </div>
+        </div>
+
+        <!-- 6. Benefits -->
+        <div class="card amber">
+            <div class="card-header">
+                <div class="icon amber">✨</div>
+                <div>
+                    <div class="card-title">Benefits of Persistence</div>
+                    <div class="card-num">Topic 70</div>
+                </div>
+            </div>
+            <div class="benefits-grid">
+                <div class="benefit-item">
+                    <div class="b-icon">🧠</div>
+                    <div class="b-title">Short-term Memory</div>
+                    <div class="b-sub">Retains context across conversation turns</div>
+                </div>
+                <div class="benefit-item">
+                    <div class="b-icon">🛡️</div>
+                    <div class="b-title">Fault Tolerance</div>
+                    <div class="b-sub">Resume after crash from last checkpoint</div>
+                </div>
+                <div class="benefit-item">
+                    <div class="b-icon">👤</div>
+                    <div class="b-title">HITL</div>
+                    <div class="b-sub">Human reviews &amp; approves mid-workflow</div>
+                </div>
+                <div class="benefit-item" style="grid-column: 1/-1; max-width: 200px; margin: 0 auto;">
+                    <div class="b-icon">⏪</div>
+                    <div class="b-title">Time Travel</div>
+                    <div class="b-sub">Replay &amp; debug past states</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- SET 2 -->
+        <div class="section-label">Set 2 — Advanced Features</div>
+
+        <!-- 7. Fault Tolerance Code -->
+        <div class="card red">
+            <div class="card-header">
+                <div class="icon red">🔁</div>
+                <div>
+                    <div class="card-title">Fault Tolerance — Code & Resume</div>
+                    <div class="card-num">Topic 71</div>
+                </div>
+            </div>
+            <ul class="points">
+                <li class="red"><code style="font-family:JetBrains Mono;font-size:0.8em">CrashState(TypedDict)</code>:
+                    fields — input, step1, step2, step3</li>
+                <li><code style="font-family:JetBrains Mono;font-size:0.8em">step_2</code> simulates a hang with <code
+                        style="font-family:JetBrains Mono;font-size:0.8em">time.sleep(30)</code></li>
+                <li class="red">After kernel interrupt → crash simulated</li>
+                <li>Resume by invoking with <code style="font-family:JetBrains Mono;font-size:0.8em">None</code> input +
+                    same thread_id</li>
+            </ul>
+            <div class="code-block"><span class="cm"># ⭐ key line — resume after crash by passing None (not new
+                    input)</span>
+                final_state = graph.<span class="fn">invoke</span>(
+                <span class="kw">None</span>, <span class="cm"># None = resume, don't restart</span>
+                config={<span class="str">"configurable"</span>: {<span class="str">"thread_id"</span>: <span
+                    class="str">"thread-1"</span>}}
+                )
+                <span class="cm"># Picks up from last saved checkpoint → completes remaining steps</span>
+            </div>
+        </div>
+
+        <!-- 8. HITL -->
+        <div class="card amber">
+            <div class="card-header">
+                <div class="icon amber">👤</div>
+                <div>
+                    <div class="card-title">Human-in-the-Loop (HITL)</div>
+                    <div class="card-num">Topic 72</div>
+                </div>
+            </div>
+            <div class="definition">
+                Workflow pauses mid-execution for a human to <strong>review, approve, or modify</strong> before
+                continuing.
+            </div>
+            <ul class="points">
+                <li class="amber">Graph runs to a node → <strong>interrupts</strong> before calling external API</li>
+                <li>Human actively reviews the output (e.g., a LinkedIn post draft)</li>
+                <li class="amber">After approval → <strong>resume</strong> execution from that checkpoint</li>
+            </ul>
+            <div class="flow">
+                <div class="flow-node">topic</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-node active">LinkedIn post</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-node" style="border-color:#f59e0b;color:#f59e0b">interrupt</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-node">API</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-node start">resume</div>
+            </div>
+        </div>
+
+        <!-- 9. Time Travel Concept -->
+        <div class="card purple">
+            <div class="card-header">
+                <div class="icon purple">⏪</div>
+                <div>
+                    <div class="card-title">Time Travel — Concept</div>
+                    <div class="card-num">Topic 73</div>
+                </div>
+            </div>
+            <div class="definition">
+                Time Travel = ability to <strong>go back to a previous checkpoint</strong> and re-run the workflow from
+                that exact point.
+            </div>
+            <ul class="points">
+                <li class="purple">Use case: <strong>debugging</strong> — replay past states to find issues</li>
+                <li>Access any past state using its unique <code
+                        style="font-family:JetBrains Mono;font-size:0.8em">checkpoint_id</code></li>
+                <li class="purple">Re-run from that checkpoint with <code
+                        style="font-family:JetBrains Mono;font-size:0.8em">None</code> as input</li>
+                <li>Pizza example: go back to state where only topic='pizza' exists → regenerate joke</li>
+            </ul>
+            <div class="code-block">past_config = {<span class="str">"configurable"</span>: {<span
+                    class="str">"thread_id"</span>: <span class="str">"1"</span>, <span
+                    class="str">"checkpoint_id"</span>: <span class="str">"&lt;id&gt;"</span>}}
+
+                workflow.<span class="fn">get_state</span>(past_config) <span class="cm"># inspect past state values +
+                    next node</span>
+                workflow.<span class="fn">invoke</span>(<span class="kw">None</span>, past_config) <span class="cm"># ⭐
+                    key line — re-run from checkpoint</span>
+                <span class="cm"># Result: workflow replays from the exact past state</span>
+            </div>
+            <div class="tags">
+                <span class="tag purple">checkpoint_id</span>
+                <span class="tag blue">get_state</span>
+                <span class="tag green">invoke(None, ...)</span>
+            </div>
+        </div>
+
+        <!-- 10. Updating State -->
+        <div class="card green">
+            <div class="card-header">
+                <div class="icon green">✏️</div>
+                <div>
+                    <div class="card-title">Updating State (Advanced Time Travel)</div>
+                    <div class="card-num">Topic 74</div>
+                </div>
+            </div>
+            <div class="definition">
+                You can <strong>modify state values at a past checkpoint</strong> and re-run the workflow with the new
+                values — creating a new branch.
+            </div>
+            <ul class="points">
+                <li class="green">Use <code
+                        style="font-family:JetBrains Mono;font-size:0.8em">workflow.update_state()</code> to change a
+                    past state</li>
+                <li>Returns a <strong>new checkpoint_id</strong> for the modified state</li>
+                <li class="green">Invoke with new checkpoint_id → workflow re-runs with updated data</li>
+                <li>Example: <strong>Pizza → Samosa</strong> (topic changed, jokes regenerated)</li>
+            </ul>
+            <div class="code-block"><span class="cm"># ⭐ key line — modify past state and create new branch</span>
+                new_config = workflow.<span class="fn">update_state</span>(
+                {<span class="str">"configurable"</span>: {<span class="str">"thread_id"</span>: <span
+                    class="str">"1"</span>, <span class="str">"checkpoint_id"</span>: <span
+                    class="str">"&lt;old_id&gt;"</span>}},
+                {<span class="str">'topic'</span>: <span class="str">'samosa'</span>} <span class="cm"># overwrite
+                    specific state</span>
+                ) <span class="cm"># returns new checkpoint_id</span>
+
+                workflow.<span class="fn">invoke</span>(<span class="kw">None</span>, new_config) <span class="cm">#
+                    re-run from updated state</span></div>
+            <div class="tags">
+                <span class="tag green">update_state</span>
+                <span class="tag amber">new checkpoint</span>
+                <span class="tag purple">branch execution</span>
+            </div>
+        </div>
+
+        <!-- Quick Reference -->
+        <div class="divider"></div>
+        <div class="section-label">Quick Reference</div>
+
+        <div class="card blue">
+            <div class="card-header">
+                <div class="icon blue">📋</div>
+                <div>
+                    <div class="card-title">Key Methods Cheatsheet</div>
+                    <div class="card-num">Reference</div>
+                </div>
+            </div>
+            <div class="code-block">checkpointer = <span class="fn">InMemorySaver</span>() <span class="cm">#
+                    setup</span>
+                workflow = graph.<span class="fn">compile</span>(checkpointer=checkpointer) <span class="cm"># ⭐ attach
+                    persistence</span>
+                config = {<span class="str">"configurable"</span>: {<span class="str">"thread_id"</span>: <span
+                    class="str">"1"</span>}}
+
+                workflow.<span class="fn">invoke</span>(input, config=config) <span class="cm"># run with thread</span>
+                workflow.<span class="fn">get_state</span>(config) <span class="cm"># read current state</span>
+                <span class="fn">list</span>(workflow.<span class="fn">get_state_history</span>(config)) <span
+                    class="cm"># all checkpoints</span>
+                workflow.<span class="fn">invoke</span>(<span class="kw">None</span>, {<span
+                    class="str">"configurable"</span>: {<span class="str">"thread_id"</span>: <span
+                    class="str">"1"</span>, <span class="str">"checkpoint_id"</span>: <span class="str">"..."</span>}})
+                <span class="cm"># time travel</span>
+                workflow.<span class="fn">update_state</span>(config, {<span class="str">'key'</span>: <span
+                    class="str">'val'</span>}) <span class="cm"># update state</span>
+                workflow.<span class="fn">invoke</span>(<span class="kw">None</span>, config) <span class="cm"># resume
+                    after crash</span>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>
