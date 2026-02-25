@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iterative Workflows in LangGraph</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0d0f14;
+            --surface: #13161e;
+            --surface2: #1a1e2a;
+            --border: #252a38;
+            --accent: #7c6af7;
+            --accent2: #4fd9a4;
+            --accent3: #f7a04f;
+            --red: #f76f6f;
+            --blue: #4fb3f7;
+            --text: #e2e6f3;
+            --muted: #7a8099;
+            --code-bg: #0a0c12;
+            --tag-bg: rgba(124, 106, 247, 0.12);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Syne', sans-serif;
+            line-height: 1.7;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(124, 106, 247, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(124, 106, 247, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 940px;
+            margin: 0 auto;
+            padding: 60px 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        header {
+            margin-bottom: 52px;
+            animation: fadeDown 0.6s ease both;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--tag-bg);
+            border: 1px solid rgba(124, 106, 247, 0.3);
+            color: var(--accent);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            padding: 5px 14px;
+            border-radius: 100px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 800;
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+            margin-bottom: 14px;
+        }
+
+        h1 span {
+            color: var(--accent2);
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Section */
+        .section {
+            margin-bottom: 52px;
+            animation: fadeUp 0.5s ease both;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+
+        .section-num {
+            width: 32px;
+            height: 32px;
+            background: var(--accent);
+            color: #fff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .section-num.green {
+            background: var(--accent2);
+            color: #0d0f14;
+        }
+
+        .section-num.orange {
+            background: var(--accent3);
+            color: #0d0f14;
+        }
+
+        .section-num.blue {
+            background: var(--blue);
+            color: #0d0f14;
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: -0.01em;
+        }
+
+        /* Card */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .card:hover {
+            border-color: rgba(124, 106, 247, 0.3);
+        }
+
+        .card h3 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--accent2);
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card h3::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent2);
+            flex-shrink: 0;
+        }
+
+        .card h3.orange {
+            color: var(--accent3);
+        }
+
+        .card h3.orange::before {
+            background: var(--accent3);
+        }
+
+        .card h3.blue {
+            color: var(--blue);
+        }
+
+        .card h3.blue::before {
+            background: var(--blue);
+        }
+
+        .card p {
+            color: #b0b8cc;
+            font-size: 0.88rem;
+            line-height: 1.65;
+        }
+
+        /* Code */
+        pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            border-radius: 8px;
+            padding: 16px 20px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+            color: #c9d1e8;
+            line-height: 1.85;
+        }
+
+        .kw {
+            color: #7c6af7
+        }
+
+        .fn {
+            color: #4fd9a4
+        }
+
+        .str {
+            color: #f7c04f
+        }
+
+        .cm {
+            color: #4a5270;
+            font-style: italic
+        }
+
+        .ty {
+            color: #f7a04f
+        }
+
+        .num {
+            color: #f7a04f
+        }
+
+        .bl {
+            color: #4fb3f7
+        }
+
+        /* Highlight */
+        .highlight {
+            background: rgba(124, 106, 247, 0.07);
+            border: 1px solid rgba(124, 106, 247, 0.2);
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin: 12px 0;
+        }
+
+        .highlight.green {
+            background: rgba(79, 217, 164, 0.07);
+            border-color: rgba(79, 217, 164, 0.2);
+        }
+
+        .highlight.orange {
+            background: rgba(247, 160, 79, 0.07);
+            border-color: rgba(247, 160, 79, 0.2);
+        }
+
+        .highlight p {
+            color: #c5cce6;
+            font-size: 0.88rem;
+        }
+
+        .highlight strong {
+            color: var(--accent);
+        }
+
+        .highlight.green strong {
+            color: var(--accent2);
+        }
+
+        .highlight.orange strong {
+            color: var(--accent3);
+        }
+
+        /* Divider */
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border), transparent);
+            margin: 52px 0;
+        }
+
+        /* Table */
+        .table-wrap {
+            overflow-x: auto;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: var(--surface2);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-align: left;
+            padding: 12px 18px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 11px 18px;
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border);
+            vertical-align: top;
+        }
+
+        td:first-child {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent2);
+            font-size: 0.78rem;
+            white-space: nowrap;
+        }
+
+        td p {
+            color: #b0b8cc;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.015);
+        }
+
+        /* Flowchart */
+        .flowchart-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 32px 20px;
+            margin-bottom: 14px;
+            display: flex;
+            justify-content: center;
+            overflow-x: auto;
+        }
+
+        .flowchart-wrap svg {
+            overflow: visible;
+        }
+
+        /* Diff box */
+        .diff {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 10px 0;
+        }
+
+        @media(max-width:600px) {
+            .diff {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .diff-box {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px 16px;
+        }
+
+        .diff-box .label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 8px;
+        }
+
+        .diff-box.old .label {
+            color: var(--red);
+        }
+
+        .diff-box.new .label {
+            color: var(--accent2);
+        }
+
+        .diff-box pre {
+            border: none;
+            padding: 0;
+            margin: 0;
+            background: transparent;
+        }
+
+        @keyframes fadeDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .section:nth-child(1) {
+            animation-delay: 0.1s
+        }
+
+        .section:nth-child(2) {
+            animation-delay: 0.2s
+        }
+
+        .section:nth-child(3) {
+            animation-delay: 0.3s
+        }
+
+        .section:nth-child(4) {
+            animation-delay: 0.4s
+        }
+
+        .section:nth-child(5) {
+            animation-delay: 0.5s
+        }
+
+        .section:nth-child(6) {
+            animation-delay: 0.6s
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <!-- HEADER -->
+        <header>
+            <div class="badge">📹 Video 8 · CampusX · Agentic AI</div>
+            <h1>Iterative Workflows<br>in <span>LangGraph</span></h1>
+            <p class="subtitle">// loops · evaluation · self-improvement · max_iteration guard</p>
+        </header>
+
+        <!-- SECTION 1: Concept -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-num">01</div>
+                <h2>What is an Iterative Workflow?</h2>
+            </div>
+            <div class="card">
+                <p>An iterative workflow creates a <strong style="color:var(--accent2)">feedback loop</strong> in the
+                    graph — a node generates output, another evaluates it, and if not good enough, an optimizer improves
+                    it and <strong style="color:var(--accent)">loops back</strong> to the evaluator. This repeats until
+                    the output is <strong style="color:var(--accent2)">approved</strong> or a <strong
+                        style="color:var(--accent3)">max iteration limit</strong> is hit.</p>
+            </div>
+            <div class="highlight orange">
+                <p><strong>New concept:</strong> <code>graph.add_conditional_edges(node, fn, mapping_dict)</code> — a
+                    3rd argument maps return values explicitly to node names or END. Also introduces the
+                    <strong>loop-back edge</strong>: <code>graph.add_edge('optimize', 'evaluate')</code>
+                </p>
+            </div>
+            <div class="highlight green">
+                <p><strong>Real-world use:</strong> LinkedIn/X/Instagram post generation → auto-evaluate quality →
+                    auto-improve. The entire pipeline runs without human intervention.</p>
+            </div>
+        </div>
+
+        <!-- SECTION 2: Flowchart -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-num green">02</div>
+                <h2>X (Twitter) Post Generator — Workflow Design</h2>
+            </div>
+
+            <div class="flowchart-wrap">
+                <svg width="620" height="660" viewBox="0 0 620 660" xmlns="http://www.w3.org/2000/svg"
+                    font-family="'JetBrains Mono', monospace">
+                    <defs>
+                        <marker id="mG" markerWidth="9" markerHeight="6" refX="8" refY="3" orient="auto">
+                            <polygon points="0 0,9 3,0 6" fill="#4fd9a4" />
+                        </marker>
+                        <marker id="mP" markerWidth="9" markerHeight="6" refX="8" refY="3" orient="auto">
+                            <polygon points="0 0,9 3,0 6" fill="#7c6af7" />
+                        </marker>
+                        <marker id="mO" markerWidth="9" markerHeight="6" refX="8" refY="3" orient="auto">
+                            <polygon points="0 0,9 3,0 6" fill="#f7a04f" />
+                        </marker>
+                        <marker id="mR" markerWidth="9" markerHeight="6" refX="8" refY="3" orient="auto">
+                            <polygon points="0 0,9 3,0 6" fill="#f76f6f" />
+                        </marker>
+                        <marker id="mB" markerWidth="9" markerHeight="6" refX="8" refY="3" orient="auto">
+                            <polygon points="0 0,9 3,0 6" fill="#4fb3f7" />
+                        </marker>
+                    </defs>
+
+                    <!-- __start__ -->
+                    <rect x="185" y="20" width="250" height="46" rx="23" fill="#0f1218" stroke="#4fd9a4"
+                        stroke-width="2.5" />
+                    <text x="310" y="44" text-anchor="middle" fill="#4fd9a4" font-size="14"
+                        font-weight="700">__start__</text>
+                    <text x="310" y="58" text-anchor="middle" fill="#555e7a" font-size="10">topic (str)</text>
+
+                    <!-- arrow: start -> generate -->
+                    <line x1="310" y1="66" x2="310" y2="96" stroke="#4fd9a4" stroke-width="2" marker-end="url(#mG)" />
+
+                    <!-- generate -->
+                    <rect x="175" y="98" width="270" height="56" rx="10" fill="#13161e" stroke="#7c6af7"
+                        stroke-width="2" />
+                    <text x="310" y="120" text-anchor="middle" fill="#e2e6f3" font-size="13"
+                        font-weight="600">generate</text>
+                    <text x="310" y="137" text-anchor="middle" fill="#555e7a" font-size="10">LLM: gpt-4o</text>
+                    <text x="310" y="148" text-anchor="middle" fill="#555e7a" font-size="10">→ writes funny tweet</text>
+
+                    <!-- arrow: generate -> evaluate -->
+                    <line x1="310" y1="154" x2="310" y2="184" stroke="#7c6af7" stroke-width="2" marker-end="url(#mP)" />
+
+                    <!-- evaluate -->
+                    <rect x="175" y="186" width="270" height="56" rx="10" fill="#13161e" stroke="#7c6af7"
+                        stroke-width="2" />
+                    <text x="310" y="208" text-anchor="middle" fill="#e2e6f3" font-size="13"
+                        font-weight="600">evaluate</text>
+                    <text x="310" y="225" text-anchor="middle" fill="#555e7a" font-size="10">LLM: gpt-4o-mini
+                        (structured)</text>
+                    <text x="310" y="237" text-anchor="middle" fill="#555e7a" font-size="10">→ evaluation +
+                        feedback</text>
+
+                    <!-- arrow: evaluate -> diamond (dashed) -->
+                    <line x1="310" y1="242" x2="310" y2="270" stroke="#f7a04f" stroke-width="2" stroke-dasharray="5,3"
+                        marker-end="url(#mO)" />
+                    <rect x="260" y="248" width="100" height="14" rx="3" fill="#0d0f14" />
+                    <text x="310" y="259" text-anchor="middle" fill="#f7a04f" font-size="9">conditional edge</text>
+
+                    <!-- DIAMOND: route_evaluation -->
+                    <polygon points="310,272 435,322 310,372 185,322" fill="#1a1e2a" stroke="#f7a04f"
+                        stroke-width="2.5" />
+                    <text x="310" y="316" text-anchor="middle" fill="#f7c04f" font-size="12"
+                        font-weight="600">route_evaluation</text>
+                    <text x="310" y="334" text-anchor="middle" fill="#f7a04f" font-size="10">approved OR
+                        iteration≥max?</text>
+
+                    <!-- LEFT: approved -> __end__ -->
+                    <line x1="185" y1="322" x2="75" y2="322" stroke="#4fd9a4" stroke-width="1.8"
+                        stroke-dasharray="5,3" />
+                    <line x1="75" y1="322" x2="75" y2="545" stroke="#4fd9a4" stroke-width="1.8" stroke-dasharray="5,3"
+                        marker-end="url(#mG)" />
+                    <rect x="78" y="305" width="68" height="15" rx="3" fill="#0d0f14" />
+                    <text x="112" y="316" text-anchor="middle" fill="#4fd9a4" font-size="10">approved ✓</text>
+
+                    <!-- RIGHT: needs_improvement -> optimize -->
+                    <line x1="435" y1="322" x2="545" y2="322" stroke="#f76f6f" stroke-width="1.8"
+                        stroke-dasharray="5,3" />
+                    <line x1="545" y1="322" x2="545" y2="432" stroke="#f76f6f" stroke-width="1.8" stroke-dasharray="5,3"
+                        marker-end="url(#mR)" />
+                    <rect x="448" y="305" width="94" height="15" rx="3" fill="#0d0f14" />
+                    <text x="495" y="316" text-anchor="middle" fill="#f76f6f" font-size="10">needs_improvement</text>
+
+                    <!-- optimize -->
+                    <rect x="430" y="434" width="230" height="56" rx="10" fill="#13161e" stroke="#f76f6f"
+                        stroke-width="2" />
+                    <text x="545" y="456" text-anchor="middle" fill="#f76f6f" font-size="13"
+                        font-weight="600">optimize</text>
+                    <text x="545" y="473" text-anchor="middle" fill="#555e7a" font-size="10">LLM: gpt-4o</text>
+                    <text x="545" y="484" text-anchor="middle" fill="#555e7a" font-size="10">rewrites tweet +
+                        iteration+1</text>
+
+                    <!-- LOOP BACK: optimize -> evaluate (curved arrow going left and up) -->
+                    <path d="M545,434 Q545,380 450,300 Q420,270 440,214" fill="none" stroke="#4fb3f7" stroke-width="2"
+                        stroke-dasharray="0" marker-end="url(#mB)" />
+                    <rect x="550" y="370" width="54" height="14" rx="3" fill="#0d0f14" />
+                    <text x="577" y="381" text-anchor="middle" fill="#4fb3f7" font-size="9">loop back</text>
+
+                    <!-- __end__ -->
+                    <rect x="14" y="547" width="122" height="42" rx="21" fill="#130d1f" stroke="#7c6af7"
+                        stroke-width="2.5" />
+                    <text x="75" y="572" text-anchor="middle" fill="#7c6af7" font-size="13"
+                        font-weight="700">__end__</text>
+
+                    <!-- LEGEND -->
+                    <rect x="155" y="434" width="190" height="88" rx="8" fill="#13161e" stroke="#252a38" />
+                    <text x="167" y="450" fill="#7a8099" font-size="9" font-weight="700">LEGEND</text>
+                    <line x1="167" y1="463" x2="190" y2="463" stroke="#7c6af7" stroke-width="2" />
+                    <text x="194" y="467" fill="#b0b8cc" font-size="9">normal edge</text>
+                    <line x1="167" y1="478" x2="190" y2="478" stroke="#f7a04f" stroke-width="1.5"
+                        stroke-dasharray="4,2" />
+                    <text x="194" y="482" fill="#b0b8cc" font-size="9">conditional edge</text>
+                    <line x1="167" y1="493" x2="190" y2="493" stroke="#4fb3f7" stroke-width="2" />
+                    <text x="194" y="497" fill="#b0b8cc" font-size="9">loop-back edge</text>
+                    <polygon points="167,508 171,502 175,508 171,514" fill="#1a1e2a" stroke="#f7a04f"
+                        stroke-width="1.5" />
+                    <text x="179" y="512" fill="#b0b8cc" font-size="9">decision node</text>
+                </svg>
+            </div>
+
+            <div class="card">
+                <h3>Three LLMs — Specialized Roles</h3>
+                <pre><code>generator_llm  = ChatOpenAI(model=<span class="str">'gpt-4o'</span>)      <span class="cm"># writes the tweet</span>
+evaluator_llm  = ChatOpenAI(model=<span class="str">'gpt-4o-mini'</span>) <span class="cm"># judges quality</span>
+optimizer_llm  = ChatOpenAI(model=<span class="str">'gpt-4o'</span>)      <span class="cm"># rewrites the tweet</span></code></pre>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- SECTION 3: State -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-num orange">03</div>
+                <h2>State Design</h2>
+            </div>
+
+            <!-- V1 vs V2 -->
+            <div class="diff">
+                <div class="diff-box old">
+                    <div class="label">Version 1 — Basic</div>
+                    <pre><code><span class="kw">class</span> <span class="ty">TweetState</span>(TypedDict):
+    topic:        <span class="ty">str</span>
+    tweet:        <span class="ty">str</span>
+    evaluation:   Literal[<span class="str">"approved"</span>,
+                          <span class="str">"needs_improvement"</span>]
+    feedback:     <span class="ty">str</span>
+    iteration:    <span class="ty">int</span>
+    max_iteration:<span class="ty">int</span></code></pre>
+                </div>
+                <div class="diff-box new">
+                    <div class="label">Version 2 — With History</div>
+                    <pre><code><span class="kw">class</span> <span class="ty">TweetState</span>(TypedDict):
+    topic:        <span class="ty">str</span>
+    tweet:        <span class="ty">str</span>
+    evaluation:   Literal[<span class="str">"approved"</span>,
+                          <span class="str">"needs_improvement"</span>]
+    feedback:     <span class="ty">str</span>
+    iteration:    <span class="ty">int</span>
+    max_iteration:<span class="ty">int</span>
+    tweet_history:   Annotated[list[<span class="ty">str</span>], operator.add]
+    feedback_history:Annotated[list[<span class="ty">str</span>], operator.add]</code></pre>
+                </div>
+            </div>
+
+            <div class="highlight">
+                <p><strong>Annotated[list[str], operator.add]</strong> — a special LangGraph state type. Instead of
+                    overwriting, each update <strong>appends</strong> to the list. Perfect for tracking history across
+                    iterations. Import: <code>from typing import Annotated</code> and <code>import operator</code>.</p>
+            </div>
+
+            <div class="card">
+                <h3>Pydantic Schema for Structured Evaluator Output</h3>
+                <pre><code><span class="kw">from</span> pydantic <span class="kw">import</span> BaseModel, Field
+
+<span class="kw">class</span> <span class="ty">TweetEvaluation</span>(BaseModel):
+    evaluation: Literal[<span class="str">"approved"</span>, <span class="str">"needs_improvement"</span>] = Field(
+        ..., description=<span class="str">"Final evaluation verdict"</span>
+    )
+    feedback: <span class="ty">str</span> = Field(
+        ..., description=<span class="str">"Constructive feedback for the tweet"</span>
+    )
+
+structured_evaluator_llm = evaluator_llm.with_structured_output(TweetEvaluation)</code></pre>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- SECTION 4: Node Functions -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-num blue">04</div>
+                <h2>Node Functions</h2>
+            </div>
+
+            <div class="card">
+                <h3>generate_tweet — LLM: gpt-4o</h3>
+                <pre><code><span class="kw">def</span> <span class="fn">generate_tweet</span>(state: TweetState):
+    messages = [
+        SystemMessage(content=<span class="str">"You are a funny and clever Twitter/X influencer."</span>),
+        HumanMessage(content=<span class="str">f"""
+Write a short, original, and hilarious tweet on the topic: "{state['topic']}".
+Rules:
+- Do NOT use question-answer format.
+- Max 280 characters.
+- Use observational humor, irony, sarcasm, or cultural references.
+- Think in meme logic, punchlines, or relatable takes.
+- Use simple, day to day english"""</span>)
+    ]
+    response = generator_llm.invoke(messages).content
+    <span class="kw">return</span> {<span class="str">'tweet'</span>: response, <span class="str">'tweet_history'</span>: [response]}  <span class="cm"># [response] appends to list</span></code></pre>
+            </div>
+
+            <div class="card">
+                <h3>evaluate_tweet — LLM: gpt-4o-mini (structured output)</h3>
+                <pre><code><span class="kw">def</span> <span class="fn">evaluate_tweet</span>(state: TweetState):
+    messages = [
+        SystemMessage(content=<span class="str">"You are a ruthless, no-laugh-given Twitter critic."</span>),
+        HumanMessage(content=<span class="str">f"""
+Evaluate the following tweet: "{state['tweet']}"
+
+Criteria:
+1. Originality  - Is this fresh?
+2. Humor        - Did it make you smile?
+3. Punchiness   - Is it short and scroll-stopping?
+4. Virality     - Would people retweet it?
+5. Format       - Well-formed, under 280 chars?
+
+Auto-reject if:
+- Written in Q&A format
+- Exceeds 280 characters
+- Setup-punchline joke format
+
+Respond ONLY as structured JSON:
+- evaluation: "approved" or "needs_improvement"
+- feedback: One paragraph on strengths and weaknesses"""</span>)
+    ]
+    response = structured_evaluator_llm.invoke(messages)
+    <span class="kw">return</span> {<span class="str">'evaluation'</span>: response.evaluation, <span class="str">'feedback'</span>: response.feedback}</code></pre>
+            </div>
+
+            <div class="card">
+                <h3>optimize_tweet — LLM: gpt-4o</h3>
+                <pre><code><span class="kw">def</span> <span class="fn">optimize_tweet</span>(state: TweetState):
+    messages = [
+        SystemMessage(content=<span class="str">"You punch up tweets for virality and humor based on given feedback."</span>),
+        HumanMessage(content=<span class="str">f"""
+Improve the tweet based on this feedback:
+"{state['feedback']}"
+
+Topic: "{state['topic']}"
+Original Tweet:
+{state['tweet']}
+
+Re-write as short, viral-worthy tweet. Avoid Q&A style. Under 280 chars."""</span>)
+    ]
+    response  = optimizer_llm.invoke(messages).content
+    iteration = state[<span class="str">'iteration'</span>] + <span class="num">1</span>
+    <span class="kw">return</span> {<span class="str">'tweet'</span>: response, <span class="str">'iteration'</span>: iteration, <span class="str">'tweet_history'</span>: [response]}</code></pre>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- SECTION 5: Routing + Graph Build -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-num">05</div>
+                <h2>Routing Function + Graph Build</h2>
+            </div>
+
+            <div class="card">
+                <h3>route_evaluation — Max Iteration Guard</h3>
+                <pre><code><span class="kw">def</span> <span class="fn">route_evaluation</span>(state: TweetState):
+    <span class="cm"># Exit if approved OR if we've hit the iteration cap</span>
+    <span class="kw">if</span> state[<span class="str">'evaluation'</span>] == <span class="str">'approved'</span> <span class="kw">or</span> state[<span class="str">'iteration'</span>] >= state[<span class="str">'max_iteration'</span>]:
+        <span class="kw">return</span> <span class="str">'approved'</span>
+    <span class="kw">else</span>:
+        <span class="kw">return</span> <span class="str">'needs_improvement'</span></code></pre>
+                <div class="highlight orange" style="margin-top:10px;">
+                    <p><strong>Max iteration guard</strong> prevents infinite loops. Even if the evaluator always says
+                        "needs_improvement", the workflow exits after <code>max_iteration</code> attempts.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="orange">New API — add_conditional_edges with Mapping Dict</h3>
+                <pre><code>graph = StateGraph(TweetState)
+
+graph.add_node(<span class="str">'generate'</span>,  generate_tweet)
+graph.add_node(<span class="str">'evaluate'</span>,  evaluate_tweet)
+graph.add_node(<span class="str">'optimize'</span>,  optimize_tweet)
+
+graph.add_edge(START, <span class="str">'generate'</span>)
+graph.add_edge(<span class="str">'generate'</span>, <span class="str">'evaluate'</span>)
+
+<span class="cm"># 3-argument version: explicit mapping dict</span>
+graph.add_conditional_edges(
+    <span class="str">'evaluate'</span>,
+    route_evaluation,
+    {<span class="str">'approved'</span>: END, <span class="str">'needs_improvement'</span>: <span class="str">'optimize'</span>}  <span class="cm"># 🔑 mapping dict</span>
+)
+
+graph.add_edge(<span class="str">'optimize'</span>, <span class="str">'evaluate'</span>)  <span class="cm"># 🔁 loop-back edge — creates the cycle</span>
+
+workflow = graph.compile()</code></pre>
+            </div>
+
+            <div class="highlight green">
+                <p><strong>The loop-back edge</strong> <code>graph.add_edge('optimize', 'evaluate')</code> is what makes
+                    the workflow iterative. After optimization, the new tweet is immediately re-evaluated — this cycle
+                    repeats until approved or max_iteration is reached.</p>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- SECTION 6: Key APIs -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-num orange">06</div>
+                <h2>Key APIs &amp; Concepts Summary</h2>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>API / Concept</th>
+                            <th>Purpose</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>add_conditional_edges(n, fn, dict)</td>
+                            <td>
+                                <p>3-arg version maps condition return values → explicit node names or END using a
+                                    Python dict.</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>add_edge('optimize', 'evaluate')</td>
+                            <td>
+                                <p>Loop-back edge — creates the iterative cycle. The graph is no longer a pure DAG.</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>iteration + max_iteration</td>
+                            <td>
+                                <p>Counter in state tracks how many optimization cycles have run. Guard prevents
+                                    infinite loops.</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Annotated[list[str], operator.add]</td>
+                            <td>
+                                <p>Reducer annotation — each state update appends to the list instead of overwriting.
+                                    Used for history.</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Multiple specialized LLMs</td>
+                            <td>
+                                <p>Different models for different tasks: gpt-4o for generation, gpt-4o-mini for fast
+                                    evaluation, gpt-4o for optimization.</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>with_structured_output(Schema)</td>
+                            <td>
+                                <p>Constrains evaluator LLM to return TweetEvaluation Pydantic model — ensures clean
+                                    evaluation + feedback.</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- SECTION 7: Pattern -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-num">07</div>
+                <h2>Iterative Workflow Recipe</h2>
+            </div>
+            <div class="card">
+                <h3>Reusable Pattern</h3>
+                <pre><code><span class="cm"># 1. State with iteration guard</span>
+<span class="kw">class</span> <span class="ty">MyState</span>(TypedDict):
+    output:        <span class="ty">str</span>
+    evaluation:    Literal[<span class="str">"approved"</span>, <span class="str">"needs_improvement"</span>]
+    iteration:     <span class="ty">int</span>
+    max_iteration: <span class="ty">int</span>
+    history:       Annotated[list[<span class="ty">str</span>], operator.add]  <span class="cm"># append-only list</span>
+
+<span class="cm"># 2. Three nodes: generate → evaluate → optimize</span>
+<span class="kw">def</span> <span class="fn">generate</span>(state): ...
+<span class="kw">def</span> <span class="fn">evaluate</span>(state): ...   <span class="cm"># uses structured LLM output</span>
+<span class="kw">def</span> <span class="fn">optimize</span>(state): ...   <span class="cm"># increments state['iteration']</span>
+
+<span class="cm"># 3. Routing with max iteration guard</span>
+<span class="kw">def</span> <span class="fn">route</span>(state: MyState):
+    <span class="kw">if</span> state[<span class="str">'evaluation'</span>] == <span class="str">'approved'</span> <span class="kw">or</span> state[<span class="str">'iteration'</span>] >= state[<span class="str">'max_iteration'</span>]:
+        <span class="kw">return</span> <span class="str">'approved'</span>
+    <span class="kw">return</span> <span class="str">'needs_improvement'</span>
+
+<span class="cm"># 4. Build graph with loop-back</span>
+graph = StateGraph(MyState)
+graph.add_node(<span class="str">'generate'</span>, generate)
+graph.add_node(<span class="str">'evaluate'</span>, evaluate)
+graph.add_node(<span class="str">'optimize'</span>, optimize)
+graph.add_edge(START, <span class="str">'generate'</span>)
+graph.add_edge(<span class="str">'generate'</span>, <span class="str">'evaluate'</span>)
+graph.add_conditional_edges(<span class="str">'evaluate'</span>, route, {<span class="str">'approved'</span>: END, <span class="str">'needs_improvement'</span>: <span class="str">'optimize'</span>})
+graph.add_edge(<span class="str">'optimize'</span>, <span class="str">'evaluate'</span>)  <span class="cm"># 🔁 loop-back</span>
+workflow = graph.compile()
+
+<span class="cm"># 5. Invoke with initial state</span>
+workflow.invoke({<span class="str">'topic'</span>: <span class="str">'AI'</span>, <span class="str">'iteration'</span>: <span class="num">0</span>, <span class="str">'max_iteration'</span>: <span class="num">3</span>, <span class="str">'history'</span>: []})</code></pre>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>

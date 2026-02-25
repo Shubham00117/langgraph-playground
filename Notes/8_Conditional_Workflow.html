@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conditional Workflows in LangGraph</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0d0f14;
+            --surface: #13161e;
+            --surface2: #1a1e2a;
+            --border: #252a38;
+            --accent: #7c6af7;
+            --accent2: #4fd9a4;
+            --accent3: #f7a04f;
+            --red: #f76f6f;
+            --text: #e2e6f3;
+            --muted: #7a8099;
+            --code-bg: #0a0c12;
+            --tag-bg: rgba(124, 106, 247, 0.12);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Syne', sans-serif;
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(124, 106, 247, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(124, 106, 247, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 940px;
+            margin: 0 auto;
+            padding: 60px 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            margin-bottom: 52px;
+            animation: fadeDown 0.6s ease both;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--tag-bg);
+            border: 1px solid rgba(124, 106, 247, 0.3);
+            color: var(--accent);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            padding: 5px 14px;
+            border-radius: 100px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 800;
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+            margin-bottom: 14px;
+        }
+
+        h1 span {
+            color: var(--accent);
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .section {
+            margin-bottom: 52px;
+            animation: fadeUp 0.5s ease both;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+
+        .section-num {
+            width: 32px;
+            height: 32px;
+            background: var(--accent);
+            color: #fff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .section-num.green {
+            background: var(--accent2);
+            color: #0d0f14;
+        }
+
+        .section-num.orange {
+            background: var(--accent3);
+            color: #0d0f14;
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: -0.01em;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .card:hover {
+            border-color: rgba(124, 106, 247, 0.3);
+        }
+
+        .card h3 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--accent2);
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card h3::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent2);
+            flex-shrink: 0;
+        }
+
+        .card p {
+            color: #b0b8cc;
+            font-size: 0.88rem;
+            line-height: 1.65;
+        }
+
+        pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            border-radius: 8px;
+            padding: 16px 20px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+            color: #c9d1e8;
+            line-height: 1.85;
+        }
+
+        .kw {
+            color: #7c6af7
+        }
+
+        .fn {
+            color: #4fd9a4
+        }
+
+        .str {
+            color: #f7c04f
+        }
+
+        .cm {
+            color: #4a5270;
+            font-style: italic
+        }
+
+        .ty {
+            color: #f7a04f
+        }
+
+        .num {
+            color: #f7a04f
+        }
+
+        .highlight {
+            background: rgba(124, 106, 247, 0.07);
+            border: 1px solid rgba(124, 106, 247, 0.2);
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin: 12px 0;
+        }
+
+        .highlight p {
+            color: #c5cce6;
+            font-size: 0.88rem;
+        }
+
+        .highlight strong {
+            color: var(--accent);
+        }
+
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border), transparent);
+            margin: 52px 0;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: var(--surface2);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-align: left;
+            padding: 12px 18px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 11px 18px;
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border);
+            vertical-align: top;
+        }
+
+        td:first-child {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent2);
+            font-size: 0.78rem;
+            white-space: nowrap;
+        }
+
+        td p {
+            color: #b0b8cc;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.015);
+        }
+
+        .flowchart-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 32px 20px;
+            margin-bottom: 14px;
+            display: flex;
+            justify-content: center;
+            overflow-x: auto;
+        }
+
+        .flowchart-wrap svg {
+            overflow: visible;
+        }
+
+        @keyframes fadeDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .section:nth-child(1) {
+            animation-delay: 0.1s
+        }
+
+        .section:nth-child(2) {
+            animation-delay: 0.2s
+        }
+
+        .section:nth-child(3) {
+            animation-delay: 0.3s
+        }
+
+        .section:nth-child(4) {
+            animation-delay: 0.4s
+        }
+
+        .section:nth-child(5) {
+            animation-delay: 0.5s
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <!-- HEADER -->
+        <header>
+            <div class="badge">Video 7 · CampusX · Agentic AI</div>
+            <h1>Conditional Workflows<br>in <span>LangGraph</span></h1>
+            <p class="subtitle">// routing · conditions · structured LLM output</p>
+        </header>
+
+        <!-- SECTION 1 -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-num">01</div>
+                <h2>What is a Conditional Workflow?</h2>
+            </div>
+            <div class="card">
+                <p>A conditional workflow routes execution to <strong style="color:var(--accent)">different
+                        nodes</strong> based on a condition — essentially <strong style="color:var(--accent)">if-else
+                        logic</strong> embedded into the graph. After a node runs, a <strong
+                        style="color:var(--accent2)">condition function</strong> inspects the state and returns the name
+                    of the next node to execute.</p>
+            </div>
+            <div class="highlight">
+                <p>Key API: <strong>graph.add_conditional_edges(node_name, condition_fn)</strong> — the condition
+                    function must return a <strong>Literal[...]</strong> string matching a registered node name.
+                    Visualized as <strong>dashed arrows</strong> in the compiled graph.</p>
+            </div>
+        </div>
+
+        <!-- SECTION 2 -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-num">02</div>
+                <h2>Example 1 — Quadratic Equation Workflow</h2>
+            </div>
+
+            <div class="card">
+                <p>For <code>ax² + bx + c = 0</code>, discriminant <code>d = b² − 4ac</code> determines root type:&nbsp;
+                    <strong style="color:var(--accent2)">d &gt; 0</strong> → 2 real roots &nbsp;|&nbsp;
+                    <strong style="color:var(--accent3)">d = 0</strong> → 1 repeated root &nbsp;|&nbsp;
+                    <strong style="color:var(--red)">d &lt; 0</strong> → no real roots
+                </p>
+            </div>
+
+            <!-- FLOWCHART 1 -->
+            <div class="flowchart-wrap">
+                <svg width="660" height="660" viewBox="0 0 660 660" xmlns="http://www.w3.org/2000/svg"
+                    font-family="'JetBrains Mono', monospace">
+                    <defs>
+                        <marker id="mG" markerWidth="9" markerHeight="6" refX="8" refY="3" orient="auto">
+                            <polygon points="0 0,9 3,0 6" fill="#4fd9a4" />
+                        </marker>
+                        <marker id="mP" markerWidth="9" markerHeight="6" refX="8" refY="3" orient="auto">
+                            <polygon points="0 0,9 3,0 6" fill="#7c6af7" />
+                        </marker>
+                        <marker id="mO" markerWidth="9" markerHeight="6" refX="8" refY="3" orient="auto">
+                            <polygon points="0 0,9 3,0 6" fill="#f7a04f" />
+                        </marker>
+                        <marker id="mR" markerWidth="9" markerHeight="6" refX="8" refY="3" orient="auto">
+                            <polygon points="0 0,9 3,0 6" fill="#f76f6f" />
+                        </marker>
+                        <marker id="mPd" markerWidth="9" markerHeight="6" refX="8" refY="3" orient="auto">
+                            <polygon points="0 0,9 3,0 6" fill="#7c6af7" />
+                        </marker>
+                    </defs>
+
+                    <!-- NODE: __start__ (pill) -->
+                    <rect x="205" y="20" width="250" height="46" rx="23" fill="#0f1218" stroke="#4fd9a4"
+                        stroke-width="2.5" />
+                    <text x="330" y="48" text-anchor="middle" fill="#4fd9a4" font-size="14"
+                        font-weight="700">__start__</text>
+
+                    <!-- ARROW: start -> show_equation -->
+                    <line x1="330" y1="66" x2="330" y2="95" stroke="#4fd9a4" stroke-width="2" marker-end="url(#mG)" />
+
+                    <!-- NODE: show_equation -->
+                    <rect x="185" y="97" width="290" height="52" rx="10" fill="#13161e" stroke="#7c6af7"
+                        stroke-width="2" />
+                    <text x="330" y="119" text-anchor="middle" fill="#e2e6f3" font-size="13">show_equation</text>
+                    <text x="330" y="138" text-anchor="middle" fill="#555e7a" font-size="10">→ formats ax²+bx+c
+                        string</text>
+
+                    <!-- ARROW: show_equation -> calculate_discriminant -->
+                    <line x1="330" y1="149" x2="330" y2="178" stroke="#7c6af7" stroke-width="2" marker-end="url(#mP)" />
+
+                    <!-- NODE: calculate_discriminant -->
+                    <rect x="155" y="180" width="350" height="52" rx="10" fill="#13161e" stroke="#7c6af7"
+                        stroke-width="2" />
+                    <text x="330" y="202" text-anchor="middle" fill="#e2e6f3"
+                        font-size="13">calculate_discriminant</text>
+                    <text x="330" y="220" text-anchor="middle" fill="#555e7a" font-size="10">→ computes b²−4ac</text>
+
+                    <!-- ARROW: calc -> diamond (dashed = conditional) -->
+                    <line x1="330" y1="232" x2="330" y2="261" stroke="#f7a04f" stroke-width="2" stroke-dasharray="6,3"
+                        marker-end="url(#mO)" />
+                    <rect x="270" y="238" width="94" height="16" rx="4" fill="#0d0f14" />
+                    <text x="317" y="250" text-anchor="middle" fill="#f7a04f" font-size="9">conditional edge</text>
+
+                    <!-- DIAMOND: check_condition -->
+                    <polygon points="330,263 450,313 330,363 210,313" fill="#1a1e2a" stroke="#f7a04f"
+                        stroke-width="2.5" />
+                    <text x="330" y="307" text-anchor="middle" fill="#f7c04f" font-size="12"
+                        font-weight="600">check_condition</text>
+                    <text x="330" y="325" text-anchor="middle" fill="#f7a04f" font-size="10">(discriminant)</text>
+
+                    <!-- BRANCH LEFT: d < 0 -->
+                    <line x1="210" y1="313" x2="75" y2="313" stroke="#f76f6f" stroke-width="1.8"
+                        stroke-dasharray="5,3" />
+                    <line x1="75" y1="313" x2="75" y2="428" stroke="#f76f6f" stroke-width="1.8" stroke-dasharray="5,3"
+                        marker-end="url(#mR)" />
+                    <rect x="78" y="296" width="54" height="16" rx="3" fill="#0d0f14" />
+                    <text x="105" y="308" text-anchor="middle" fill="#f76f6f" font-size="10">d &lt; 0</text>
+
+                    <!-- BRANCH CENTER: d = 0 -->
+                    <line x1="330" y1="363" x2="330" y2="428" stroke="#f7a04f" stroke-width="1.8" stroke-dasharray="5,3"
+                        marker-end="url(#mO)" />
+                    <rect x="336" y="382" width="42" height="16" rx="3" fill="#0d0f14" />
+                    <text x="357" y="394" text-anchor="middle" fill="#f7a04f" font-size="10">d = 0</text>
+
+                    <!-- BRANCH RIGHT: d > 0 -->
+                    <line x1="450" y1="313" x2="585" y2="313" stroke="#4fd9a4" stroke-width="1.8"
+                        stroke-dasharray="5,3" />
+                    <line x1="585" y1="313" x2="585" y2="428" stroke="#4fd9a4" stroke-width="1.8" stroke-dasharray="5,3"
+                        marker-end="url(#mG)" />
+                    <rect x="500" y="296" width="54" height="16" rx="3" fill="#0d0f14" />
+                    <text x="527" y="308" text-anchor="middle" fill="#4fd9a4" font-size="10">d &gt; 0</text>
+
+                    <!-- NODE: no_real_roots -->
+                    <rect x="14" y="430" width="122" height="52" rx="9" fill="#13161e" stroke="#f76f6f"
+                        stroke-width="2" />
+                    <text x="75" y="452" text-anchor="middle" fill="#f76f6f" font-size="11">no_real</text>
+                    <text x="75" y="468" text-anchor="middle" fill="#f76f6f" font-size="11">_roots</text>
+
+                    <!-- NODE: repeated_roots -->
+                    <rect x="210" y="430" width="240" height="52" rx="9" fill="#13161e" stroke="#f7a04f"
+                        stroke-width="2" />
+                    <text x="330" y="458" text-anchor="middle" fill="#f7a04f" font-size="12">repeated_roots</text>
+                    <text x="330" y="474" text-anchor="middle" fill="#555e7a" font-size="10">root = −b / 2a</text>
+
+                    <!-- NODE: real_roots -->
+                    <rect x="524" y="430" width="122" height="52" rx="9" fill="#13161e" stroke="#4fd9a4"
+                        stroke-width="2" />
+                    <text x="585" y="458" text-anchor="middle" fill="#4fd9a4" font-size="12">real_roots</text>
+                    <text x="585" y="474" text-anchor="middle" fill="#555e7a" font-size="10">r1, r2</text>
+
+                    <!-- CONVERGE to __end__ -->
+                    <line x1="75" y1="482" x2="75" y2="588" stroke="#f76f6f" stroke-width="1.5" />
+                    <line x1="75" y1="588" x2="280" y2="588" stroke="#f76f6f" stroke-width="1.5" />
+                    <line x1="330" y1="482" x2="330" y2="588" stroke="#f7a04f" stroke-width="1.5" />
+                    <line x1="585" y1="482" x2="585" y2="588" stroke="#4fd9a4" stroke-width="1.5" />
+                    <line x1="585" y1="588" x2="380" y2="588" stroke="#4fd9a4" stroke-width="1.5" />
+                    <!-- merge dot -->
+                    <circle cx="330" cy="588" r="5" fill="#7c6af7" />
+                    <!-- down to end -->
+                    <line x1="330" y1="593" x2="330" y2="612" stroke="#7c6af7" stroke-width="2" marker-end="url(#mP)" />
+
+                    <!-- NODE: __end__ -->
+                    <rect x="205" y="614" width="250" height="42" rx="21" fill="#130d1f" stroke="#7c6af7"
+                        stroke-width="2.5" />
+                    <text x="330" y="641" text-anchor="middle" fill="#7c6af7" font-size="14"
+                        font-weight="700">__end__</text>
+
+                    <!-- LEGEND box -->
+                    <rect x="2" y="570" width="64" height="74" rx="7" fill="#13161e" stroke="#252a38" />
+                    <text x="11" y="584" fill="#7a8099" font-size="8" font-weight="700">LEGEND</text>
+                    <line x1="10" y1="594" x2="34" y2="594" stroke="#7c6af7" stroke-width="2" />
+                    <text x="37" y="598" fill="#b0b8cc" font-size="8">normal</text>
+                    <line x1="10" y1="610" x2="34" y2="610" stroke="#f7a04f" stroke-width="1.5"
+                        stroke-dasharray="4,2" />
+                    <text x="37" y="614" fill="#b0b8cc" font-size="8">cond.</text>
+                    <polygon points="10,626 14,620 18,626 14,632" fill="#1a1e2a" stroke="#f7a04f" stroke-width="1.5" />
+                    <text x="22" y="630" fill="#b0b8cc" font-size="8">decision</text>
+                </svg>
+            </div>
+
+            <div class="card">
+                <h3>State Schema</h3>
+                <pre><code><span class="kw">class</span> <span class="ty">QuadState</span>(TypedDict):
+    a: <span class="ty">int</span>;  b: <span class="ty">int</span>;  c: <span class="ty">int</span>     <span class="cm"># inputs</span>
+    equation:     <span class="ty">str</span>              <span class="cm"># set by show_equation</span>
+    discriminant: <span class="ty">float</span>            <span class="cm"># set by calculate_discriminant</span>
+    result:       <span class="ty">str</span>              <span class="cm"># set by whichever branch runs</span></code></pre>
+            </div>
+
+            <div class="card">
+                <h3>Node Functions</h3>
+                <pre><code><span class="kw">def</span> <span class="fn">show_equation</span>(state: QuadState):
+    eq = <span class="str">f'{state["a"]}x² + {state["b"]}x + {state["c"]}'</span>
+    <span class="kw">return</span> {<span class="str">'equation'</span>: eq}
+
+<span class="kw">def</span> <span class="fn">calculate_discriminant</span>(state: QuadState):
+    d = state[<span class="str">"b"</span>]**<span class="num">2</span> - (<span class="num">4</span> * state[<span class="str">"a"</span>] * state[<span class="str">"c"</span>])
+    <span class="kw">return</span> {<span class="str">'discriminant'</span>: d}
+
+<span class="kw">def</span> <span class="fn">real_roots</span>(state: QuadState):
+    r1 = (-state[<span class="str">"b"</span>] + state[<span class="str">"discriminant"</span>]**<span class="num">0.5</span>) / (<span class="num">2</span>*state[<span class="str">"a"</span>])
+    r2 = (-state[<span class="str">"b"</span>] - state[<span class="str">"discriminant"</span>]**<span class="num">0.5</span>) / (<span class="num">2</span>*state[<span class="str">"a"</span>])
+    <span class="kw">return</span> {<span class="str">'result'</span>: <span class="str">f'Roots: {r1} and {r2}'</span>}
+
+<span class="kw">def</span> <span class="fn">repeated_roots</span>(state: QuadState):
+    r = -state[<span class="str">"b"</span>] / (<span class="num">2</span> * state[<span class="str">"a"</span>])
+    <span class="kw">return</span> {<span class="str">'result'</span>: <span class="str">f'Only repeating root: {r}'</span>}
+
+<span class="kw">def</span> <span class="fn">no_real_roots</span>(state: QuadState):
+    <span class="kw">return</span> {<span class="str">'result'</span>: <span class="str">'No real roots'</span>}</code></pre>
+            </div>
+
+            <div class="card">
+                <h3>Condition Function + Graph Build</h3>
+                <pre><code><span class="kw">def</span> <span class="fn">check_condition</span>(state: QuadState) -> Literal[<span class="str">"real_roots"</span>, <span class="str">"repeated_roots"</span>, <span class="str">"no_real_roots"</span>]:
+    <span class="kw">if</span>   state[<span class="str">'discriminant'</span>] > <span class="num">0</span>:  <span class="kw">return</span> <span class="str">"real_roots"</span>
+    <span class="kw">elif</span> state[<span class="str">'discriminant'</span>] == <span class="num">0</span>: <span class="kw">return</span> <span class="str">"repeated_roots"</span>
+    <span class="kw">else</span>:                             <span class="kw">return</span> <span class="str">"no_real_roots"</span>
+
+graph = StateGraph(QuadState)
+graph.add_node(<span class="str">'show_equation'</span>,        show_equation)
+graph.add_node(<span class="str">'calculate_discriminant'</span>, calculate_discriminant)
+graph.add_node(<span class="str">'real_roots'</span>,            real_roots)
+graph.add_node(<span class="str">'repeated_roots'</span>,        repeated_roots)
+graph.add_node(<span class="str">'no_real_roots'</span>,         no_real_roots)
+
+graph.add_edge(START, <span class="str">'show_equation'</span>)
+graph.add_edge(<span class="str">'show_equation'</span>, <span class="str">'calculate_discriminant'</span>)
+graph.add_conditional_edges(<span class="str">'calculate_discriminant'</span>, check_condition) <span class="cm"># key line</span>
+graph.add_edge(<span class="str">'real_roots'</span>,    END)
+graph.add_edge(<span class="str">'repeated_roots'</span>, END)
+graph.add_edge(<span class="str">'no_real_roots'</span>,  END)
+workflow = graph.compile()</code></pre>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- SECTION 3 -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-num green">03</div>
+                <h2>Example 2 — LLM Review Handling Workflow</h2>
+            </div>
+
+            <div class="card">
+                <p>An LLM-powered workflow that reads a customer review, detects sentiment, and either <strong
+                        style="color:var(--accent2)">thanks the customer</strong> (positive) or <strong
+                        style="color:var(--red)">diagnoses the issue</strong> and drafts an empathetic support reply
+                    (negative). Uses <strong style="color:var(--accent)">structured LLM output</strong> via Pydantic
+                    schemas.</p>
+            </div>
+
+            <!-- FLOWCHART 2 -->
+            <div class="flowchart-wrap">
+                <svg width="660" height="700" viewBox="0 0 660 700" xmlns="http://www.w3.org/2000/svg"
+                    font-family="'JetBrains Mono', monospace">
+                    <defs>
+                        <marker id="mg2" markerWidth="9" markerHeight="6" refX="8" refY="3" orient="auto">
+                            <polygon points="0 0,9 3,0 6" fill="#4fd9a4" />
+                        </marker>
+                        <marker id="mp2" markerWidth="9" markerHeight="6" refX="8" refY="3" orient="auto">
+                            <polygon points="0 0,9 3,0 6" fill="#7c6af7" />
+                        </marker>
+                        <marker id="mo2" markerWidth="9" markerHeight="6" refX="8" refY="3" orient="auto">
+                            <polygon points="0 0,9 3,0 6" fill="#f7a04f" />
+                        </marker>
+                        <marker id="mr2" markerWidth="9" markerHeight="6" refX="8" refY="3" orient="auto">
+                            <polygon points="0 0,9 3,0 6" fill="#f76f6f" />
+                        </marker>
+                    </defs>
+
+                    <!-- __start__ -->
+                    <rect x="205" y="20" width="250" height="46" rx="23" fill="#0f1218" stroke="#4fd9a4"
+                        stroke-width="2.5" />
+                    <text x="330" y="48" text-anchor="middle" fill="#4fd9a4" font-size="14"
+                        font-weight="700">__start__</text>
+
+                    <line x1="330" y1="66" x2="330" y2="95" stroke="#4fd9a4" stroke-width="2" marker-end="url(#mg2)" />
+                    <rect x="305" y="72" width="62" height="14" rx="3" fill="#0d0f14" />
+                    <text x="336" y="83" text-anchor="middle" fill="#555e7a" font-size="9">review str</text>
+
+                    <!-- find_sentiment -->
+                    <rect x="175" y="97" width="310" height="52" rx="10" fill="#13161e" stroke="#7c6af7"
+                        stroke-width="2" />
+                    <text x="330" y="119" text-anchor="middle" fill="#e2e6f3" font-size="13">find_sentiment</text>
+                    <text x="330" y="138" text-anchor="middle" fill="#555e7a" font-size="10">LLM → SentimentSchema →
+                        "positive"/"negative"</text>
+
+                    <!-- dashed arrow to diamond -->
+                    <line x1="330" y1="149" x2="330" y2="178" stroke="#f7a04f" stroke-width="2" stroke-dasharray="5,3"
+                        marker-end="url(#mo2)" />
+                    <rect x="268" y="154" width="100" height="14" rx="3" fill="#0d0f14" />
+                    <text x="318" y="165" text-anchor="middle" fill="#f7a04f" font-size="9">conditional edge</text>
+
+                    <!-- DIAMOND: check_sentiment -->
+                    <polygon points="330,180 455,232 330,284 205,232" fill="#1a1e2a" stroke="#f7a04f"
+                        stroke-width="2.5" />
+                    <text x="330" y="226" text-anchor="middle" fill="#f7c04f" font-size="12"
+                        font-weight="600">check_sentiment</text>
+                    <text x="330" y="244" text-anchor="middle" fill="#f7a04f" font-size="10">(sentiment)</text>
+
+                    <!-- RIGHT: positive -->
+                    <line x1="455" y1="232" x2="585" y2="232" stroke="#4fd9a4" stroke-width="1.8"
+                        stroke-dasharray="5,3" />
+                    <line x1="585" y1="232" x2="585" y2="340" stroke="#4fd9a4" stroke-width="1.8" stroke-dasharray="5,3"
+                        marker-end="url(#mg2)" />
+                    <rect x="487" y="218" width="62" height="14" rx="3" fill="#0d0f14" />
+                    <text x="518" y="229" text-anchor="middle" fill="#4fd9a4" font-size="10">positive</text>
+
+                    <!-- LEFT: negative -->
+                    <line x1="205" y1="232" x2="75" y2="232" stroke="#f76f6f" stroke-width="1.8"
+                        stroke-dasharray="5,3" />
+                    <line x1="75" y1="232" x2="75" y2="340" stroke="#f76f6f" stroke-width="1.8" stroke-dasharray="5,3"
+                        marker-end="url(#mr2)" />
+                    <rect x="100" y="218" width="62" height="14" rx="3" fill="#0d0f14" />
+                    <text x="131" y="229" text-anchor="middle" fill="#f76f6f" font-size="10">negative</text>
+
+                    <!-- positive_response -->
+                    <rect x="470" y="342" width="180" height="56" rx="10" fill="#13161e" stroke="#4fd9a4"
+                        stroke-width="2" />
+                    <text x="560" y="364" text-anchor="middle" fill="#4fd9a4" font-size="12">positive_response</text>
+                    <text x="560" y="381" text-anchor="middle" fill="#555e7a" font-size="10">LLM warm thank-you</text>
+                    <text x="560" y="393" text-anchor="middle" fill="#555e7a" font-size="10">+ feedback request</text>
+
+                    <!-- run_diagnosis -->
+                    <rect x="10" y="342" width="130" height="56" rx="10" fill="#13161e" stroke="#f76f6f"
+                        stroke-width="2" />
+                    <text x="75" y="362" text-anchor="middle" fill="#f76f6f" font-size="12">run_diagnosis</text>
+                    <text x="75" y="378" text-anchor="middle" fill="#555e7a" font-size="10">LLM →</text>
+                    <text x="75" y="392" text-anchor="middle" fill="#555e7a" font-size="10">DiagnosisSchema</text>
+
+                    <!-- run_diagnosis -> negative_response -->
+                    <line x1="75" y1="398" x2="75" y2="470" stroke="#f76f6f" stroke-width="2" marker-end="url(#mr2)" />
+                    <rect x="78" y="424" width="84" height="14" rx="3" fill="#0d0f14" />
+                    <text x="120" y="435" text-anchor="middle" fill="#555e7a" font-size="9">diagnosis dict</text>
+
+                    <!-- negative_response -->
+                    <rect x="10" y="472" width="130" height="56" rx="10" fill="#13161e" stroke="#f7a04f"
+                        stroke-width="2" />
+                    <text x="75" y="492" text-anchor="middle" fill="#f7a04f" font-size="11">negative_response</text>
+                    <text x="75" y="508" text-anchor="middle" fill="#555e7a" font-size="10">LLM empathetic</text>
+                    <text x="75" y="522" text-anchor="middle" fill="#555e7a" font-size="10">support reply</text>
+
+                    <!-- CONVERGE all to __end__ -->
+                    <!-- negative_response -> bottom -->
+                    <line x1="75" y1="528" x2="75" y2="626" stroke="#f7a04f" stroke-width="1.5" />
+                    <line x1="75" y1="626" x2="278" y2="626" stroke="#f7a04f" stroke-width="1.5" />
+                    <!-- positive_response -> bottom -->
+                    <line x1="560" y1="398" x2="560" y2="626" stroke="#4fd9a4" stroke-width="1.5" />
+                    <line x1="560" y1="626" x2="382" y2="626" stroke="#4fd9a4" stroke-width="1.5" />
+                    <!-- merge dot -->
+                    <circle cx="330" cy="626" r="5" fill="#7c6af7" />
+                    <!-- down to end -->
+                    <line x1="330" y1="631" x2="330" y2="651" stroke="#7c6af7" stroke-width="2"
+                        marker-end="url(#mp2)" />
+
+                    <!-- __end__ -->
+                    <rect x="205" y="653" width="250" height="42" rx="21" fill="#130d1f" stroke="#7c6af7"
+                        stroke-width="2.5" />
+                    <text x="330" y="679" text-anchor="middle" fill="#7c6af7" font-size="14"
+                        font-weight="700">__end__</text>
+
+                    <!-- LEGEND -->
+                    <rect x="230" y="296" width="200" height="38" rx="7" fill="#13161e" stroke="#252a38" />
+                    <text x="248" y="311" fill="#7a8099" font-size="9" font-weight="700">LEGEND</text>
+                    <line x1="248" y1="322" x2="264" y2="322" stroke="#7c6af7" stroke-width="2" />
+                    <text x="268" y="326" fill="#b0b8cc" font-size="9">normal edge</text>
+                    <line x1="320" y1="322" x2="336" y2="322" stroke="#f7a04f" stroke-width="1.5"
+                        stroke-dasharray="4,2" />
+                    <text x="340" y="326" fill="#b0b8cc" font-size="9">conditional edge</text>
+                </svg>
+            </div>
+
+            <div class="card">
+                <h3>Pydantic Schemas for Structured LLM Output</h3>
+                <pre><code><span class="kw">class</span> <span class="ty">SentimentSchema</span>(BaseModel):
+    sentiment: Literal[<span class="str">"positive"</span>, <span class="str">"negative"</span>] = Field(description=<span class="str">'Sentiment of the review'</span>)
+
+<span class="kw">class</span> <span class="ty">DiagnosisSchema</span>(BaseModel):
+    issue_type: Literal[<span class="str">"UX"</span>,<span class="str">"Performance"</span>,<span class="str">"Bug"</span>,<span class="str">"Support"</span>,<span class="str">"Other"</span>] = Field(description=<span class="str">'Issue category'</span>)
+    tone:       Literal[<span class="str">"angry"</span>,<span class="str">"frustrated"</span>,<span class="str">"disappointed"</span>,<span class="str">"calm"</span>]       = Field(description=<span class="str">'Emotional tone'</span>)
+    urgency:    Literal[<span class="str">"low"</span>,<span class="str">"medium"</span>,<span class="str">"high"</span>]                             = Field(description=<span class="str">'Urgency level'</span>)
+
+<span class="cm"># One structured model per task</span>
+structured_model  = model.with_structured_output(SentimentSchema)
+structured_model2 = model.with_structured_output(DiagnosisSchema)</code></pre>
+            </div>
+
+            <div class="card">
+                <h3>Node Functions</h3>
+                <pre><code><span class="kw">def</span> <span class="fn">find_sentiment</span>(state: ReviewState):
+    prompt = <span class="str">f'Find sentiment of: \n{state["review"]}'</span>
+    sentiment = structured_model.invoke(prompt).sentiment
+    <span class="kw">return</span> {<span class="str">'sentiment'</span>: sentiment}
+
+<span class="kw">def</span> <span class="fn">positive_response</span>(state: ReviewState):
+    prompt = <span class="str">f"""Write a warm thank-you for this review:
+    "{state['review']}"
+Also ask user to leave feedback on our website."""</span>
+    <span class="kw">return</span> {<span class="str">'response'</span>: model.invoke(prompt).content}
+
+<span class="kw">def</span> <span class="fn">run_diagnosis</span>(state: ReviewState):
+    prompt = <span class="str">f"""Diagnose this negative review:
+{state['review']}
+Return issue_type, tone, and urgency."""</span>
+    response = structured_model2.invoke(prompt)
+    <span class="kw">return</span> {<span class="str">'diagnosis'</span>: response.model_dump()}  <span class="cm"># Pydantic → dict for state</span>
+
+<span class="kw">def</span> <span class="fn">negative_response</span>(state: ReviewState):
+    d = state[<span class="str">'diagnosis'</span>]
+    prompt = <span class="str">f"""You are a support assistant.
+User had a '{d['issue_type']}' issue, sounded '{d['tone']}', urgency '{d['urgency']}'.
+Write an empathetic, helpful resolution message."""</span>
+    <span class="kw">return</span> {<span class="str">'response'</span>: model.invoke(prompt).content}</code></pre>
+            </div>
+
+            <div class="card">
+                <h3>Condition Function + Graph Build</h3>
+                <pre><code><span class="kw">def</span> <span class="fn">check_sentiment</span>(state: ReviewState) -> Literal[<span class="str">"positive_response"</span>, <span class="str">"run_diagnosis"</span>]:
+    <span class="kw">if</span> state[<span class="str">'sentiment'</span>] == <span class="str">'positive'</span>: <span class="kw">return</span> <span class="str">'positive_response'</span>
+    <span class="kw">else</span>:                                  <span class="kw">return</span> <span class="str">'run_diagnosis'</span>
+
+graph = StateGraph(ReviewState)
+graph.add_node(<span class="str">'find_sentiment'</span>,    find_sentiment)
+graph.add_node(<span class="str">'positive_response'</span>, positive_response)
+graph.add_node(<span class="str">'run_diagnosis'</span>,     run_diagnosis)
+graph.add_node(<span class="str">'negative_response'</span>, negative_response)
+
+graph.add_edge(START, <span class="str">'find_sentiment'</span>)
+graph.add_conditional_edges(<span class="str">'find_sentiment'</span>, check_sentiment)  <span class="cm"># key line</span>
+graph.add_edge(<span class="str">'positive_response'</span>, END)
+graph.add_edge(<span class="str">'run_diagnosis'</span>,     <span class="str">'negative_response'</span>)
+graph.add_edge(<span class="str">'negative_response'</span>, END)
+workflow = graph.compile()</code></pre>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- SECTION 4 -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-num orange">04</div>
+                <h2>Key APIs &amp; Concepts Summary</h2>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>API / Concept</th>
+                            <th>Purpose</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>add_conditional_edges(node, fn)</td>
+                            <td>
+                                <p>Routes from a node to different next-nodes based on what the condition function
+                                    returns.</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Literal["a","b","c"]</td>
+                            <td>
+                                <p>Return type on condition functions — enforces only valid registered node names are
+                                    returned.</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>model.with_structured_output(Schema)</td>
+                            <td>
+                                <p>Constrains LLM response to a Pydantic schema. Returns a typed object instead of raw
+                                    text.</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>response.model_dump()</td>
+                            <td>
+                                <p>Converts Pydantic object → plain Python dict for storage in LangGraph's TypedDict
+                                    state.</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Diamond shape in flowchart</td>
+                            <td>
+                                <p>Represents the decision/condition point. Multiple dashed arrows exit — one per
+                                    possible route.</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Dashed arrows in graph viz</td>
+                            <td>
+                                <p>LangGraph visualizes conditional edges as dashed to distinguish them from normal
+                                    edges.</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- SECTION 5 -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-num">05</div>
+                <h2>Reusable Pattern</h2>
+            </div>
+            <div class="card">
+                <h3>Conditional Workflow Recipe</h3>
+                <pre><code><span class="cm"># 1. Define state</span>
+<span class="kw">class</span> <span class="ty">MyState</span>(TypedDict): ...
+
+<span class="cm"># 2. Write node functions (each returns partial state dict)</span>
+<span class="kw">def</span> <span class="fn">node_a</span>(state): ...
+<span class="kw">def</span> <span class="fn">node_b</span>(state): ...
+<span class="kw">def</span> <span class="fn">node_c</span>(state): ...
+
+<span class="cm"># 3. Write condition function — return type is Literal of node names</span>
+<span class="kw">def</span> <span class="fn">my_condition</span>(state: MyState) -> Literal[<span class="str">"node_b"</span>, <span class="str">"node_c"</span>]:
+    <span class="kw">if</span> some_check(state): <span class="kw">return</span> <span class="str">"node_b"</span>
+    <span class="kw">else</span>:                 <span class="kw">return</span> <span class="str">"node_c"</span>
+
+<span class="cm"># 4. Build and compile</span>
+graph = StateGraph(MyState)
+graph.add_node(<span class="str">"node_a"</span>, node_a)
+graph.add_node(<span class="str">"node_b"</span>, node_b)
+graph.add_node(<span class="str">"node_c"</span>, node_c)
+graph.add_edge(START, <span class="str">"node_a"</span>)
+graph.add_conditional_edges(<span class="str">"node_a"</span>, my_condition)  <span class="cm"># key line</span>
+graph.add_edge(<span class="str">"node_b"</span>, END)
+graph.add_edge(<span class="str">"node_c"</span>, END)
+workflow = graph.compile()</code></pre>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>
