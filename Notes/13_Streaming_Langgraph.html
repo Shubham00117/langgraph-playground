@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streaming in LangGraph — Notes</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@300;400;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #08080f;
+            --card: #0f0f1c;
+            --border: #1a1a2e;
+            --accent: #5e60ce;
+            --green: #00d9a0;
+            --yellow: #ffd166;
+            --blue: #48cae4;
+            --pink: #ef476f;
+            --text: #dde1f0;
+            --muted: #525270;
+            --code-bg: #070710;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            padding: 36px 20px 80px;
+            line-height: 1.65;
+        }
+
+        .page {
+            max-width: 860px;
+            margin: 0 auto;
+        }
+
+        /* HEADER */
+        .header {
+            margin-bottom: 44px;
+            padding-bottom: 28px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(94, 96, 206, .15);
+            border: 1px solid rgba(94, 96, 206, .4);
+            color: var(--accent);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            padding: 4px 12px;
+            border-radius: 99px;
+            margin-bottom: 14px;
+        }
+
+        h1 {
+            font-size: 36px;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 6px;
+        }
+
+        h1 span {
+            color: var(--accent);
+        }
+
+        .sub {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        /* SECTION */
+        .section {
+            margin-bottom: 36px;
+        }
+
+        .sec-label {
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sec-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* CARD */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin-bottom: 12px;
+        }
+
+        .card-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .card p {
+            font-size: 13.5px;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .card p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* DEF BOX */
+        .def {
+            background: rgba(94, 96, 206, .07);
+            border-left: 3px solid var(--accent);
+            border-radius: 0 8px 8px 0;
+            padding: 12px 16px;
+            font-size: 14px;
+            color: #b0b4d8;
+            margin-bottom: 12px;
+        }
+
+        /* WHY LIST */
+        .why-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .why-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 13.5px;
+            color: var(--muted);
+            padding: 8px 12px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .why-list li strong {
+            color: var(--text);
+        }
+
+        .num-dot {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        /* CODE */
+        pre {
+            background: var(--code-bg);
+            border: 1px solid #141428;
+            border-radius: 8px;
+            padding: 14px 18px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12.5px;
+            line-height: 1.8;
+            color: #a8b0d0;
+            margin-top: 10px;
+        }
+
+        .kw {
+            color: #c792ea;
+        }
+
+        .fn {
+            color: #82aaff;
+        }
+
+        .str {
+            color: #c3e88d;
+        }
+
+        .cm {
+            color: #3a3a58;
+            font-style: italic;
+        }
+
+        .dec {
+            color: var(--yellow);
+        }
+
+        .num {
+            color: #f78c6c;
+        }
+
+        .hi {
+            color: var(--green);
+        }
+
+        /* COMPARE GRID */
+        .cmp {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        @media(max-width:600px) {
+            .cmp {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .cmp-box {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px 16px;
+        }
+
+        .cmp-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .cl-red {
+            color: var(--pink);
+        }
+
+        .cl-green {
+            color: var(--green);
+        }
+
+        /* TAG */
+        .tag {
+            display: inline-block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11.5px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            background: rgba(72, 202, 228, .08);
+            color: var(--blue);
+            margin: 2px 3px 2px 0;
+        }
+
+        /* TIP */
+        .tip {
+            padding: 10px 14px;
+            border-radius: 0 7px 7px 0;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        .tip-y {
+            background: #1a1400;
+            border-left: 3px solid var(--yellow);
+            color: #c8a030;
+        }
+
+        .tip-g {
+            background: #001a10;
+            border-left: 3px solid var(--green);
+            color: #00a070;
+        }
+
+        .tip-b {
+            background: #001525;
+            border-left: 3px solid var(--blue);
+            color: #38a0c0;
+        }
+
+        /* FLOW */
+        .flow {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .flow-step {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 13.5px;
+            color: var(--muted);
+        }
+
+        .flow-step:last-child {
+            border-bottom: none;
+        }
+
+        .flow-step strong {
+            color: var(--text);
+        }
+
+        .arrow {
+            color: var(--accent);
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+
+        <!-- HEADER -->
+        <div class="header">
+            <div class="badge">CampusX · Module 13 · Streaming in LangGraph</div>
+            <h1>Streaming <span>in LangGraph</span></h1>
+            <p class="sub">Tokens delivered as generated — not all at once</p>
+        </div>
+
+
+        <!-- 1. WHAT IS STREAMING -->
+        <div class="section">
+            <div class="sec-label">Topic 87 — What is Streaming</div>
+            <div class="def">
+                In LLMs, <strong>streaming</strong> means the model starts sending <strong>tokens (words)</strong> as
+                soon as they're generated — instead of waiting for the entire response to be ready before returning it.
+            </div>
+        </div>
+
+
+        <!-- 2. WHY STREAMING -->
+        <div class="section">
+            <div class="sec-label">Topic 88 — Why Use Streaming</div>
+            <ul class="why-list">
+                <li><span class="num-dot">1</span>
+                    <div><strong>Faster perceived response</strong> — low drop-off rates, users don't leave</div>
+                </li>
+                <li><span class="num-dot">2</span>
+                    <div><strong>Mimics human-like conversation</strong> — builds trust, feels alive, keeps users
+                        engaged</div>
+                </li>
+                <li><span class="num-dot">3</span>
+                    <div><strong>Essential for Multi-modal UIs</strong> — voice, video, and combined interfaces</div>
+                </li>
+                <li><span class="num-dot">4</span>
+                    <div><strong>Better UX for long output</strong> — especially code generation (shows as it writes)
+                    </div>
+                </li>
+                <li><span class="num-dot">5</span>
+                    <div><strong>Cancel midway</strong> — saves tokens &amp; cost if the answer is already visible</div>
+                </li>
+                <li><span class="num-dot">6</span>
+                    <div><strong>Interleave UI updates</strong> — show "thinking…", tool results, agent progress in
+                        real-time</div>
+                </li>
+            </ul>
+        </div>
+
+
+        <!-- 3. PYTHON GENERATOR -->
+        <div class="section">
+            <div class="sec-label">Topic 89 — Python Generator (Foundation)</div>
+            <div class="card">
+                <div class="card-title">How streaming works under the hood</div>
+                <p>A <strong>generator</strong> is a special iterator that yields values one at a time using the <span
+                        class="tag">yield</span> keyword instead of <span class="tag">return</span>. LangGraph's
+                    <code>.stream()</code> is a generator.
+                </p>
+                <div class="cmp">
+                    <div class="cmp-box">
+                        <div class="cmp-label cl-red">❌ Normal function — waits</div>
+                        <pre><span class="kw">def</span> <span class="fn">get_words</span>():
+    <span class="kw">return</span> [<span class="str">"Hello"</span>, <span class="str">"World"</span>]
+
+<span class="cm"># All words arrive at once</span>
+words = <span class="fn">get_words</span>()</pre>
+                    </div>
+                    <div class="cmp-box">
+                        <div class="cmp-label cl-green">✅ Generator — streams</div>
+                        <pre><span class="kw">def</span> <span class="fn">stream_words</span>():
+    <span class="kw">yield</span> <span class="str">"Hello"</span>
+    <span class="kw">yield</span> <span class="str">"World"</span>
+
+<span class="cm"># Words arrive one by one</span>
+<span class="kw">for</span> w <span class="kw">in</span> <span class="fn">stream_words</span>():
+    <span class="fn">print</span>(w)</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- 4. LANGGRAPH BACKEND -->
+        <div class="section">
+            <div class="sec-label">Topic 90 — LangGraph Backend — chatbot.stream()</div>
+            <div class="card">
+                <div class="card-title">Replace <code>.invoke()</code> with <code>.stream()</code></div>
+                <p>Use <span class="tag">stream_mode='messages'</span> to stream token-by-token from the LLM node.</p>
+                <pre><span class="cm"># OLD — waits for full response</span>
+response = chatbot.<span class="fn">invoke</span>(
+    {<span class="str">'messages'</span>: [<span class="fn">HumanMessage</span>(content=user_input)]},
+    config={<span class="str">'configurable'</span>: {<span class="str">'thread_id'</span>: <span class="str">'thread-1'</span>}}
+)
+
+<span class="cm"># NEW — streams chunks as generated</span>
+<span class="kw">for</span> message_chunk, metadata <span class="kw">in</span> chatbot.<span class="fn">stream</span>(
+    {<span class="str">'messages'</span>: [<span class="fn">HumanMessage</span>(content=user_input)]},
+    config={<span class="str">'configurable'</span>: {<span class="str">'thread_id'</span>: <span class="str">'thread-1'</span>}},
+    stream_mode=<span class="str">'messages'</span>          <span class="cm"># ← key param</span>
+):
+    <span class="kw">if</span> message_chunk.content:
+        <span class="fn">print</span>(message_chunk.content, end=<span class="str">" "</span>, flush=<span class="hi">True</span>)</pre>
+                <div class="tip tip-b">💡 <code>stream_mode='messages'</code> yields individual token chunks from the
+                    LLM. Each iteration gives <code>(message_chunk, metadata)</code> — check
+                    <code>message_chunk.content</code> is not empty before using it.
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">What each variable contains</div>
+                <div class="flow">
+                    <div class="flow-step"><span class="arrow">→</span>
+                        <div><strong>message_chunk</strong> — a partial AIMessage with <code>.content</code> = one
+                            token/word fragment</div>
+                    </div>
+                    <div class="flow-step"><span class="arrow">→</span>
+                        <div><strong>metadata</strong> — node name, run_id, graph info (used for filtering by node)
+                        </div>
+                    </div>
+                    <div class="flow-step"><span class="arrow">→</span>
+                        <div><strong>stream_mode='messages'</strong> — streams LLM tokens. Other modes: <span
+                                class="tag">values</span> (full state), <span class="tag">updates</span> (state diffs)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- 5. STREAMLIT FRONTEND -->
+        <div class="section">
+            <div class="sec-label">Topic 91 — Streamlit Frontend — st.write_stream()</div>
+            <div class="card">
+                <div class="card-title">Cleanest approach — one line handles streaming display</div>
+                <p>Streamlit's <span class="tag">st.write_stream()</span> accepts a generator and renders tokens live.
+                    It returns the complete final string when done — save it to session_state.</p>
+                <pre><span class="kw">with</span> st.<span class="fn">chat_message</span>(<span class="str">'assistant'</span>):
+
+    <span class="cm"># st.write_stream() renders tokens live as they arrive</span>
+    <span class="cm"># Returns the full assembled string when complete</span>
+    ai_message = st.<span class="fn">write_stream</span>(
+        message_chunk.content
+        <span class="kw">for</span> message_chunk, metadata <span class="kw">in</span> chatbot.<span class="fn">stream</span>(
+            {<span class="str">'messages'</span>: [<span class="fn">HumanMessage</span>(content=user_input)]},
+            config={<span class="str">'configurable'</span>: {<span class="str">'thread_id'</span>: <span class="str">'thread-1'</span>}},
+            stream_mode=<span class="str">'messages'</span>
+        )
+    )
+
+<span class="cm"># Save completed response to history</span>
+st.session_state[<span class="str">'message_history'</span>].<span class="fn">append</span>(
+    {<span class="str">'role'</span>: <span class="str">'assistant'</span>, <span class="str">'content'</span>: ai_message}
+)</pre>
+                <div class="tip tip-g">✅ <code>st.write_stream()</code> is the cleanest production pattern. It handles
+                    the streaming loop, the cursor effect, and returns the final text — all in one call.</div>
+            </div>
+
+        </div>
+
+
+        <!-- 6. QUICK REFERENCE -->
+        <div class="section">
+            <div class="sec-label">Topic 92 — Quick Reference</div>
+            <div class="card">
+                <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                    <tr style="border-bottom:1px solid var(--border)">
+                        <th
+                            style="text-align:left;color:var(--muted);font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:8px 10px">
+                            Concept</th>
+                        <th
+                            style="text-align:left;color:var(--muted);font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:8px 10px">
+                            Code</th>
+                        <th
+                            style="text-align:left;color:var(--muted);font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:8px 10px">
+                            Note</th>
+                    </tr>
+                    <tr style="border-bottom:1px solid #0f0f1e">
+                        <td style="padding:9px 10px;color:var(--text)">Stream from graph</td>
+                        <td
+                            style="padding:9px 10px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--blue)">
+                            chatbot.stream(...)</td>
+                        <td style="padding:9px 10px;color:var(--muted)">Returns a generator</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid #0f0f1e">
+                        <td style="padding:9px 10px;color:var(--text)">Stream mode param</td>
+                        <td
+                            style="padding:9px 10px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--blue)">
+                            stream_mode='messages'</td>
+                        <td style="padding:9px 10px;color:var(--muted)">Token-by-token LLM output</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid #0f0f1e">
+                        <td style="padding:9px 10px;color:var(--text)">Each chunk</td>
+                        <td
+                            style="padding:9px 10px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--blue)">
+                            message_chunk.content</td>
+                        <td style="padding:9px 10px;color:var(--muted)">Check it's not empty string</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid #0f0f1e">
+                        <td style="padding:9px 10px;color:var(--text)">Streamlit display</td>
+                        <td
+                            style="padding:9px 10px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--blue)">
+                            st.write_stream(gen)</td>
+                        <td style="padding:9px 10px;color:var(--muted)">Returns full string</td>
+                    </tr>
+
+                </table>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>

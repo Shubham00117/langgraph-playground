@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LangSmith Study Notes</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #0f1117;
+            color: #e2e8f0;
+            line-height: 1.7;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            color: #7c3aed;
+            border-bottom: 3px solid #7c3aed;
+            padding-bottom: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        h2 {
+            font-size: 1.4rem;
+            color: #a78bfa;
+            margin: 2.5rem 0 0.8rem 0;
+            padding: 0.4rem 0.8rem;
+            border-left: 4px solid #7c3aed;
+            background: #1e1b2e;
+            border-radius: 0 6px 6px 0;
+        }
+
+        h3 {
+            font-size: 1.05rem;
+            color: #c4b5fd;
+            margin: 1.2rem 0 0.4rem 0;
+        }
+
+        p {
+            margin: 0.5rem 0;
+            color: #cbd5e1;
+            font-size: 0.95rem;
+        }
+
+        ul {
+            margin: 0.5rem 0 0.5rem 1.4rem;
+        }
+
+        ul li {
+            color: #cbd5e1;
+            font-size: 0.95rem;
+            margin-bottom: 0.3rem;
+        }
+
+        ul li strong {
+            color: #e2e8f0;
+        }
+
+        .definition-box {
+            background: #1a2035;
+            border: 1px solid #312e81;
+            border-radius: 8px;
+            padding: 1rem 1.2rem;
+            margin: 0.8rem 0;
+        }
+
+        .definition-box p {
+            color: #bfdbfe;
+        }
+
+        .tag {
+            display: inline-block;
+            background: #312e81;
+            color: #a5b4fc;
+            font-size: 0.78rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            margin: 0.15rem 0.2rem 0.15rem 0;
+            font-family: monospace;
+        }
+
+        pre {
+            background: #111827;
+            border: 1px solid #374151;
+            border-radius: 8px;
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 0.8rem 0;
+        }
+
+        code {
+            font-family: 'Fira Code', 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: #86efac;
+        }
+
+        pre code {
+            color: #d1fae5;
+        }
+
+        .comment {
+            color: #6b7280;
+        }
+
+        .keyword {
+            color: #818cf8;
+        }
+
+        .string {
+            color: #fbbf24;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 0.8rem 0;
+        }
+
+        .card {
+            background: #1e1b2e;
+            border: 1px solid #374151;
+            border-radius: 8px;
+            padding: 0.9rem 1rem;
+        }
+
+        .card h3 {
+            margin-top: 0;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #065f46;
+            color: #6ee7b7;
+            font-size: 0.75rem;
+            padding: 0.1rem 0.5rem;
+            border-radius: 10px;
+            margin-left: 0.4rem;
+            vertical-align: middle;
+        }
+
+        .badge.warn {
+            background: #78350f;
+            color: #fcd34d;
+        }
+
+        .badge.info {
+            background: #1e3a5f;
+            color: #93c5fd;
+        }
+
+        .section-divider {
+            border: none;
+            border-top: 1px solid #1f2937;
+            margin: 2rem 0;
+        }
+
+        .toc {
+            background: #13111e;
+            border: 1px solid #2d2550;
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .toc h3 {
+            color: #a78bfa;
+            margin-bottom: 0.6rem;
+        }
+
+        .toc ol {
+            margin-left: 1.2rem;
+        }
+
+        .toc ol li {
+            color: #8b9aff;
+            font-size: 0.9rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .toc ol li a {
+            color: #8b9aff;
+            text-decoration: none;
+        }
+
+        .toc ol li a:hover {
+            text-decoration: underline;
+            color: #c4b5fd;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <div class="badge">CampusX · Module 16 · LangSmith</div>
+        <h1>🔍 LangSmith — Study Notes</h1>
+
+        <div class="toc">
+            <h3>📑 Table of Contents</h3>
+            <ol>
+                <li><a href="#why">Why LangSmith?</a></li>
+                <li><a href="#what">What is LangSmith?</a></li>
+                <li><a href="#observability">Observability in LLMs</a></li>
+                <li><a href="#core-concepts">Core Concepts: Project, Trace, Run</a></li>
+                <li><a href="#what-traces">What LangSmith Traces</a></li>
+                <li><a href="#setup">Setup & Environment</a></li>
+                <li><a href="#tracing-auto">Auto-Tracing (LangChain)</a></li>
+                <li><a href="#tracing-manual">Manual Tracing with @traceable</a></li>
+                <li><a href="#rag">Tracing RAG Apps</a></li>
+                <li><a href="#langgraph">LangGraph + LangSmith</a></li>
+                <li><a href="#monitoring">Monitoring & Alerting</a></li>
+                <li><a href="#evaluators">Evaluators</a></li>
+                <li><a href="#datasets">Datasets & Annotation</a></li>
+                <li><a href="#prompt-exp">Prompt Experimentation</a></li>
+                <li><a href="#playground">Playground</a></li>
+                <li><a href="#feedback">User Feedback Integration</a></li>
+                <li><a href="#collab">Collaboration</a></li>
+            </ol>
+        </div>
+
+        <!-- ─── 1. WHY ─────────────────────────────────────── -->
+        <h2 id="why">Topic 106. Why Do We Need LangSmith?</h2>
+
+        <p>Modern LLM apps are <strong>complex multi-step workflows</strong>. Debugging them without proper tooling is
+            painful.</p>
+
+        <div class="grid-2">
+            <div class="card">
+                <h3>Example — AI Job Application Assistant</h3>
+                <ul>
+                    <li>Read job description (JD) from link / PDF</li>
+                    <li>Search user's portfolio and resume</li>
+                    <li>Match most relevant skills</li>
+                    <li>Generate tailored cover letter</li>
+                    <li>Proofread final letter</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>Problems Without LangSmith</h3>
+                <ul>
+                    <li>Latency could be <strong>7–10 mins</strong> — hard to pinpoint which step is slow</li>
+                    <li>Cost grows invisibly (token usage per step)</li>
+                    <li>No visibility into which prompt caused a bad output</li>
+                    <li>Hallucinations in RAG — retriever or generator fault?</li>
+                </ul>
+            </div>
+        </div>
+
+        <hr class="section-divider" />
+
+        <!-- ─── 2. WHAT ─────────────────────────────────────── -->
+        <h2 id="what">Topic 107. What is LangSmith?</h2>
+
+        <div class="definition-box">
+            <p><strong>LangSmith</strong> is a unified <em>observability &amp; evaluation platform</em> where teams can
+                <strong>debug, test, and monitor AI app performance</strong>.
+            </p>
+        </div>
+
+        <p>It works with any LLM framework — LangChain, LangGraph, or plain Python — and records every detail of your
+            LLM execution automatically.</p>
+
+        <hr class="section-divider" />
+
+        <!-- ─── 3. OBSERVABILITY ──────────────────────────────── -->
+        <h2 id="observability">Topic 108. Observability in LLM Systems</h2>
+
+        <div class="definition-box">
+            <p><strong>Observability</strong> is the ability to understand a system's internal state by examining its
+                external outputs — like <em>logs, metrics, and traces</em>.</p>
+            <p style="margin-top:0.5rem;">It allows you to diagnose issues, understand performance, and improve
+                reliability by analyzing data generated by the system. Essentially, it answers <em>"why"</em> something
+                is happening, even if you didn't anticipate the problem.</p>
+        </div>
+
+        <h3>Why LLMs are Harder to Observe</h3>
+        <ul>
+            <li>LLMs are <strong>non-deterministic</strong> — same input can produce different outputs</li>
+            <li>Traditional software: input → fixed output. LLM: input → varies each run</li>
+            <li>Execution generates a <strong>trace</strong> that needs to be stored and analyzed</li>
+        </ul>
+
+        <hr class="section-divider" />
+
+        <!-- ─── 4. CORE CONCEPTS ─────────────────────────────── -->
+        <h2 id="core-concepts">Topic 109. Core Concepts: Project → Trace → Run</h2>
+
+        <div class="grid-2">
+            <div class="card">
+                <h3>🗂️ Project</h3>
+                <p>A named container for all traces related to one LLM application (e.g., <code>langsmith-demo</code>,
+                    <code>RAG Chatbot</code>).
+                </p>
+            </div>
+            <div class="card">
+                <h3>🔁 Trace</h3>
+                <p>A complete record of one end-to-end execution of your LLM app — from user input to final output. One
+                    request = one trace.</p>
+            </div>
+        </div>
+        <div class="card" style="margin-top:1rem;">
+            <h3>⚙️ Run</h3>
+            <p>A single step/span inside a trace. Each component call (PromptTemplate, LLM, Parser) becomes its own Run
+                inside the Trace.</p>
+            <p style="margin-top:0.4rem;"><strong>Example trace:</strong> <span class="tag">user</span> → <span
+                    class="tag">Prompt</span> → <span class="tag">LLM</span> → <span class="tag">Parser</span> — each is
+                a separate Run with its own timing.</p>
+        </div>
+
+        <pre><code><span class="comment"># When you execute a chain, LangSmith creates:</span>
+<span class="comment">#   1 Trace  (the whole execution)</span>
+<span class="comment">#   N Runs   (one per step: PromptTemplate, ChatOpenAI, StrOutputParser)</span>
+execute → trace → [run1, run2, run3]</code></pre>
+
+        <hr class="section-divider" />
+
+        <!-- ─── 5. WHAT TRACES ──────────────────────────────── -->
+        <h2 id="what-traces">Topic 110. What Does LangSmith Trace?</h2>
+
+        <p>For every execution, LangSmith automatically captures:</p>
+
+        <div class="grid-2">
+            <div class="card">
+                <ul>
+                    <li><strong>1. Input &amp; Output</strong> — full prompt and response</li>
+                    <li><strong>2. All Intermediate Steps</strong> — every node in the chain</li>
+                    <li><strong>3. Latency</strong> — time per step and total</li>
+                    <li><strong>4. Token Usage</strong> — prompt + completion tokens</li>
+                    <li><strong>5. Cost</strong> — in USD per call</li>
+                </ul>
+            </div>
+            <div class="card">
+                <ul>
+                    <li><strong>6. Errors</strong> — exception details per run</li>
+                    <li><strong>7. Tags</strong> — custom labels (e.g., <code>"report generation"</code>)</li>
+                    <li><strong>8. Metadata</strong> — key-value pairs (e.g., model name, version)</li>
+                    <li><strong>9. Feedback</strong> — human or automated scores</li>
+                </ul>
+            </div>
+        </div>
+
+        <hr class="section-divider" />
+
+        <!-- ─── 6. SETUP ─────────────────────────────────────── -->
+        <h2 id="setup">Topic 111. Setup & Environment</h2>
+
+        <h3>Steps to Get Started</h3>
+        <ul>
+            <li>Download code from GitHub (campusx-official/langsmith-masterclass)</li>
+            <li>Create a virtual environment and install <code>requirements.txt</code></li>
+            <li>Create an account at <strong>smith.langchain.com</strong></li>
+            <li>Create a <code>.env</code> file and paste API keys</li>
+        </ul>
+
+        <h3>Required .env Variables</h3>
+        <pre><code><span class="comment"># Enable LangSmith tracing</span>
+LANGCHAIN_TRACING_V2=<span class="string">true</span>
+
+<span class="comment"># LangSmith endpoint</span>
+LANGCHAIN_ENDPOINT=<span class="string">https://api.smith.langchain.com</span>
+
+<span class="comment"># Your LangSmith API key (from smith.langchain.com settings)</span>
+LANGCHAIN_API_KEY=<span class="string">lsv2_pt_...</span>
+
+<span class="comment"># Project name — traces go here</span>
+LANGCHAIN_PROJECT=<span class="string">LangSmith-Project</span></code></pre>
+
+        <p>You can also <strong>override the project per script</strong> using:</p>
+        <pre><code><span class="keyword">import</span> os
+os.environ[<span class="string">'LANGCHAIN_PROJECT'</span>] = <span class="string">'Sequential LLM App'</span>  <span class="comment"># sets project for this run</span></code></pre>
+
+        <hr class="section-divider" />
+
+        <!-- ─── 7. AUTO TRACING ──────────────────────────────── -->
+        <h2 id="tracing-auto">Topic 112. Auto-Tracing with LangChain</h2>
+
+        <p>When <code>LANGCHAIN_TRACING_V2=true</code> is set, <strong>all LangChain/LangGraph components are traced
+                automatically</strong> — no extra code needed.</p>
+
+        <h3>Adding Tags & Metadata to a Run</h3>
+        <p>Pass a <code>config</code> dict to <code>.invoke()</code> to enrich traces with searchable tags and metadata:
+        </p>
+
+        <pre><code>config = {
+    <span class="string">'run_name'</span>: <span class="string">'sequential chain'</span>,          <span class="comment"># visible name in LangSmith UI</span>
+    <span class="string">'tags'</span>: [<span class="string">'llm app'</span>, <span class="string">'report generation'</span>],  <span class="comment"># filter by tag in UI</span>
+    <span class="string">'metadata'</span>: {<span class="string">'model1'</span>: <span class="string">'gpt-4o-mini'</span>}     <span class="comment"># extra key-value info</span>
+}
+
+result = chain.invoke({<span class="string">'topic'</span>: <span class="string">'Unemployment in India'</span>}, config=config)</code></pre>
+
+        <p>These appear in the <strong>Metadata tab</strong> of each run in the LangSmith UI.</p>
+
+        <hr class="section-divider" />
+
+        <!-- ─── 8. MANUAL TRACING ────────────────────────────── -->
+        <h2 id="tracing-manual">Topic 113. Manual Tracing with @traceable</h2>
+
+        <p>For custom Python functions (not LangChain components), use the <code>@traceable</code> decorator to make
+            them appear as runs in your trace.</p>
+
+        <pre><code><span class="keyword">from</span> langsmith <span class="keyword">import</span> traceable
+
+<span class="comment"># Wraps this function as a named Run in LangSmith</span>
+@traceable(name=<span class="string">"load_pdf"</span>, tags=[<span class="string">'pdf'</span>], metadata={<span class="string">'loader'</span>: <span class="string">'PyPDFLoader'</span>})
+<span class="keyword">def</span> load_pdf(path: str):
+    loader = PyPDFLoader(path)
+    <span class="keyword">return</span> loader.load()   <span class="comment"># returns list[Document]</span></code></pre>
+
+        <h3>@traceable Parameters</h3>
+        <ul>
+            <li><strong>name</strong> — display name in LangSmith UI</li>
+            <li><strong>tags</strong> — list of searchable labels</li>
+            <li><strong>metadata</strong> — dict of extra info (model used, config params, etc.)</li>
+        </ul>
+
+        <h3>Parent vs Child Runs</h3>
+        <p>When a <code>@traceable</code> function calls other <code>@traceable</code> functions, LangSmith
+            automatically makes them <strong>children</strong> of the parent run.</p>
+
+        <pre><code><span class="comment"># Parent function — becomes the root Trace</span>
+@traceable(name=<span class="string">"setup_pipeline"</span>, tags=[<span class="string">"setup"</span>])
+<span class="keyword">def</span> setup_pipeline(pdf_path):
+    docs   = load_pdf(pdf_path)       <span class="comment"># Child Run 1</span>
+    splits = split_documents(docs)    <span class="comment"># Child Run 2</span>
+    vs     = build_vectorstore(splits)<span class="comment"># Child Run 3</span>
+    <span class="keyword">return</span> vs</code></pre>
+
+        <hr class="section-divider" />
+
+        <!-- ─── 9. RAG ───────────────────────────────────────── -->
+        <h2 id="rag">Topic 114. Tracing RAG Applications</h2>
+
+        <h3>Why RAG Needs Special Attention</h3>
+        <p>RAG apps have <strong>two big failure modes</strong>:</p>
+        <ul>
+            <li><strong>Retriever errors</strong> — wrong or irrelevant documents retrieved</li>
+            <li><strong>Generator errors</strong> — model hallucinates or misuses context</li>
+        </ul>
+        <p>In production it's often unclear <em>where</em> the failure happened. LangSmith automatically records:</p>
+        <ul>
+            <li>User query</li>
+            <li>Retrieved documents</li>
+            <li>LLM prompt (with inserted docs)</li>
+            <li>LLM response</li>
+        </ul>
+
+        <h3>Flat Trace vs Nested Trace in RAG</h3>
+        <div class="grid-2">
+            <div class="card">
+                <h3>Flat Trace <span class="badge warn">v2</span></h3>
+                <p>Setup and query called at global scope → treated as two <strong>separate, unrelated traces</strong>.
+                </p>
+            </div>
+            <div class="card">
+                <h3>Nested Trace <span class="badge">v3/v4</span></h3>
+                <p>Wrap both in a parent <code>@traceable</code> → setup becomes a child of the parent, giving a clear
+                    <strong>tree view</strong>.
+                </p>
+            </div>
+        </div>
+
+        <h3>Build-Path Caching Logic</h3>
+        <p>The build path (PDF load → split → embed) is re-triggered only when:</p>
+        <ul>
+            <li>No cache exists yet (first-ever run)</li>
+            <li>PDF content changes</li>
+            <li>PDF file metadata changes</li>
+            <li>Chunking params change (chunk size or overlap)</li>
+            <li>Embedding model name changes</li>
+        </ul>
+
+        <hr class="section-divider" />
+
+        <!-- ─── 10. LANGGRAPH ────────────────────────────────── -->
+        <h2 id="langgraph">Topic 115. LangGraph + LangSmith Integration</h2>
+
+        <p>LangGraph workflows can be complex trees of nodes. LangSmith integrates natively:</p>
+        <ul>
+            <li>Every <strong>graph execution is logged as a trace</strong></li>
+            <li>Each <strong>node</strong> (retriever, LLM, tool call, subgraph) becomes a <strong>run</strong> inside
+                the trace</li>
+            <li>You can visualize the <strong>path taken</strong>:
+                <code>START → Retriever → Reranker → LLM Answer → END</code>
+            </li>
+            <li>If a workflow branches (conditional / parallel / subgraph), LangSmith captures <strong>which path was
+                    actually executed</strong></li>
+        </ul>
+
+        <p>No extra configuration needed — set the env vars and all graph executions are traced automatically.</p>
+
+        <hr class="section-divider" />
+
+        <!-- ─── 11. MONITORING ──────────────────────────────── -->
+        <h2 id="monitoring">Topic 116. Monitoring & Alerting</h2>
+
+        <div class="definition-box">
+            <p>Monitoring in LangSmith looks across <strong>many traces at once</strong> to track the overall health of
+                your LLM system. It aggregates key metrics and lets you set alerts.</p>
+        </div>
+
+        <h3>Key Metrics Tracked</h3>
+        <ul>
+            <li><strong>Latency</strong> — P50, P95, P99 percentiles</li>
+            <li><strong>Token usage</strong> — total tokens consumed</li>
+            <li><strong>Cost</strong> — USD per period</li>
+            <li><strong>Error rates</strong> — percentage of failed runs</li>
+            <li><strong>Success rates</strong></li>
+        </ul>
+
+        <h3>Alerts</h3>
+        <p>You can create alerts that trigger when metrics drift outside acceptable ranges. Alert types:</p>
+        <ul>
+            <li><strong>Errored Runs</strong> — e.g., error rate exceeds 50% in the last 15 minutes</li>
+            <li><strong>Feedback Score</strong> — drop below threshold</li>
+            <li><strong>Latency</strong> — spike detected</li>
+        </ul>
+        <p>Notifications can be sent via <strong>PagerDuty</strong> or <strong>Webhook</strong>.</p>
+
+        <p>Why it matters: issues often appear first as <em>patterns across multiple runs</em> rather than in a single
+            trace. Monitoring catches these early signals before users are impacted at scale.</p>
+
+        <hr class="section-divider" />
+
+        <!-- ─── 12. EVALUATORS ──────────────────────────────── -->
+        <h2 id="evaluators">Topic 117. Evaluators (Online)</h2>
+
+        <p>Evaluators run automatically on new traces to score your LLM app's output quality in production.</p>
+
+        <h3>Types of Evaluators</h3>
+        <div class="grid-2">
+            <div class="card">
+                <h3>🤖 LLM-as-Judge</h3>
+                <ul>
+                    <li><strong>Create from labeled data</strong> — align with your examples</li>
+                    <li><strong>Create from scratch</strong> — write a custom judge prompt</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>&lt;/&gt; Code Evaluator</h3>
+                <ul>
+                    <li>Write a custom Python function</li>
+                    <li>Return a score programmatically</li>
+                </ul>
+            </div>
+        </div>
+
+        <h3>Prebuilt Evaluators</h3>
+        <ul>
+            <li><strong>Hallucination</strong> — does the answer hallucinate facts?</li>
+            <li><strong>Conciseness</strong> — is the answer concise?</li>
+            <li><strong>Code Checker</strong> — does the code solve the task?</li>
+        </ul>
+
+        <h3>RAG-Specific Evaluation Metrics</h3>
+        <ul>
+            <li><strong>Faithfulness</strong> → Are answers grounded in retrieved documents?</li>
+            <li><strong>Relevance</strong> → Did the response actually address the user's question?</li>
+        </ul>
+        <p>By running the same dataset across GPT-4, Claude, and LLaMA, you can directly compare which model performs
+            best.</p>
+
+        <hr class="section-divider" />
+
+        <!-- ─── 13. DATASETS ────────────────────────────────── -->
+        <h2 id="datasets">Topic 118. Dataset Creation & Annotation</h2>
+
+        <div class="definition-box">
+            <p>LangSmith provides tools to build <strong>versioned datasets</strong> for evaluation and fine-tuning.</p>
+        </div>
+
+        <ul>
+            <li>Build datasets from real traces — click <strong>Add to Dataset</strong> on any run</li>
+            <li>Supports <strong>manual annotation</strong> (e.g., labeling whether an answer is correct)</li>
+            <li>Datasets are versioned and reusable across projects</li>
+            <li>High-quality datasets are critical for evaluation feedback loops</li>
+        </ul>
+
+        <h3>Example Use Case</h3>
+        <ul>
+            <li>Customer support: build a dataset of <strong>common questions + expected answers</strong></li>
+            <li>Use it to benchmark your RAG agent every time you change retrieval logic</li>
+        </ul>
+
+        <h3>Annotation Queue</h3>
+        <p>Traces can also be added to an <strong>Annotation Queue</strong> — a review workflow where humans can label,
+            score, or approve outputs before they enter the dataset.</p>
+
+        <hr class="section-divider" />
+
+        <!-- ─── 14. PROMPT EXP ──────────────────────────────── -->
+        <h2 id="prompt-exp">Topic 119. Prompt Experimentation</h2>
+
+        <div class="definition-box">
+            <p>LangSmith allows you to <strong>systematically test and compare different prompt versions</strong>. You
+                can run A/B tests across prompts on the same dataset, track performance against evaluation metrics, and
+                record outcomes over time.</p>
+        </div>
+
+        <ul>
+            <li>Run <strong>A/B tests</strong> across prompt variants on the same dataset</li>
+            <li>Track which prompt version performs best under which conditions</li>
+            <li>History is stored — giving a clear audit trail of prompt changes</li>
+        </ul>
+
+        <hr class="section-divider" />
+
+        <!-- ─── 15. PLAYGROUND ──────────────────────────────── -->
+        <h2 id="playground">Topic 120. Playground</h2>
+
+        <p>The <strong>Playground</strong> (at <code>smith.langchain.com/playground</code>) lets you iterate on and test
+            prompts interactively.</p>
+
+        <ul>
+            <li>Select a model (e.g., OpenAI gpt-5-mini)</li>
+            <li>Write system and human prompts with variables like <code>{question}</code></li>
+            <li>Use the <strong>Compare</strong> button to run two prompt versions side-by-side</li>
+            <li>See Output A vs Output B in real time</li>
+            <li>Save prompts to the <strong>Prompts Hub</strong> for team collaboration</li>
+        </ul>
+
+        <p>You can also open any run from a trace directly in the Playground using the <strong>"Open in
+                Playground"</strong> button to re-run and tweak it.</p>
+
+        <hr class="section-divider" />
+
+        <!-- ─── 16. FEEDBACK ────────────────────────────────── -->
+        <h2 id="feedback">Topic 121. User Feedback Integration</h2>
+
+        <ul>
+            <li>Capture <strong>thumbs up/down, ratings, or structured feedback</strong> from users in production</li>
+            <li>Feedback is <strong>logged alongside traces</strong> — tied to the exact prompt, model, and state</li>
+            <li>Supports bulk analysis of what users like or dislike</li>
+            <li>Enables <strong>human-in-the-loop</strong> quality control</li>
+        </ul>
+
+        <h3>Sharing Traces</h3>
+        <p>Any trace can be shared via a public link — anyone with the link can view the run and feedback. Useful for
+            bug reports and team review.</p>
+
+        <hr class="section-divider" />
+
+        <!-- ─── 17. COLLAB ──────────────────────────────────── -->
+        <h2 id="collab">Topic 122. Collaboration</h2>
+
+        <ul>
+            <li>Team members can <strong>view, share, and comment</strong> on traces, datasets, and evaluations</li>
+            <li>Provides a <strong>web UI</strong> where non-engineers (PMs, QA, annotators) can inspect and annotate
+                runs</li>
+            <li>Enables <strong>shared experiment dashboards</strong> across the team</li>
+        </ul>
+
+        <hr class="section-divider" />
+
+        <!-- ─── QUICK REFERENCE ─────────────────────────────── -->
+        <h2>📌 Quick Reference Summary</h2>
+
+        <div class="grid-2">
+            <div class="card">
+                <h3>LangSmith Feature Map</h3>
+                <ul>
+                    <li><span class="tag">Tracing</span> Debug step-by-step execution</li>
+                    <li><span class="tag">Monitoring</span> Track metrics across many runs</li>
+                    <li><span class="tag">Evaluators</span> Auto-score output quality</li>
+                    <li><span class="tag">Datasets</span> Build evaluation benchmarks</li>
+                    <li><span class="tag">Playground</span> A/B test prompts interactively</li>
+                    <li><span class="tag">Feedback</span> Capture user signals</li>
+                    <li><span class="tag">Collaboration</span> Team review &amp; annotation</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>Key Terminology</h3>
+                <ul>
+                    <li><strong>Project</strong> — container for traces</li>
+                    <li><strong>Trace</strong> — one full execution</li>
+                    <li><strong>Run</strong> — one step inside a trace</li>
+                    <li><strong>@traceable</strong> — decorator to trace custom functions</li>
+                    <li><strong>config</strong> — dict to add run_name / tags / metadata</li>
+                    <li><strong>Evaluator</strong> — auto-scorer on traces</li>
+                    <li><strong>Dataset</strong> — versioned input-output pairs</li>
+                </ul>
+            </div>
+        </div>
+
+        <hr class="section-divider" />
+
+        <p style="text-align:center; color:#4b5563; font-size:0.85rem; margin-top:2rem;">
+            LangSmith Study Notes · LangSmith Crash Course · All concepts extracted from screenshots
+        </p>
+
+    </div>
+</body>
+
+</html>

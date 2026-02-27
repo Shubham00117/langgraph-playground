@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streamlit — Industry Notes</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@300;400;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #07070e;
+            --surface: #0f0f1a;
+            --card: #111120;
+            --border: #1c1c30;
+            --accent: #7c5cfc;
+            --accent2: #fc5c7d;
+            --green: #00e5a0;
+            --yellow: #ffc947;
+            --blue: #38b6ff;
+            --orange: #ff8c42;
+            --text: #dde1f0;
+            --muted: #555578;
+            --code-bg: #090912;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            padding: 40px 20px 100px;
+            line-height: 1.65;
+        }
+
+        .page {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* ── HEADER ── */
+        .header {
+            text-align: center;
+            padding: 48px 0 40px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 48px;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #1a1a2e;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            padding: 5px 14px;
+            border-radius: 99px;
+            margin-bottom: 16px;
+        }
+
+        h1 {
+            font-size: 42px;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.15;
+            margin-bottom: 10px;
+        }
+
+        h1 span {
+            color: var(--accent);
+        }
+
+        .tagline {
+            color: var(--muted);
+            font-size: 15px;
+            font-weight: 300;
+        }
+
+        /* ── TOC ── */
+        .toc {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 48px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 6px 20px;
+        }
+
+        .toc a {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 13px;
+            padding: 4px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: color .15s;
+        }
+
+        .toc a:hover {
+            color: var(--accent);
+        }
+
+        .toc a::before {
+            content: '→';
+            color: var(--accent);
+            font-size: 11px;
+        }
+
+        /* ── SECTION ── */
+        .section {
+            margin-bottom: 52px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .ic-purple {
+            background: rgba(124, 92, 252, .15);
+        }
+
+        .ic-green {
+            background: rgba(0, 229, 160, .12);
+        }
+
+        .ic-blue {
+            background: rgba(56, 182, 255, .12);
+        }
+
+        .ic-yellow {
+            background: rgba(255, 201, 71, .12);
+        }
+
+        .ic-pink {
+            background: rgba(252, 92, 125, .12);
+        }
+
+        .ic-orange {
+            background: rgba(255, 140, 66, .12);
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .section-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        /* ── CARD ── */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin-bottom: 14px;
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card p {
+            font-size: 13.5px;
+            color: var(--muted);
+            margin-bottom: 12px;
+        }
+
+        .card p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* ── CODE ── */
+        pre {
+            background: var(--code-bg);
+            border: 1px solid #18182a;
+            border-radius: 8px;
+            padding: 14px 18px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12.5px;
+            line-height: 1.8;
+            color: #b0b8d8;
+            margin-top: 10px;
+        }
+
+        pre:last-child {
+            margin-bottom: 0;
+        }
+
+        .kw {
+            color: #c792ea;
+        }
+
+        .fn {
+            color: #82aaff;
+        }
+
+        .str {
+            color: #c3e88d;
+        }
+
+        .cm {
+            color: #3d4060;
+            font-style: italic;
+        }
+
+        .dec {
+            color: var(--yellow);
+        }
+
+        .var {
+            color: #f07178;
+        }
+
+        .num {
+            color: #f78c6c;
+        }
+
+        .hi {
+            background: rgba(124, 92, 252, .18);
+            border-radius: 3px;
+            padding: 1px 3px;
+        }
+
+        /* ── TAG / PILL ── */
+        .tag {
+            display: inline-block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11.5px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin: 2px 3px 2px 0;
+            border: 1px solid var(--border);
+        }
+
+        .tag-p {
+            background: rgba(124, 92, 252, .1);
+            color: var(--accent);
+            border-color: rgba(124, 92, 252, .3);
+        }
+
+        .tag-g {
+            background: rgba(0, 229, 160, .08);
+            color: var(--green);
+            border-color: rgba(0, 229, 160, .25);
+        }
+
+        .tag-b {
+            background: rgba(56, 182, 255, .08);
+            color: var(--blue);
+            border-color: rgba(56, 182, 255, .25);
+        }
+
+        .tag-y {
+            background: rgba(255, 201, 71, .08);
+            color: var(--yellow);
+            border-color: rgba(255, 201, 71, .25);
+        }
+
+        .tag-r {
+            background: rgba(252, 92, 125, .08);
+            color: var(--accent2);
+            border-color: rgba(252, 92, 125, .25);
+        }
+
+        /* ── TABLE ── */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        th {
+            text-align: left;
+            color: var(--muted);
+            font-weight: 600;
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 9px 12px;
+            border-bottom: 1px solid #131320;
+            vertical-align: top;
+        }
+
+        td:first-child {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--blue);
+            font-size: 12px;
+        }
+
+        td:last-child {
+            color: var(--muted);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* ── NOTE / TIP ── */
+        .tip {
+            display: flex;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 7px;
+            font-size: 13px;
+            margin-top: 12px;
+        }
+
+        .tip-y {
+            background: #1a1500;
+            border-left: 3px solid var(--yellow);
+            color: #c8a840;
+        }
+
+        .tip-g {
+            background: #001a12;
+            border-left: 3px solid var(--green);
+            color: #00b07a;
+        }
+
+        .tip-p {
+            background: #110d20;
+            border-left: 3px solid var(--accent);
+            color: #9b82f5;
+        }
+
+        /* ── GRID ── */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        @media (max-width: 640px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ── COMPARE ── */
+        .compare {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .compare-box {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px;
+        }
+
+        .compare-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .cl-green {
+            color: var(--green);
+        }
+
+        .cl-blue {
+            color: var(--blue);
+        }
+
+        @media (max-width: 600px) {
+            .compare {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* run cmd */
+        .run {
+            background: #061206;
+            border: 1px solid #1a3a1a;
+            border-radius: 8px;
+            padding: 11px 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12.5px;
+            color: var(--green);
+            margin-top: 10px;
+        }
+
+        .run::before {
+            content: '$ ';
+            color: var(--muted);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+
+        <!-- HEADER -->
+        <div class="header">
+            <div class="badge">CampusX · Module 12 · Streamlit Complete Guide</div>
+            <h1>Streamlit <span>Complete</span> Guide</h1>
+            <p class="tagline">Every concept you need to build production-grade Streamlit apps</p>
+        </div>
+
+        <!-- TOC -->
+        <div class="toc">
+            <a href="#exec">Execution Model</a>
+            <a href="#display">Display Elements</a>
+            <a href="#widgets">Input Widgets</a>
+            <a href="#layout">Layout & Containers</a>
+            <a href="#state">Session State</a>
+            <a href="#cache">Caching</a>
+            <a href="#chat">Chat UI</a>
+            <a href="#forms">Forms</a>
+            <a href="#status">Status & Feedback</a>
+            <a href="#secrets">Secrets</a>
+            <a href="#multipage">Multipage Apps</a>
+            <a href="#config">Page Config</a>
+        </div>
+
+
+        <!-- 1. EXECUTION MODEL -->
+        <div class="section" id="exec">
+            <div class="section-header">
+                <div class="section-icon ic-purple">⚡</div>
+                <div>
+                    <div class="section-num">Topic 75</div>
+                    <div class="section-title">Execution Model</div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">🔁 Script reruns top-to-bottom on every interaction</div>
+                <p>Every time a user interacts (clicks, types, selects), Streamlit reruns your entire script from top to
+                    bottom. This is the most critical concept to internalize.</p>
+                <div class="tip tip-y">⚠️ Expensive operations (DB calls, model loads) placed at the top level will
+                    re-execute on every click — always wrap them in <code>@st.cache_data</code> or
+                    <code>@st.cache_resource</code>.
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">📁 Project Structure</div>
+                <pre>langgraph-chatbot/
+├── app.py               <span class="cm"># main streamlit file</span>
+├── pages/               <span class="cm"># for multipage apps</span>
+│   └── 2_Settings.py
+├── .streamlit/
+│   └── secrets.toml     <span class="cm"># API keys, DB URLs</span>
+└── requirements.txt</pre>
+                <div class="run">streamlit run app.py</div>
+            </div>
+        </div>
+
+
+        <!-- 2. DISPLAY ELEMENTS -->
+        <div class="section" id="display">
+            <div class="section-header">
+                <div class="section-icon ic-blue">📄</div>
+                <div>
+                    <div class="section-num">Topic 76</div>
+                    <div class="section-title">Display Elements</div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">Core display functions</div>
+                <table>
+                    <tr>
+                        <th>Function</th>
+                        <th>Use</th>
+                    </tr>
+                    <tr>
+                        <td>st.write(anything)</td>
+                        <td>Swiss-army knife — renders text, df, chart, dict, etc.</td>
+                    </tr>
+                    <tr>
+                        <td>st.title("text")</td>
+                        <td>Large page title (H1)</td>
+                    </tr>
+                    <tr>
+                        <td>st.header("text")</td>
+                        <td>Section header (H2)</td>
+                    </tr>
+                    <tr>
+                        <td>st.subheader("text")</td>
+                        <td>Sub-section (H3)</td>
+                    </tr>
+                    <tr>
+                        <td>st.markdown("**bold**")</td>
+                        <td>Full Markdown support</td>
+                    </tr>
+                    <tr>
+                        <td>st.caption("text")</td>
+                        <td>Small grey helper text</td>
+                    </tr>
+                    <tr>
+                        <td>st.code("...", language="python")</td>
+                        <td>Syntax-highlighted code block</td>
+                    </tr>
+                    <tr>
+                        <td>st.dataframe(df)</td>
+                        <td>Interactive sortable table</td>
+                    </tr>
+                    <tr>
+                        <td>st.table(df)</td>
+                        <td>Static table (no sorting)</td>
+                    </tr>
+                    <tr>
+                        <td>st.metric("Label", value, delta)</td>
+                        <td>KPI card with change indicator</td>
+                    </tr>
+                    <tr>
+                        <td>st.image(path_or_url)</td>
+                        <td>Display image</td>
+                    </tr>
+                    <tr>
+                        <td>st.json(dict)</td>
+                        <td>Collapsible JSON viewer</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="card">
+                <div class="card-title">Practical examples</div>
+                <pre><span class="kw">import</span> streamlit <span class="kw">as</span> st
+
+st.<span class="fn">title</span>(<span class="str">"My AI App"</span>)
+st.<span class="fn">markdown</span>(<span class="str">"Built with **LangGraph** & *Streamlit*"</span>)
+
+<span class="cm"># Metric card — great for dashboards</span>
+st.<span class="fn">metric</span>(label=<span class="str">"Accuracy"</span>, value=<span class="str">"94.5%"</span>, delta=<span class="str">"+2.1%"</span>)
+
+<span class="cm"># Render a dataframe interactively</span>
+st.<span class="fn">dataframe</span>(df, use_container_width=<span class="kw">True</span>)</pre>
+            </div>
+        </div>
+
+
+        <!-- 3. INPUT WIDGETS -->
+        <div class="section" id="widgets">
+            <div class="section-header">
+                <div class="section-icon ic-green">🎛️</div>
+                <div>
+                    <div class="section-num">Topic 77</div>
+                    <div class="section-title">Input Widgets</div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">All return the current value on each rerun</div>
+                <table>
+                    <tr>
+                        <th>Widget</th>
+                        <th>Use Case</th>
+                    </tr>
+                    <tr>
+                        <td>st.text_input("label")</td>
+                        <td>Single-line text (names, queries)</td>
+                    </tr>
+                    <tr>
+                        <td>st.text_area("label")</td>
+                        <td>Multi-line text (prompts, descriptions)</td>
+                    </tr>
+                    <tr>
+                        <td>st.number_input("label")</td>
+                        <td>Numeric input with min/max/step</td>
+                    </tr>
+                    <tr>
+                        <td>st.selectbox("label", options)</td>
+                        <td>Dropdown — pick one</td>
+                    </tr>
+                    <tr>
+                        <td>st.multiselect("label", options)</td>
+                        <td>Dropdown — pick many</td>
+                    </tr>
+                    <tr>
+                        <td>st.radio("label", options)</td>
+                        <td>Radio button group</td>
+                    </tr>
+                    <tr>
+                        <td>st.checkbox("label")</td>
+                        <td>Boolean toggle</td>
+                    </tr>
+                    <tr>
+                        <td>st.slider("label", min, max)</td>
+                        <td>Range slider</td>
+                    </tr>
+                    <tr>
+                        <td>st.date_input("label")</td>
+                        <td>Date picker</td>
+                    </tr>
+                    <tr>
+                        <td>st.file_uploader("label")</td>
+                        <td>File upload (CSV, PDF, images)</td>
+                    </tr>
+                    <tr>
+                        <td>st.button("label")</td>
+                        <td>Click trigger — returns True once</td>
+                    </tr>
+                    <tr>
+                        <td>st.toggle("label")</td>
+                        <td>On/Off switch</td>
+                    </tr>
+                    <tr>
+                        <td>st.chat_input("placeholder")</td>
+                        <td>Sticky chat input at bottom of page</td>
+                    </tr>
+                </table>
+                <pre><span class="cm"># Widgets are just Python assignments</span>
+name   = st.<span class="fn">text_input</span>(<span class="str">"Your name"</span>)
+model  = st.<span class="fn">selectbox</span>(<span class="str">"Choose model"</span>, [<span class="str">"gpt-4"</span>, <span class="str">"llama-3"</span>, <span class="str">"claude"</span>])
+temp   = st.<span class="fn">slider</span>(<span class="str">"Temperature"</span>, <span class="num">0.0</span>, <span class="num">1.0</span>, <span class="num">0.7</span>)
+upload = st.<span class="fn">file_uploader</span>(<span class="str">"Upload PDF"</span>, type=[<span class="str">"pdf"</span>])
+
+<span class="kw">if</span> st.<span class="fn">button</span>(<span class="str">"Run"</span>):
+    st.<span class="fn">write</span>(<span class="str">f"Hello {name}, temp={temp}"</span>)</pre>
+            </div>
+        </div>
+
+
+        <!-- 4. LAYOUT -->
+        <div class="section" id="layout">
+            <div class="section-header">
+                <div class="section-icon ic-orange">🗂️</div>
+                <div>
+                    <div class="section-num">Topic 78</div>
+                    <div class="section-title">Layout & Containers</div>
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-title">st.sidebar</div>
+                    <p>Pin widgets to a collapsible left panel — industry standard for settings, filters, API keys.</p>
+                    <pre><span class="kw">with</span> st.sidebar:
+    st.<span class="fn">header</span>(<span class="str">"Settings"</span>)
+    model = st.<span class="fn">selectbox</span>(
+        <span class="str">"Model"</span>, [<span class="str">"gpt-4"</span>, <span class="str">"llama"</span>]
+    )
+    temp = st.<span class="fn">slider</span>(<span class="str">"Temp"</span>, <span class="num">0.0</span>, <span class="num">1.0</span>)</pre>
+                </div>
+                <div class="card">
+                    <div class="card-title">st.columns</div>
+                    <p>Side-by-side layout for metrics, charts, inputs.</p>
+                    <pre>col1, col2, col3 = \
+    st.<span class="fn">columns</span>([<span class="num">2</span>, <span class="num">1</span>, <span class="num">1</span>])
+
+<span class="kw">with</span> col1:
+    st.<span class="fn">metric</span>(<span class="str">"Revenue"</span>, <span class="str">"$4.2M"</span>)
+<span class="kw">with</span> col2:
+    st.<span class="fn">metric</span>(<span class="str">"Users"</span>, <span class="str">"12k"</span>)
+<span class="kw">with</span> col3:
+    st.<span class="fn">metric</span>(<span class="str">"Uptime"</span>, <span class="str">"99.9%"</span>)</pre>
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-title">st.tabs</div>
+                    <p>Organize content across clickable tab panels.</p>
+                    <pre>tab1, tab2 = st.<span class="fn">tabs</span>(
+    [<span class="str">"📊 Chart"</span>, <span class="str">"📋 Data"</span>]
+)
+<span class="kw">with</span> tab1:
+    st.<span class="fn">line_chart</span>(df)
+<span class="kw">with</span> tab2:
+    st.<span class="fn">dataframe</span>(df)</pre>
+                </div>
+                <div class="card">
+                    <div class="card-title">st.expander</div>
+                    <p>Collapsible panel — great for showing extra info, raw data, or debug output.</p>
+                    <pre><span class="kw">with</span> st.<span class="fn">expander</span>(<span class="str">"See raw data"</span>):
+    st.<span class="fn">dataframe</span>(raw_df)
+
+<span class="kw">with</span> st.<span class="fn">expander</span>(<span class="str">"Debug info"</span>):
+    st.<span class="fn">json</span>(response_dict)</pre>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">st.container & st.empty</div>
+                <p><span class="tag tag-p">st.container()</span> groups elements (re-orderable). <span
+                        class="tag tag-b">st.empty()</span> creates a single-slot placeholder you can overwrite —
+                    perfect for streaming text or live updates.</p>
+                <pre><span class="cm"># Streaming text output pattern</span>
+placeholder = st.<span class="fn">empty</span>()
+full_response = <span class="str">""</span>
+
+<span class="kw">for</span> chunk <span class="kw">in</span> stream_llm():
+    full_response += chunk
+    placeholder.<span class="fn">markdown</span>(full_response + <span class="str">"▌"</span>)  <span class="cm"># cursor effect</span>
+
+placeholder.<span class="fn">markdown</span>(full_response)  <span class="cm"># final, no cursor</span></pre>
+            </div>
+        </div>
+
+
+        <!-- 5. SESSION STATE -->
+        <div class="section" id="state">
+            <div class="section-header">
+                <div class="section-icon ic-purple">💾</div>
+                <div>
+                    <div class="section-num">Topic 79</div>
+                    <div class="section-title">Session State</div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">Persist data across reruns — per user, per session</div>
+                <p><code>st.session_state</code> is a dict that survives reruns within the same browser session.
+                    Different users each get their own isolated state.</p>
+                <pre><span class="cm"># Initialize (always guard with 'not in')</span>
+<span class="kw">if</span> <span class="str">"count"</span> <span class="kw">not in</span> st.session_state:
+    st.session_state[<span class="str">"count"</span>] = <span class="num">0</span>
+
+<span class="cm"># Read — two equivalent syntaxes</span>
+x = st.session_state[<span class="str">"count"</span>]     <span class="cm"># dict style</span>
+x = st.session_state.count          <span class="cm"># attribute style</span>
+
+<span class="cm"># Write</span>
+st.session_state[<span class="str">"count"</span>] += <span class="num">1</span>
+
+<span class="cm"># Delete</span>
+<span class="kw">del</span> st.session_state[<span class="str">"count"</span>]
+
+<span class="cm"># Widget key → auto-syncs to session_state</span>
+st.<span class="fn">text_input</span>(<span class="str">"Name"</span>, key=<span class="str">"username"</span>)
+st.<span class="fn">write</span>(st.session_state.username)  <span class="cm"># always in sync</span></pre>
+            </div>
+            <div class="card">
+                <div class="card-title">Callbacks — run before the script reruns</div>
+                <p>Attach <code>on_click</code> / <code>on_change</code> to widgets for event-driven logic.</p>
+                <pre><span class="kw">def</span> <span class="fn">increment</span>():
+    st.session_state.count += <span class="num">1</span>
+
+st.<span class="fn">button</span>(<span class="str">"➕ Add"</span>, on_click=increment)
+st.<span class="fn">write</span>(<span class="str">"Count:"</span>, st.session_state.count)</pre>
+                <div class="tip tip-p">💡 session_state vs cache: session_state is per-user, per-session. Cached values
+                    are shared across all users.</div>
+            </div>
+        </div>
+
+
+        <!-- 6. CACHING -->
+        <div class="section" id="cache">
+            <div class="section-header">
+                <div class="section-icon ic-yellow">⚡</div>
+                <div>
+                    <div class="section-num">Topic 80</div>
+                    <div class="section-title">Caching — Critical for Performance</div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">Two decorators — know when to use each</div>
+                <div class="compare">
+                    <div class="compare-box">
+                        <div class="compare-label cl-green">@st.cache_data</div>
+                        <p style="font-size:13px; color:var(--muted);">Returns <strong style="color:var(--text)">data
+                                copies</strong>. Use for DB queries, API calls, dataframe transforms, ML inference
+                            results.</p>
+                        <pre style="margin-top:8px;"><span class="dec">@st.cache_data</span>
+<span class="kw">def</span> <span class="fn">load_data</span>(url):
+    <span class="kw">return</span> pd.<span class="fn">read_csv</span>(url)</pre>
+                    </div>
+                    <div class="compare-box">
+                        <div class="compare-label cl-blue">@st.cache_resource</div>
+                        <p style="font-size:13px; color:var(--muted);">Returns <strong style="color:var(--text)">shared
+                                object</strong>. Use for ML models, DB connections, LangGraph workflows.</p>
+                        <pre style="margin-top:8px;"><span class="dec">@st.cache_resource</span>
+<span class="kw">def</span> <span class="fn">load_model</span>():
+    <span class="kw">return</span> <span class="fn">build_chatbot</span>()</pre>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">Cache parameters</div>
+                <pre><span class="cm"># TTL — auto-expire after N seconds (e.g. live data)</span>
+<span class="dec">@st.cache_data</span>(ttl=<span class="num">300</span>)          <span class="cm"># expire every 5 min</span>
+<span class="kw">def</span> <span class="fn">get_live_prices</span>(): ...
+
+<span class="cm"># Max entries — limit memory</span>
+<span class="dec">@st.cache_data</span>(max_entries=<span class="num">50</span>)
+<span class="kw">def</span> <span class="fn">query_db</span>(user_id): ...
+
+<span class="cm"># Persist to disk across restarts</span>
+<span class="dec">@st.cache_data</span>(persist=<span class="str">"disk"</span>)
+<span class="kw">def</span> <span class="fn">expensive_computation</span>(): ...
+
+<span class="cm"># Manual cache clear</span>
+<span class="kw">if</span> st.<span class="fn">button</span>(<span class="str">"Clear cache"</span>):
+    st.cache_data.<span class="fn">clear</span>()</pre>
+                <div class="tip tip-y">⚠️ <code>@st.cache_resource</code> returns the actual shared object — if you
+                    mutate it (e.g., append to a list), all users see that change. Use <code>@st.cache_data</code> when
+                    you don't want mutations shared.</div>
+            </div>
+        </div>
+
+
+        <!-- 7. CHAT UI -->
+        <div class="section" id="chat">
+            <div class="section-header">
+                <div class="section-icon ic-green">💬</div>
+                <div>
+                    <div class="section-num">Topic 81</div>
+                    <div class="section-title">Chat UI (LLM / Chatbot Pattern)</div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">Complete production chatbot pattern</div>
+                <pre><span class="kw">import</span> streamlit <span class="kw">as</span> st
+<span class="kw">from</span> langchain_core.messages <span class="kw">import</span> HumanMessage
+
+<span class="cm"># 1. Load model once — cached globally</span>
+<span class="dec">@st.cache_resource</span>
+<span class="kw">def</span> <span class="fn">get_chatbot</span>():
+    <span class="kw">return</span> <span class="fn">build_langgraph_chatbot</span>()
+
+chatbot = <span class="fn">get_chatbot</span>()
+
+<span class="cm"># 2. Init chat history once per session</span>
+<span class="kw">if</span> <span class="str">"messages"</span> <span class="kw">not in</span> st.session_state:
+    st.session_state.messages = []
+
+<span class="cm"># 3. Render all past messages</span>
+<span class="kw">for</span> msg <span class="kw">in</span> st.session_state.messages:
+    <span class="kw">with</span> st.<span class="fn">chat_message</span>(msg[<span class="str">"role"</span>]):
+        st.<span class="fn">markdown</span>(msg[<span class="str">"content"</span>])
+
+<span class="cm"># 4. Get new user input</span>
+<span class="kw">if</span> prompt := st.<span class="fn">chat_input</span>(<span class="str">"Ask me anything..."</span>):
+
+    <span class="cm"># 5. Show + save user message</span>
+    st.session_state.messages.<span class="fn">append</span>(
+        {<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: prompt}
+    )
+    <span class="kw">with</span> st.<span class="fn">chat_message</span>(<span class="str">"user"</span>):
+        st.<span class="fn">markdown</span>(prompt)
+
+    <span class="cm"># 6. Call LLM + stream response</span>
+    <span class="kw">with</span> st.<span class="fn">chat_message</span>(<span class="str">"assistant"</span>):
+        placeholder = st.<span class="fn">empty</span>()
+        full = <span class="str">""</span>
+        <span class="kw">for</span> chunk <span class="kw">in</span> chatbot.<span class="fn">stream</span>({<span class="str">"messages"</span>: [<span class="fn">HumanMessage</span>(prompt)]}):
+            full += chunk
+            placeholder.<span class="fn">markdown</span>(full + <span class="str">"▌"</span>)
+        placeholder.<span class="fn">markdown</span>(full)
+
+    <span class="cm"># 7. Save AI response</span>
+    st.session_state.messages.<span class="fn">append</span>(
+        {<span class="str">"role"</span>: <span class="str">"assistant"</span>, <span class="str">"content"</span>: full}
+    )</pre>
+            </div>
+            <div class="tip tip-g">✅ Use <code>st.markdown()</code> inside chat_message instead of
+                <code>st.text()</code> — it renders bold, code blocks, lists from LLM output properly.
+            </div>
+        </div>
+
+
+        <!-- 8. FORMS -->
+        <div class="section" id="forms">
+            <div class="section-header">
+                <div class="section-icon ic-pink">📝</div>
+                <div>
+                    <div class="section-num">Topic 82</div>
+                    <div class="section-title">Forms — Batch Widget Submissions</div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">Group widgets — script only reruns on submit</div>
+                <p>Without forms, every keypress/slider move triggers a full rerun. Forms batch all changes and rerun
+                    only when submitted — essential for search or settings panels.</p>
+                <pre><span class="kw">with</span> st.<span class="fn">form</span>(<span class="str">"search_form"</span>):
+    query  = st.<span class="fn">text_input</span>(<span class="str">"Search query"</span>)
+    top_k  = st.<span class="fn">slider</span>(<span class="str">"Results"</span>, <span class="num">1</span>, <span class="num">20</span>, <span class="num">5</span>)
+    source = st.<span class="fn">selectbox</span>(<span class="str">"Source"</span>, [<span class="str">"Web"</span>, <span class="str">"DB"</span>])
+    submitted = st.<span class="fn">form_submit_button</span>(<span class="str">"🔍 Search"</span>)
+
+<span class="kw">if</span> submitted:
+    results = <span class="fn">search</span>(query, top_k, source)
+    st.<span class="fn">dataframe</span>(results)</pre>
+            </div>
+        </div>
+
+
+        <!-- 9. STATUS & FEEDBACK -->
+        <div class="section" id="status">
+            <div class="section-header">
+                <div class="section-icon ic-blue">🔔</div>
+                <div>
+                    <div class="section-num">Topic 83</div>
+                    <div class="section-title">Status & Feedback Elements</div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">User feedback and loading states</div>
+                <table>
+                    <tr>
+                        <th>Function</th>
+                        <th>Use</th>
+                    </tr>
+                    <tr>
+                        <td>st.success("msg")</td>
+                        <td>Green success banner</td>
+                    </tr>
+                    <tr>
+                        <td>st.error("msg")</td>
+                        <td>Red error banner</td>
+                    </tr>
+                    <tr>
+                        <td>st.warning("msg")</td>
+                        <td>Yellow warning banner</td>
+                    </tr>
+                    <tr>
+                        <td>st.info("msg")</td>
+                        <td>Blue info banner</td>
+                    </tr>
+                    <tr>
+                        <td>st.toast("msg")</td>
+                        <td>Temporary floating notification</td>
+                    </tr>
+                    <tr>
+                        <td>st.spinner("Loading…")</td>
+                        <td>Animated loading overlay</td>
+                    </tr>
+                    <tr>
+                        <td>st.progress(value)</td>
+                        <td>Progress bar 0.0 → 1.0</td>
+                    </tr>
+                    <tr>
+                        <td>st.balloons()</td>
+                        <td>Celebration animation 🎈</td>
+                    </tr>
+                    <tr>
+                        <td>st.status("Working…")</td>
+                        <td>Expandable live status box</td>
+                    </tr>
+                </table>
+                <pre><span class="cm"># Spinner wraps long-running calls</span>
+<span class="kw">with</span> st.<span class="fn">spinner</span>(<span class="str">"Calling AI model..."</span>):
+    response = <span class="fn">call_llm</span>(prompt)
+
+st.<span class="fn">success</span>(<span class="str">"Done!"</span>)
+
+<span class="cm"># Status — shows step-by-step progress</span>
+<span class="kw">with</span> st.<span class="fn">status</span>(<span class="str">"Processing pipeline..."</span>) <span class="kw">as</span> status:
+    st.<span class="fn">write</span>(<span class="str">"Step 1: Loading data"</span>)
+    <span class="fn">load_data</span>()
+    st.<span class="fn">write</span>(<span class="str">"Step 2: Running model"</span>)
+    <span class="fn">run_model</span>()
+    status.<span class="fn">update</span>(label=<span class="str">"Complete!"</span>, state=<span class="str">"complete"</span>)</pre>
+            </div>
+        </div>
+
+
+        <!-- 10. SECRETS -->
+        <div class="section" id="secrets">
+            <div class="section-header">
+                <div class="section-icon ic-yellow">🔐</div>
+                <div>
+                    <div class="section-num">Topic 84</div>
+                    <div class="section-title">Secrets Management</div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">Never hardcode API keys — use secrets.toml</div>
+                <p>Streamlit reads <code>.streamlit/secrets.toml</code> locally and from the Streamlit Cloud dashboard
+                    in production.</p>
+                <pre><span class="cm"># .streamlit/secrets.toml  (never commit to git!)</span>
+OPENAI_API_KEY = <span class="str">"sk-..."</span>
+GROQ_API_KEY   = <span class="str">"gsk-..."</span>
+
+[database]
+host     = <span class="str">"db.example.com"</span>
+password = <span class="str">"secret123"</span></pre>
+                <pre><span class="cm"># Access in your Python code</span>
+api_key  = st.secrets[<span class="str">"OPENAI_API_KEY"</span>]
+db_pass  = st.secrets[<span class="str">"database"</span>][<span class="str">"password"</span>]
+
+<span class="cm"># Or as attributes</span>
+api_key  = st.secrets.OPENAI_API_KEY</pre>
+                <div class="tip tip-y">⚠️ Add <code>.streamlit/secrets.toml</code> to <code>.gitignore</code>. In
+                    production, set secrets via Streamlit Cloud's UI — they're injected automatically.</div>
+            </div>
+        </div>
+
+
+        <!-- 11. MULTIPAGE -->
+        <div class="section" id="multipage">
+            <div class="section-header">
+                <div class="section-icon ic-orange">📑</div>
+                <div>
+                    <div class="section-num">Topic 85</div>
+                    <div class="section-title">Multipage Apps</div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">Automatic page routing via directory structure</div>
+                <p>Files inside a <code>pages/</code> folder become separate pages automatically — no routing code
+                    needed.</p>
+                <pre>my_app/
+├── app.py               <span class="cm"># Home page</span>
+└── pages/
+    ├── 1_📊_Dashboard.py
+    ├── 2_💬_Chat.py
+    └── 3_⚙️_Settings.py</pre>
+                <div class="tip tip-g">✅ Prefix filenames with numbers to control sort order. Emojis in names appear in
+                    the sidebar navigation automatically.</div>
+                <p style="margin-top:12px;">Share data between pages with <code>st.session_state</code> — it persists
+                    across page navigation within the same session.</p>
+                <pre><span class="cm"># In app.py (Home)</span>
+st.session_state[<span class="str">"user_id"</span>] = <span class="str">"abc123"</span>
+
+<span class="cm"># In pages/2_Chat.py — same session, same state</span>
+user = st.session_state.get(<span class="str">"user_id"</span>, <span class="str">"guest"</span>)
+st.<span class="fn">write</span>(<span class="str">f"Chatting as: {user}"</span>)</pre>
+            </div>
+        </div>
+
+
+        <!-- 12. PAGE CONFIG -->
+        <div class="section" id="config">
+            <div class="section-header">
+                <div class="section-icon ic-purple">⚙️</div>
+                <div>
+                    <div class="section-num">Topic 86</div>
+                    <div class="section-title">Page Config & App Setup</div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">Must be the first Streamlit call in your script</div>
+                <pre>st.<span class="fn">set_page_config</span>(
+    page_title=<span class="str">"Smart AI Assistant"</span>,
+    page_icon=<span class="str">"🤖"</span>,
+    layout=<span class="str">"wide"</span>,          <span class="cm"># "centered" (default) | "wide"</span>
+    initial_sidebar_state=<span class="str">"expanded"</span>,
+    menu_items={
+        <span class="str">"Get Help"</span>: <span class="str">"https://docs.example.com"</span>,
+        <span class="str">"About"</span>: <span class="str">"My AI App v1.0"</span>
+    }
+)</pre>
+                <div class="tip tip-p">💡 Use <code>layout="wide"</code> for dashboards and data-heavy apps. Use
+                    <code>"centered"</code> for chat apps and forms.
+                </div>
+            </div>
+
+            <!-- Quick Cheat Sheet -->
+            <div class="card" style="margin-top: 24px; border-color: rgba(124,92,252,.3);">
+                <div class="card-title" style="color: var(--accent);">⚡ Quick Cheat Sheet</div>
+                <table>
+                    <tr>
+                        <th>Concept</th>
+                        <th>Key Function / Decorator</th>
+                    </tr>
+                    <tr>
+                        <td>Cache data (queries/API)</td>
+                        <td><span class="tag tag-g">@st.cache_data</span></td>
+                    </tr>
+                    <tr>
+                        <td>Cache shared resource (model)</td>
+                        <td><span class="tag tag-b">@st.cache_resource</span></td>
+                    </tr>
+                    <tr>
+                        <td>Persist data in session</td>
+                        <td><span class="tag tag-p">st.session_state</span></td>
+                    </tr>
+                    <tr>
+                        <td>Sidebar settings panel</td>
+                        <td><span class="tag tag-y">st.sidebar</span></td>
+                    </tr>
+                    <tr>
+                        <td>Side-by-side layout</td>
+                        <td><span class="tag tag-g">st.columns()</span></td>
+                    </tr>
+                    <tr>
+                        <td>Tabs</td>
+                        <td><span class="tag tag-b">st.tabs()</span></td>
+                    </tr>
+                    <tr>
+                        <td>Collapsible section</td>
+                        <td><span class="tag tag-p">st.expander()</span></td>
+                    </tr>
+                    <tr>
+                        <td>Live update / streaming</td>
+                        <td><span class="tag tag-y">st.empty()</span></td>
+                    </tr>
+                    <tr>
+                        <td>Batch widget submit</td>
+                        <td><span class="tag tag-r">st.form()</span></td>
+                    </tr>
+                    <tr>
+                        <td>Chat message bubble</td>
+                        <td><span class="tag tag-g">st.chat_message()</span></td>
+                    </tr>
+                    <tr>
+                        <td>Chat input bar</td>
+                        <td><span class="tag tag-b">st.chat_input()</span></td>
+                    </tr>
+                    <tr>
+                        <td>Loading indicator</td>
+                        <td><span class="tag tag-p">st.spinner()</span></td>
+                    </tr>
+                    <tr>
+                        <td>API keys / secrets</td>
+                        <td><span class="tag tag-y">st.secrets</span></td>
+                    </tr>
+                    <tr>
+                        <td>Multipage routing</td>
+                        <td><span class="tag tag-r">pages/ folder</span></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>

@@ -472,16 +472,16 @@
                 <h2>Plan of Action — Chatbot Roadmap</h2>
             </div>
             <div class="card">
+                <h3 class="p">Definition</h3>
+                <p>A <strong>LangGraph Chatbot</strong> is a stateful graph that accumulates history via
+                    <code>add_messages</code> and maintains session context using <code>thread_id</code>.
+                </p>
+            </div>
+            <div class="card">
                 <h3 class="g">Module Implementation Overview</h3>
-                <p>This document details the core logic for building a stateful chatbot. It focuses on:
-                    <strong style="color:var(--accent2)">Message State</strong> (using <code>add_messages</code> to
-                    accumulate history),
-                    <strong style="color:var(--accent2)">Graph Build</strong> (single-node recursive workflow),
-                    <strong style="color:var(--accent3)">Persistence</strong> (integrating <code>MemorySaver</code>
-                    checkpointers),
-                    and <strong style="color:var(--blue)">Session Control</strong> (managing context with
-                    <code>thread_id</code>).
-                    The goal is to transition from stateless execution to a persistent conversational agent.
+                <p>This module implements a stateful chatbot using <code>add_messages</code> for history,
+                    <code>MemorySaver</code> for persistence, and <code>thread_id</code> for session management,
+                    transitioning from stateless to persistent execution.
                 </p>
             </div>
             <div class="hl">
@@ -590,12 +590,9 @@
             </div>
 
             <div class="hl g">
-                <p><strong>add_messages</strong> is a LangGraph-provided reducer (from
-                    <code>langgraph.graph.message</code>) that automatically <strong>appends</strong> new messages to
-                    the existing list instead of overwriting. This is what gives the chatbot its <strong>conversation
-                        memory</strong> within a thread. It is equivalent to
-                    <code>Annotated[list[str], operator.add]</code> but built specifically for message types.
-                </p>
+                <p><strong>add_messages</strong> is a reducer that appends new messages to the state instead of
+                    overwriting, enabling conversation history. It handles message deduplication and is optimized for
+                    chat workflows.</p>
             </div>
 
             <div class="diff">
@@ -690,6 +687,18 @@ chatbot = graph.compile()</code></pre>
             </div>
 
             <div class="card">
+                <h3 class="p">What is a Checkpointer?</h3>
+                <p>A <strong>Checkpointer</strong> provides persistence by saving graph state at specific points,
+                    enabling session resumption, human-in-the-loop, and multi-turn chat.</p>
+            </div>
+
+            <div class="card">
+                <h3 class="o">Theory: Persistence with MemorySaver</h3>
+                <p><code>MemorySaver</code> is an in-RAM checkpointer that automatically saves conversation state after
+                    each step, enabling the bot to "remember" history within a session.</p>
+            </div>
+
+            <div class="card">
                 <h3 class="o">Compile with MemorySaver</h3>
                 <pre><code><span class="kw">from</span> langgraph.checkpoint.memory <span class="kw">import</span> MemorySaver
 
@@ -713,11 +722,8 @@ chatbot = graph.compile(checkpointer=memory)    <span class="cm"># attach checkp
             </div>
 
             <div class="hl g">
-                <p><strong>How it works:</strong> MemorySaver stores the full state (all messages) under the given
-                    <code>thread_id</code> after each invoke. On the next invoke with the <strong>same
-                        thread_id</strong>, LangGraph loads the stored state and appends the new message — giving full
-                    conversation context to the LLM.
-                </p>
+                <p><strong>How it works:</strong> State is saved under a <code>thread_id</code>. Subsequent calls with
+                    the same ID load this history, providing full context to the LLM.</p>
             </div>
 
             <div class="hl o">
@@ -747,44 +753,44 @@ chatbot = graph.compile(checkpointer=memory)    <span class="cm"># attach checkp
                         <tr>
                             <td>add_messages</td>
                             <td>
-                                <p>LangGraph reducer from <code>langgraph.graph.message</code>. Appends new messages to
-                                    the list instead of overwriting. Smart deduplication included.</p>
+                                <p>Appends new messages to history with automated deduplication.</p>
                             </td>
                         </tr>
                         <tr>
                             <td>Annotated[list[BaseMessage], add_messages]</td>
                             <td>
-                                <p>The state field type that enables automatic message accumulation. All incoming
-                                    message lists are merged/appended.</p>
+                                <p>State type enabling automatic accumulation and merging of messages.</p>
                             </td>
                         </tr>
                         <tr>
                             <td>MemorySaver</td>
                             <td>
-                                <p>In-memory checkpointer. Saves full graph state per thread_id. Attach via
-                                    <code>graph.compile(checkpointer=memory)</code>.
-                                </p>
+                                <p>RAM-based checkpointer for persisting graph state per <code>thread_id</code>.</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>checkpointer=memory</td>
+                            <td>
+                                <p>Links storage layer during <code>compile()</code> to enable persistence.</p>
                             </td>
                         </tr>
                         <tr>
                             <td>thread_id</td>
                             <td>
-                                <p>Unique key that identifies a conversation session. Different thread_ids = separate
-                                    independent conversations.</p>
+                                <p>Unique identifier used to isolate and track separate chat sessions.</p>
                             </td>
                         </tr>
                         <tr>
                             <td>config</td>
                             <td>
-                                <p><code>{'configurable': {'thread_id': id}}</code> — passed as 2nd arg to
-                                    <code>chatbot.invoke(state, config=config)</code>. Links the call to stored state.
+                                <p>Passes <code>thread_id</code> to <code>invoke()</code> to load/save session context.
                                 </p>
                             </td>
                         </tr>
                         <tr>
                             <td>response['messages'][-1]</td>
                             <td>
-                                <p>Gets the last message in the state (the AI's response to the latest user turn).</p>
+                                <p>Retrieves the most recent message (AI response) from the graph state.</p>
                             </td>
                         </tr>
                     </tbody>

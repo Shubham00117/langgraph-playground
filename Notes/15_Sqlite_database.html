@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LangGraph + SQLite — Notes</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@300;400;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #07070e;
+            --card: #0e0e1c;
+            --border: #181828;
+            --accent: #6c63ff;
+            --green: #00dfa2;
+            --yellow: #ffd166;
+            --blue: #4cc9f0;
+            --pink: #f72585;
+            --text: #dde1f0;
+            --muted: #52527a;
+            --code-bg: #060610;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            padding: 36px 20px 80px;
+            line-height: 1.65;
+        }
+
+        .page {
+            max-width: 860px;
+            margin: 0 auto;
+        }
+
+        .header {
+            margin-bottom: 44px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(108, 99, 255, .15);
+            border: 1px solid rgba(108, 99, 255, .4);
+            color: var(--accent);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            padding: 4px 12px;
+            border-radius: 99px;
+            margin-bottom: 14px;
+        }
+
+        h1 {
+            font-size: 34px;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 6px;
+        }
+
+        h1 span {
+            color: var(--accent);
+        }
+
+        .sub {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .section {
+            margin-bottom: 32px;
+        }
+
+        .sec-label {
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sec-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin-bottom: 12px;
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .card p {
+            font-size: 13.5px;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .card p:last-child {
+            margin-bottom: 0;
+        }
+
+        pre {
+            background: var(--code-bg);
+            border: 1px solid #12122a;
+            border-radius: 8px;
+            padding: 14px 18px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12.5px;
+            line-height: 1.8;
+            color: #a8b0d0;
+            margin-top: 10px;
+        }
+
+        .kw {
+            color: #c792ea;
+        }
+
+        .fn {
+            color: #82aaff;
+        }
+
+        .str {
+            color: #c3e88d;
+        }
+
+        .cm {
+            color: #333355;
+            font-style: italic;
+        }
+
+        .hi {
+            color: var(--green);
+        }
+
+        .cmp {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        @media(max-width:600px) {
+            .cmp {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .cmp-box {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px 16px;
+        }
+
+        .cmp-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .cl-r {
+            color: var(--pink);
+        }
+
+        .cl-g {
+            color: var(--green);
+        }
+
+        .tip {
+            padding: 10px 14px;
+            border-radius: 0 7px 7px 0;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        .tip-g {
+            background: #001a10;
+            border-left: 3px solid var(--green);
+            color: #00a070;
+        }
+
+        .tip-y {
+            background: #1a1400;
+            border-left: 3px solid var(--yellow);
+            color: #c8a030;
+        }
+
+        .tip-b {
+            background: #001522;
+            border-left: 3px solid var(--blue);
+            color: #38a0c0;
+        }
+
+        .flow {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .flow-step {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            padding: 9px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 13.5px;
+            color: var(--muted);
+        }
+
+        .flow-step:last-child {
+            border-bottom: none;
+        }
+
+        .flow-step strong {
+            color: var(--text);
+        }
+
+        .sn {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        th {
+            text-align: left;
+            color: var(--muted);
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 9px 12px;
+            border-bottom: 1px solid #0f0f1e;
+            vertical-align: top;
+        }
+
+        td:first-child {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--blue);
+            font-size: 11.5px;
+        }
+
+        td:last-child {
+            color: var(--muted);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .run {
+            background: #061206;
+            border: 1px solid #1a3a1a;
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12.5px;
+            color: var(--green);
+            margin-top: 10px;
+        }
+
+        .run::before {
+            content: '$ ';
+            color: var(--muted);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+
+        <!-- HEADER -->
+        <div class="header">
+            <div class="badge">CampusX · Module 15 · SQLite Persistence</div>
+            <h1>Persistent Memory <span>with SQLite</span></h1>
+            <p class="sub">Replace InMemorySaver with SQLite so conversations survive server restarts</p>
+        </div>
+
+
+        <!-- 1. WHY SQLite -->
+        <div class="section">
+            <div class="sec-label">Topic 100 — Why SQLite vs InMemorySaver</div>
+            <div class="cmp">
+                <div class="cmp-box">
+                    <div class="cmp-label cl-r">❌ InMemorySaver</div>
+                    <p style="font-size:13px;color:var(--muted);">Stores threads in RAM only. All conversations are
+                        <strong style="color:var(--text)">lost on server restart</strong>. Cannot list existing threads.
+                    </p>
+                </div>
+                <div class="cmp-box">
+                    <div class="cmp-label cl-g">✅ SqliteSaver</div>
+                    <p style="font-size:13px;color:var(--muted);">Writes to a <strong style="color:var(--text)">.db file
+                            on disk</strong>. Survives restarts. Can query all saved thread IDs on startup.</p>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- 2. INSTALL -->
+        <div class="section">
+            <div class="sec-label">Topic 101 — Installation</div>
+            <div class="card">
+                <div class="card-title">Install the SQLite checkpointer package</div>
+                <div class="run">pip install langgraph-checkpoint-sqlite</div>
+                <p style="margin-top:10px;">This creates a <code
+                        style="color:var(--blue);font-family:'JetBrains Mono',monospace">chatbot.db</code> file
+                    automatically on first run.</p>
+            </div>
+        </div>
+
+
+        <!-- 3. BACKEND SETUP -->
+        <div class="section">
+            <div class="sec-label">Topic 102 — Backend — Replace Checkpointer</div>
+            <div class="card">
+                <div class="card-title">Swap InMemorySaver → SqliteSaver</div>
+                <pre><span class="kw">from</span> langgraph.checkpoint.sqlite <span class="kw">import</span> SqliteSaver
+
+<span class="cm"># OLD — RAM only, lost on restart</span>
+<span class="cm"># from langgraph.checkpoint.memory import InMemorySaver</span>
+<span class="cm"># checkpointer = InMemorySaver()</span>
+
+<span class="cm"># NEW — persists to disk</span>
+checkpointer = SqliteSaver.<span class="fn">from_conn_string</span>(<span class="str">"chatbot.db"</span>)
+
+<span class="cm"># Compile graph with SQLite checkpointer</span>
+chatbot = graph.<span class="fn">compile</span>(checkpointer=checkpointer)</pre>
+                <div class="tip tip-g">✅ Everything else (graph, nodes, edges, CONFIG) stays the same. Only the
+                    checkpointer line changes.</div>
+            </div>
+        </div>
+
+
+        <!-- 4. RETRIEVE ALL THREADS -->
+        <div class="section">
+            <div class="sec-label">Topic 103 — Retrieve All Saved Threads</div>
+            <div class="card">
+                <div class="card-title">checkpointer.list(None) — query all thread IDs from DB</div>
+                <p>Because SQLite persists data, we can fetch all past thread IDs on app startup — unlike InMemorySaver
+                    which starts empty.</p>
+                <pre><span class="kw">def</span> <span class="fn">retrieve_all_threads</span>():
+    all_threads = <span class="fn">set</span>()  <span class="cm"># set prevents duplicates</span>
+
+    <span class="kw">for</span> checkpoint <span class="kw">in</span> checkpointer.<span class="fn">list</span>(<span class="hi">None</span>):
+        thread_id = checkpoint.config[<span class="str">'configurable'</span>][<span class="str">'thread_id'</span>]
+        all_threads.<span class="fn">add</span>(thread_id)
+
+    <span class="kw">return</span> <span class="fn">list</span>(all_threads)
+
+<span class="cm"># Output example: ['thread-1', 'thread-2']</span></pre>
+                <div class="tip tip-b">💡 <code>checkpointer.list(None)</code> returns all checkpoints across all
+                    threads. Each checkpoint has a <code>.config['configurable']['thread_id']</code>. Use a
+                    <code>set()</code> to deduplicate — one thread has many checkpoints (one per message).
+                </div>
+            </div>
+        </div>
+
+
+        <!-- 5. FRONTEND INTEGRATION -->
+        <div class="section">
+            <div class="sec-label">Topic 104 — Frontend — Load DB Threads on Startup</div>
+            <div class="card">
+                <div class="card-title">Key change: initialize chat_threads from DB, not empty list</div>
+                <p>On first load, populate <code
+                        style="color:var(--blue);font-family:'JetBrains Mono',monospace">chat_threads</code> by calling
+                    <code style="color:var(--blue);font-family:'JetBrains Mono',monospace">retrieve_all_threads()</code>
+                    instead of <code>[]</code>.
+                </p>
+                <pre><span class="kw">from</span> langgraph_database_backend <span class="kw">import</span> chatbot, retrieve_all_threads
+
+<span class="cm"># Session Setup</span>
+<span class="kw">if</span> <span class="str">'thread_id'</span> <span class="kw">not in</span> st.session_state:
+    st.session_state[<span class="str">'thread_id'</span>] = <span class="fn">generate_thread_id</span>()
+
+<span class="kw">if</span> <span class="str">'chat_threads'</span> <span class="kw">not in</span> st.session_state:
+    <span class="cm"># OLD: st.session_state['chat_threads'] = []</span>
+    <span class="cm"># NEW: load from SQLite DB</span>
+    st.session_state[<span class="str">'chat_threads'</span>] = <span class="fn">retrieve_all_threads</span>()
+
+<span class="cm"># Register current thread (new or existing)</span>
+<span class="fn">add_thread</span>(st.session_state[<span class="str">'thread_id'</span>])</pre>
+                <div class="tip tip-y">⚠️ This means when the app restarts, the sidebar shows all previous conversations
+                    automatically — just like ChatGPT's history panel.</div>
+            </div>
+        </div>
+
+
+        <!-- 6. QUICK REFERENCE -->
+        <div class="section">
+            <div class="sec-label">Topic 105 — Quick Reference</div>
+            <div class="card">
+                <table>
+                    <tr>
+                        <th>Item</th>
+                        <th>Detail</th>
+                    </tr>
+                    <tr>
+                        <td>Package</td>
+                        <td>langgraph-checkpoint-sqlite</td>
+                    </tr>
+                    <tr>
+                        <td>Class</td>
+                        <td>SqliteSaver.from_conn_string("chatbot.db")</td>
+                    </tr>
+                    <tr>
+                        <td>DB file created</td>
+                        <td>chatbot.db in project root (auto-created)</td>
+                    </tr>
+                    <tr>
+                        <td>List all threads</td>
+                        <td>checkpointer.list(None) → iterate checkpoints</td>
+                    </tr>
+                    <tr>
+                        <td>Get thread_id from checkpoint</td>
+                        <td>checkpoint.config['configurable']['thread_id']</td>
+                    </tr>
+                    <tr>
+                        <td>Use set()</td>
+                        <td>Deduplicate — one thread has many checkpoints</td>
+                    </tr>
+                    <tr>
+                        <td>Frontend change</td>
+                        <td>Init chat_threads = retrieve_all_threads() not []</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>
