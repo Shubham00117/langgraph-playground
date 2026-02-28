@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tools in LangGraph — Notes</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0f1117;
+            --surface: #161b27;
+            --surface2: #1c2235;
+            --border: #252d42;
+            --border2: #2e3a54;
+            --text: #cdd5e0;
+            --text-dim: #5a6a82;
+            --white: #eef2f8;
+            --orange: #f97316;
+            --blue: #60a5fa;
+            --green: #4ade80;
+            --purple: #a78bfa;
+            --yellow: #fbbf24;
+            --code-bg: #0a0d14;
+        }
+
+        html {
+            font-size: 15px;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            padding: 48px 32px 64px;
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        /* HEADER */
+        .page-header {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-bottom: 28px;
+            border-bottom: 1px solid var(--border2);
+            margin-bottom: 40px;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--text-dim);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .breadcrumb span {
+            color: var(--orange);
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--white);
+            letter-spacing: -0.02em;
+        }
+
+        .page-header p {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            max-width: 580px;
+        }
+
+        /* SECTION */
+        .section {
+            margin-bottom: 28px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            background: var(--surface);
+            animation: fadeUp 0.35s ease both;
+        }
+
+        .section:nth-child(1) {
+            animation-delay: 0s
+        }
+
+        .section:nth-child(2) {
+            animation-delay: .05s
+        }
+
+        .section:nth-child(3) {
+            animation-delay: .10s
+        }
+
+        .section:nth-child(4) {
+            animation-delay: .15s
+        }
+
+        .section:nth-child(5) {
+            animation-delay: .20s
+        }
+
+        .sec-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 11px 20px;
+            background: var(--surface2);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sec-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--white);
+        }
+
+        .sec-icon {
+            width: 26px;
+            height: 26px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        .ic-o {
+            background: rgba(249, 115, 22, .15);
+        }
+
+        .ic-b {
+            background: rgba(96, 165, 250, .15);
+        }
+
+        .ic-g {
+            background: rgba(74, 222, 128, .15);
+        }
+
+        .ic-p {
+            background: rgba(167, 139, 250, .15);
+        }
+
+        .badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .bd-o {
+            background: rgba(249, 115, 22, .12);
+            color: var(--orange);
+            border: 1px solid rgba(249, 115, 22, .25);
+        }
+
+        .bd-b {
+            background: rgba(96, 165, 250, .12);
+            color: var(--blue);
+            border: 1px solid rgba(96, 165, 250, .25);
+        }
+
+        .bd-g {
+            background: rgba(74, 222, 128, .12);
+            color: var(--green);
+            border: 1px solid rgba(74, 222, 128, .25);
+        }
+
+        .bd-p {
+            background: rgba(167, 139, 250, .12);
+            color: var(--purple);
+            border: 1px solid rgba(167, 139, 250, .25);
+        }
+
+        /* BODY */
+        .sec-body {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .col {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* BULLET POINTS */
+        .pts {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .pt {
+            display: grid;
+            grid-template-columns: 14px 1fr;
+            gap: 10px;
+            font-size: 0.855rem;
+            line-height: 1.65;
+            color: var(--text);
+            align-items: start;
+        }
+
+        .dot-o {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--orange);
+            margin-top: 8px;
+            flex-shrink: 0;
+        }
+
+        .dot-b {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--blue);
+            margin-top: 8px;
+            flex-shrink: 0;
+        }
+
+        .dot-g {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--green);
+            margin-top: 8px;
+            flex-shrink: 0;
+        }
+
+        .dot-p {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--purple);
+            margin-top: 8px;
+            flex-shrink: 0;
+        }
+
+        .pt strong {
+            color: var(--white);
+            font-weight: 600;
+        }
+
+        .pt em {
+            color: var(--text-dim);
+            font-style: italic;
+        }
+
+        /* INLINE CODE */
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.775rem;
+            background: rgba(96, 165, 250, .1);
+            color: var(--blue);
+            padding: 2px 7px;
+            border-radius: 4px;
+            border: 1px solid rgba(96, 165, 250, .18);
+            white-space: nowrap;
+        }
+
+        /* CODE BLOCK */
+        .code-wrap {
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border2);
+        }
+
+        .code-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 7px 14px;
+            background: #0d1018;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .code-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--text-dim);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .mac-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .mac-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+        }
+
+        .md1 {
+            background: #ff5f57;
+        }
+
+        .md2 {
+            background: #febc2e;
+        }
+
+        .md3 {
+            background: #28c840;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: #c8d3e8;
+            padding: 16px 18px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.775rem;
+            line-height: 1.8;
+            tab-size: 4;
+        }
+
+        .kw {
+            color: #e879f9;
+        }
+
+        .fn {
+            color: #67e8f9;
+        }
+
+        .str {
+            color: #86efac;
+        }
+
+        .cm {
+            color: #3d4f6a;
+            font-style: italic;
+        }
+
+        .cls {
+            color: #fde68a;
+        }
+
+        .op {
+            color: #94a3b8;
+        }
+
+        /* DIVIDER */
+        .divider {
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* STEPS (numbered) */
+        .steps {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .step {
+            display: grid;
+            grid-template-columns: 30px 1fr;
+            gap: 12px;
+            align-items: start;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .step:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .step-num {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--surface2);
+            border: 1.5px solid var(--border2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--purple);
+            font-weight: 600;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .step-text {
+            font-size: 0.855rem;
+            line-height: 1.65;
+            color: var(--text);
+        }
+
+        .step-text strong {
+            color: var(--white);
+        }
+
+        /* GRAPH DIAGRAM */
+        .diagram {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 8px 0;
+        }
+
+        .g-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+        }
+
+        .g-node {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            padding: 8px 22px;
+            border-radius: 6px;
+            border: 1.5px solid var(--border2);
+            background: var(--surface2);
+            color: var(--white);
+            text-align: center;
+            min-width: 108px;
+        }
+
+        .g-node.pill {
+            border-radius: 30px;
+            background: rgba(167, 139, 250, .1);
+            border-color: rgba(167, 139, 250, .4);
+            color: var(--purple);
+        }
+
+        .g-node.tool {
+            background: rgba(249, 115, 22, .08);
+            border-color: rgba(249, 115, 22, .35);
+            color: var(--orange);
+        }
+
+        .g-node.end {
+            background: rgba(74, 222, 128, .08);
+            border-color: rgba(74, 222, 128, .35);
+            color: var(--green);
+            border-radius: 30px;
+        }
+
+        .g-arrow {
+            color: var(--text-dim);
+            font-size: 1rem;
+            margin: 5px 0;
+            line-height: 1;
+            text-align: center;
+        }
+
+        .g-cond {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: var(--yellow);
+            background: rgba(251, 191, 36, .08);
+            border: 1px solid rgba(251, 191, 36, .2);
+            padding: 3px 10px;
+            border-radius: 4px;
+            margin: 5px 0;
+            letter-spacing: .04em;
+        }
+
+        .g-split {
+            display: flex;
+            gap: 28px;
+            align-items: flex-start;
+        }
+
+        .g-branch {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+        }
+
+        .g-blabel {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: var(--text-dim);
+            text-align: center;
+            margin-top: 5px;
+            letter-spacing: .04em;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(14px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+        <div class="breadcrumb">LangGraph <span>/</span> Agentic AI <span>/</span> CampusX</div>
+        <h1>Tools in LangGraph</h1>
+        <p>How to equip an LLM agent with external tools — web search, calculator, and live APIs — using ToolNode and
+            tools_condition.</p>
+    </div>
+
+
+    <!-- 1. CORE CONCEPTS -->
+    <div class="section">
+        <div class="sec-head">
+            <div class="sec-title">
+                <div class="sec-icon ic-o">🧠</div> Core Concepts
+            </div>
+            <span class="badge bd-o">Concept</span>
+        </div>
+        <div class="sec-body">
+            <div class="two-col">
+                <div class="col">
+                    <div class="pts">
+                        <div class="pt">
+                            <div class="dot-o"></div>
+                            <div>A <strong>Tool</strong> is any Python function decorated with <code>@tool</code> — web
+                                search, calculator, API call, etc.</div>
+                        </div>
+                        <div class="pt">
+                            <div class="dot-o"></div>
+                            <div><strong>Tool Calling</strong> — the LLM decides <em>which</em> tool to call and
+                                <em>what arguments</em> to pass, based on the user's question.</div>
+                        </div>
+                        <div class="pt">
+                            <div class="dot-o"></div>
+                            <div>The <strong>docstring</strong> of each <code>@tool</code> function is read by the LLM
+                                to decide when to use it — keep it clear and specific.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="pts">
+                        <div class="pt">
+                            <div class="dot-b"></div>
+                            <div><strong>ToolNode</strong> — prebuilt LangGraph node. Listens for tool calls from the
+                                LLM, routes to the correct function, and returns results to the graph.</div>
+                        </div>
+                        <div class="pt">
+                            <div class="dot-b"></div>
+                            <div><strong>tools_condition</strong> — prebuilt conditional edge. Answers: <em>"Route to
+                                    ToolNode, or end the workflow?"</em> based on the last LLM message.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 2. GRAPH ARCHITECTURE -->
+    <div class="section">
+        <div class="sec-head">
+            <div class="sec-title">
+                <div class="sec-icon ic-b">🔀</div> Graph Architecture
+            </div>
+            <span class="badge bd-b">Design</span>
+        </div>
+        <div class="sec-body">
+            <div class="two-col">
+                <div class="col">
+                    <div class="pts">
+                        <div class="pt">
+                            <div class="dot-b"></div>
+                            <div>The graph contains <strong>two nodes</strong> — <code>chat_node</code> and
+                                <code>tools</code> — connected in a loop.</div>
+                        </div>
+                        <div class="pt">
+                            <div class="dot-b"></div>
+                            <div><code>chat_node</code> (LLM) — either answers directly <em>→ end</em>, or requests a
+                                tool call <em>→ tools</em>.</div>
+                        </div>
+                        <div class="pt">
+                            <div class="dot-b"></div>
+                            <div><code>tool_node</code> — executes the tool, then <strong>always loops back</strong> to
+                                <code>chat_node</code> so the LLM can see the result and continue.</div>
+                        </div>
+                        <div class="pt">
+                            <div class="dot-b"></div>
+                            <div><code>tools_condition</code> is wired as a conditional edge on <code>chat_node</code>
+                                to make the routing decision.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="diagram">
+                        <div class="g-col">
+                            <div class="g-node pill">__start__</div>
+                            <div class="g-arrow">↓</div>
+                            <div class="g-node">chat_node</div>
+                            <div class="g-cond">tools_condition</div>
+                            <div class="g-split">
+                                <div class="g-branch">
+                                    <div class="g-arrow">↙</div>
+                                    <div class="g-node end">__end__</div>
+                                    <div class="g-blabel">no tool call</div>
+                                </div>
+                                <div class="g-branch">
+                                    <div class="g-arrow">↘</div>
+                                    <div class="g-node tool">tools</div>
+                                    <div class="g-blabel">loops back ↑</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 3. IMPORTS & TOOL DEFINITIONS -->
+    <div class="section">
+        <div class="sec-head">
+            <div class="sec-title">
+                <div class="sec-icon ic-g">📦</div> Imports &amp; Tool Definitions
+            </div>
+            <span class="badge bd-g">Code</span>
+        </div>
+        <div class="sec-body">
+            <div class="two-col">
+                <div class="col">
+                    <div class="code-wrap">
+                        <div class="code-bar">
+                            <span class="code-label">imports</span>
+                            <div class="mac-dots">
+                                <div class="mac-dot md1"></div>
+                                <div class="mac-dot md2"></div>
+                                <div class="mac-dot md3"></div>
+                            </div>
+                        </div>
+                        <pre><span class="kw">from</span> langgraph.graph    <span class="kw">import</span> <span class="cls">StateGraph</span>, START, END
+<span class="kw">from</span> langgraph.prebuilt <span class="kw">import</span> <span class="cls">ToolNode</span>, tools_condition
+<span class="kw">from</span> langchain_community.tools <span class="kw">import</span> <span class="cls">DuckDuckGoSearchRun</span>
+<span class="kw">from</span> langchain_core.tools    <span class="kw">import</span> tool
+<span class="kw">from</span> langchain_core.messages <span class="kw">import</span> <span class="cls">BaseMessage</span>, <span class="cls">HumanMessage</span>
+<span class="kw">from</span> langchain_openai        <span class="kw">import</span> <span class="cls">ChatOpenAI</span>
+<span class="kw">from</span> typing <span class="kw">import</span> <span class="cls">TypedDict</span>, <span class="cls">Annotated</span>
+<span class="kw">from</span> langgraph.graph.message <span class="kw">import</span> add_messages
+<span class="kw">import</span> requests</pre>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="code-wrap">
+                        <div class="code-bar">
+                            <span class="code-label">3 tools defined</span>
+                            <div class="mac-dots">
+                                <div class="mac-dot md1"></div>
+                                <div class="mac-dot md2"></div>
+                                <div class="mac-dot md3"></div>
+                            </div>
+                        </div>
+                        <pre><span class="cm"># Tool 1 — prebuilt web search</span>
+search_tool = <span class="cls">DuckDuckGoSearchRun</span>(region=<span class="str">"us-en"</span>)
+
+<span class="cm"># Tool 2 — custom calculator</span>
+<span class="op">@</span>tool
+<span class="kw">def</span> <span class="fn">calculator</span>(first_num: float,
+               second_num: float,
+               operation: str) -> dict:
+    <span class="str">"""Perform add, sub, mul, div."""</span>
+    <span class="cm"># ... returns {"result": ...}</span>
+
+<span class="cm"># Tool 3 — live stock price via API</span>
+<span class="op">@</span>tool
+<span class="kw">def</span> <span class="fn">get_stock_price</span>(symbol: str) -> dict:
+    <span class="str">"""Fetch latest price for e.g. AAPL."""</span>
+    url = <span class="str">f"https://alphavantage.co/query?symbol=<span class="op">{symbol}</span>"</span>
+    <span class="kw">return</span> requests.get(url).json()</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 4. BIND & WIRE -->
+    <div class="section">
+        <div class="sec-head">
+            <div class="sec-title">
+                <div class="sec-icon ic-g">🏗️</div> Bind Tools &amp; Wire the Graph
+            </div>
+            <span class="badge bd-g">Code</span>
+        </div>
+        <div class="sec-body">
+            <div class="two-col">
+                <div class="col">
+                    <div class="code-wrap">
+                        <div class="code-bar">
+                            <span class="code-label">bind tools to llm</span>
+                            <div class="mac-dots">
+                                <div class="mac-dot md1"></div>
+                                <div class="mac-dot md2"></div>
+                                <div class="mac-dot md3"></div>
+                            </div>
+                        </div>
+                        <pre><span class="cm"># Collect all tools into a list</span>
+tools = [get_stock_price, search_tool, calculator]
+
+<span class="cm"># Inject tool schemas into LLM context</span>
+llm_with_tools = llm.bind_tools(tools)
+
+<span class="cm"># State definition</span>
+<span class="kw">class</span> <span class="cls">ChatState</span>(<span class="cls">TypedDict</span>):
+    messages: <span class="cls">Annotated</span>[list[<span class="cls">BaseMessage</span>],
+                          add_messages]</pre>
+                    </div>
+                    <div class="pts">
+                        <div class="pt">
+                            <div class="dot-g"></div>
+                            <div><code>bind_tools()</code> injects the tool schemas into the LLM so it knows which tools
+                                exist and when to call each one.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="code-wrap">
+                        <div class="code-bar">
+                            <span class="code-label">graph wiring</span>
+                            <div class="mac-dots">
+                                <div class="mac-dot md1"></div>
+                                <div class="mac-dot md2"></div>
+                                <div class="mac-dot md3"></div>
+                            </div>
+                        </div>
+                        <pre><span class="cm"># Node: LLM (may answer or call tool)</span>
+<span class="kw">def</span> <span class="fn">chat_node</span>(state: <span class="cls">ChatState</span>):
+    response = llm_with_tools.invoke(state[<span class="str">'messages'</span>])
+    <span class="kw">return</span> {<span class="str">"messages"</span>: [response]}
+
+<span class="cm"># Node: executes tool calls</span>
+tool_node = <span class="cls">ToolNode</span>(tools)
+
+<span class="cm"># Build graph</span>
+graph = <span class="cls">StateGraph</span>(<span class="cls">ChatState</span>)
+graph.add_node(<span class="str">"chat_node"</span>, chat_node)
+graph.add_node(<span class="str">"tools"</span>,     tool_node)
+
+graph.add_edge(START, <span class="str">"chat_node"</span>)
+graph.add_conditional_edges(<span class="str">"chat_node"</span>, tools_condition)
+graph.add_edge(<span class="str">"tools"</span>, <span class="str">"chat_node"</span>)  <span class="cm"># loop back</span>
+
+chatbot = graph.compile()</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 5. STREAMLIT FRONTEND -->
+    <div class="section">
+        <div class="sec-head">
+            <div class="sec-title">
+                <div class="sec-icon ic-p">🖥️</div> Streamlit Frontend — Streaming with Tool Status
+            </div>
+            <span class="badge bd-p">Frontend</span>
+        </div>
+        <div class="sec-body">
+            <div class="two-col">
+                <div class="col">
+                    <div class="steps">
+                        <div class="step">
+                            <div class="step-num">1</div>
+                            <div class="step-text">Use <code>stream_mode="messages"</code> to receive individual message
+                                chunks token-by-token instead of waiting for the full response.</div>
+                        </div>
+                        <div class="step">
+                            <div class="step-num">2</div>
+                            <div class="step-text">The stream yields two types — <strong>AIMessage</strong> (LLM text
+                                tokens) and <strong>ToolMessage</strong> (tool call inputs/outputs).</div>
+                        </div>
+                        <div class="step">
+                            <div class="step-num">3</div>
+                            <div class="step-text">On a <strong>ToolMessage</strong> chunk, show a
+                                <code>st.status()</code> spinner: <em>"⚙ Using search_tool …"</em>. Update it while
+                                running, mark complete when done.</div>
+                        </div>
+                        <div class="step">
+                            <div class="step-num">4</div>
+                            <div class="step-text">On an <strong>AIMessage</strong> chunk,
+                                <code>yield chunk.content</code> into <code>st.write_stream()</code> for live text
+                                rendering.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="code-wrap">
+                        <div class="code-bar">
+                            <span class="code-label">streamlit_frontend_tool.py</span>
+                            <div class="mac-dots">
+                                <div class="mac-dot md1"></div>
+                                <div class="mac-dot md2"></div>
+                                <div class="mac-dot md3"></div>
+                            </div>
+                        </div>
+                        <pre><span class="kw">with</span> st.chat_message(<span class="str">"assistant"</span>):
+    status_holder = {<span class="str">"box"</span>: <span class="cls">None</span>}
+
+    <span class="kw">def</span> <span class="fn">ai_only_stream</span>():
+        <span class="kw">for</span> chunk, _ <span class="kw">in</span> chatbot.stream(
+            {<span class="str">"messages"</span>: [<span class="cls">HumanMessage</span>(content=user_input)]},
+            config=CONFIG,
+            stream_mode=<span class="str">"messages"</span>
+        ):
+            <span class="cm"># ToolMessage → show status box</span>
+            <span class="kw">if</span> isinstance(chunk, <span class="cls">ToolMessage</span>):
+                name = getattr(chunk, <span class="str">"name"</span>, <span class="str">"tool"</span>)
+                <span class="kw">if</span> status_holder[<span class="str">"box"</span>] <span class="kw">is</span> <span class="cls">None</span>:
+                    status_holder[<span class="str">"box"</span>] = st.status(
+                        <span class="str">f"Using `{name}` ..."</span>, expanded=<span class="cls">True</span>)
+                <span class="kw">else</span>:
+                    status_holder[<span class="str">"box"</span>].update(
+                        label=<span class="str">f"Using `{name}` ..."</span>,
+                        state=<span class="str">"running"</span>)
+
+            <span class="cm"># AIMessage → stream text to user</span>
+            <span class="kw">if</span> isinstance(chunk, <span class="cls">AIMessage</span>):
+                <span class="kw">yield</span> chunk.content
+
+    ai_msg = st.write_stream(ai_only_stream())</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP Client with LangGraph — Notes</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0b0e16;
+            --surface: #111520;
+            --surface2: #171d2e;
+            --border: #1f2840;
+            --border2: #2a3554;
+            --text: #c8d3e2;
+            --dim: #4e6080;
+            --white: #edf2fb;
+            --red: #f87171;
+            --orange: #fb923c;
+            --yellow: #fbbf24;
+            --green: #4ade80;
+            --blue: #60a5fa;
+            --purple: #a78bfa;
+            --cyan: #22d3ee;
+            --code-bg: #080b12;
+        }
+
+        html {
+            font-size: 15px;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            padding: 48px 32px 72px;
+            max-width: 980px;
+            margin: 0 auto;
+        }
+
+        /* ── HEADER ── */
+        .hdr {
+            padding-bottom: 28px;
+            border-bottom: 1px solid var(--border2);
+            margin-bottom: 40px;
+        }
+
+        .crumb {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: var(--dim);
+            margin-bottom: 10px;
+        }
+
+        .crumb span {
+            color: var(--orange);
+        }
+
+        .hdr h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--white);
+            letter-spacing: -.02em;
+        }
+
+        .hdr p {
+            font-size: .9rem;
+            color: var(--dim);
+            margin-top: 8px;
+            max-width: 600px;
+        }
+
+        /* ── SECTION ── */
+        .sec {
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            background: var(--surface);
+            animation: up .35s ease both;
+        }
+
+        .sec:nth-child(1) {
+            animation-delay: 0s
+        }
+
+        .sec:nth-child(2) {
+            animation-delay: .04s
+        }
+
+        .sec:nth-child(3) {
+            animation-delay: .08s
+        }
+
+        .sec:nth-child(4) {
+            animation-delay: .12s
+        }
+
+        .sec:nth-child(5) {
+            animation-delay: .16s
+        }
+
+        .sec:nth-child(6) {
+            animation-delay: .20s
+        }
+
+        .sec:nth-child(7) {
+            animation-delay: .24s
+        }
+
+        .sec:nth-child(8) {
+            animation-delay: .28s
+        }
+
+        .sh {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 11px 20px;
+            background: var(--surface2);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .st {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: .875rem;
+            font-weight: 600;
+            color: var(--white);
+        }
+
+        .si {
+            width: 26px;
+            height: 26px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        .si-r {
+            background: rgba(248, 113, 113, .15);
+        }
+
+        .si-o {
+            background: rgba(251, 146, 60, .15);
+        }
+
+        .si-y {
+            background: rgba(251, 191, 36, .15);
+        }
+
+        .si-g {
+            background: rgba(74, 222, 128, .15);
+        }
+
+        .si-b {
+            background: rgba(96, 165, 250, .15);
+        }
+
+        .si-p {
+            background: rgba(167, 139, 250, .15);
+        }
+
+        .si-c {
+            background: rgba(34, 211, 238, .15);
+        }
+
+        .badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .br {
+            background: rgba(248, 113, 113, .12);
+            color: var(--red);
+            border: 1px solid rgba(248, 113, 113, .25);
+        }
+
+        .bo {
+            background: rgba(251, 146, 60, .12);
+            color: var(--orange);
+            border: 1px solid rgba(251, 146, 60, .25);
+        }
+
+        .by {
+            background: rgba(251, 191, 36, .12);
+            color: var(--yellow);
+            border: 1px solid rgba(251, 191, 36, .25);
+        }
+
+        .bg {
+            background: rgba(74, 222, 128, .12);
+            color: var(--green);
+            border: 1px solid rgba(74, 222, 128, .25);
+        }
+
+        .bb {
+            background: rgba(96, 165, 250, .12);
+            color: var(--blue);
+            border: 1px solid rgba(96, 165, 250, .25);
+        }
+
+        .bp {
+            background: rgba(167, 139, 250, .12);
+            color: var(--purple);
+            border: 1px solid rgba(167, 139, 250, .25);
+        }
+
+        .bc {
+            background: rgba(34, 211, 238, .12);
+            color: var(--cyan);
+            border: 1px solid rgba(34, 211, 238, .25);
+        }
+
+        /* ── BODY ── */
+        .sb {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .two {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .col {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* ── BULLETS ── */
+        .pts {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .pt {
+            display: grid;
+            grid-template-columns: 14px 1fr;
+            gap: 10px;
+            font-size: .855rem;
+            line-height: 1.65;
+            color: var(--text);
+            align-items: start;
+        }
+
+        .d {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-top: 8px;
+            flex-shrink: 0;
+        }
+
+        .dr {
+            background: var(--red);
+        }
+
+        .do {
+            background: var(--orange);
+        }
+
+        .dy {
+            background: var(--yellow);
+        }
+
+        .dg {
+            background: var(--green);
+        }
+
+        .db {
+            background: var(--blue);
+        }
+
+        .dp {
+            background: var(--purple);
+        }
+
+        .dc {
+            background: var(--cyan);
+        }
+
+        .pt strong {
+            color: var(--white);
+            font-weight: 600;
+        }
+
+        .pt em {
+            color: var(--dim);
+            font-style: italic;
+        }
+
+        /* ── INLINE CODE ── */
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .775rem;
+            background: rgba(96, 165, 250, .1);
+            color: var(--blue);
+            padding: 2px 7px;
+            border-radius: 4px;
+            border: 1px solid rgba(96, 165, 250, .18);
+            white-space: nowrap;
+        }
+
+        /* ── CODE BLOCK ── */
+        .cw {
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border2);
+        }
+
+        .cb {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 7px 14px;
+            background: #09101a;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .cl {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--dim);
+            letter-spacing: .06em;
+            text-transform: uppercase;
+        }
+
+        .md {
+            display: flex;
+            gap: 5px;
+        }
+
+        .md span {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+        }
+
+        .md1 {
+            background: #ff5f57;
+        }
+
+        .md2 {
+            background: #febc2e;
+        }
+
+        .md3 {
+            background: #28c840;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: #c4cedf;
+            padding: 16px 18px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .775rem;
+            line-height: 1.8;
+        }
+
+        .kw {
+            color: #e879f9;
+        }
+
+        .fn {
+            color: #67e8f9;
+        }
+
+        .str {
+            color: #86efac;
+        }
+
+        .cm {
+            color: #2d3e58;
+            font-style: italic;
+        }
+
+        .cls {
+            color: #fde68a;
+        }
+
+        .op {
+            color: #7090b8;
+        }
+
+        .num {
+            color: #fb923c;
+        }
+
+        /* ── DIVIDER ── */
+        .div {
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* ── STEP LIST ── */
+        .steps {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .step {
+            display: grid;
+            grid-template-columns: 30px 1fr;
+            gap: 12px;
+            align-items: start;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .step:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .sn {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--surface2);
+            border: 1.5px solid var(--border2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--cyan);
+            font-weight: 600;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .st2 {
+            font-size: .855rem;
+            line-height: 1.65;
+            color: var(--text);
+        }
+
+        .st2 strong {
+            color: var(--white);
+        }
+
+        /* ── ARCH DIAGRAM ── */
+        .arch {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            padding: 8px 0;
+            flex-wrap: wrap;
+        }
+
+        .abox {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            padding: 9px 18px;
+            border-radius: 7px;
+            border: 1.5px solid var(--border2);
+            background: var(--surface2);
+            color: var(--white);
+            text-align: center;
+            min-width: 100px;
+        }
+
+        .abox.client {
+            background: rgba(96, 165, 250, .1);
+            border-color: rgba(96, 165, 250, .4);
+            color: var(--blue);
+        }
+
+        .abox.server {
+            background: rgba(74, 222, 128, .1);
+            border-color: rgba(74, 222, 128, .4);
+            color: var(--green);
+        }
+
+        .abox.remote {
+            background: rgba(34, 211, 238, .1);
+            border-color: rgba(34, 211, 238, .4);
+            color: var(--cyan);
+        }
+
+        .abox.local {
+            background: rgba(251, 191, 36, .1);
+            border-color: rgba(251, 191, 36, .4);
+            color: var(--yellow);
+        }
+
+        .aarr {
+            color: var(--dim);
+            padding: 0 12px;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .asub {
+            font-size: 9px;
+            color: var(--dim);
+            font-family: 'JetBrains Mono', monospace;
+            margin-top: 3px;
+        }
+
+        /* ── CALLOUT ── */
+        .callout {
+            display: flex;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 7px;
+            border: 1px solid rgba(248, 113, 113, .25);
+            background: rgba(248, 113, 113, .06);
+            font-size: .85rem;
+            line-height: 1.6;
+            color: var(--text);
+            align-items: flex-start;
+        }
+
+        .callout.blue {
+            border-color: rgba(96, 165, 250, .25);
+            background: rgba(96, 165, 250, .06);
+        }
+
+        .callout.green {
+            border-color: rgba(74, 222, 128, .25);
+            background: rgba(74, 222, 128, .06);
+        }
+
+        .callout.amber {
+            border-color: rgba(251, 191, 36, .25);
+            background: rgba(251, 191, 36, .06);
+        }
+
+        .callout-icon {
+            font-size: 1rem;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .callout strong {
+            color: var(--white);
+        }
+
+        @keyframes up {
+            from {
+                opacity: 0;
+                transform: translateY(14px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <div class="hdr">
+        <div class="crumb">LangGraph <span>/</span> Agentic AI <span>/</span> CampusX</div>
+        <h1>MCP Client with LangGraph</h1>
+        <p>How to integrate Model Context Protocol (MCP) servers into a LangGraph chatbot — covering the why,
+            architecture, server setup, async conversion, and full client implementation.</p>
+    </div>
+
+
+    <!-- 1. THE PROBLEM (N×M) -->
+    <div class="sec">
+        <div class="sh">
+            <div class="st">
+                <div class="si si-r">⚠️</div> The Problem — Brittle Tool Integration
+            </div>
+            <span class="badge br">Problem</span>
+        </div>
+        <div class="sb">
+            <div class="two">
+                <div class="col">
+                    <div class="pts">
+                        <div class="pt">
+                            <div class="d dr"></div>
+                            <div>Each tool (search, calculator, get_stock_price…) is hand-coded <strong>inside the
+                                    chatbot</strong> — tightly coupled.</div>
+                        </div>
+                        <div class="pt">
+                            <div class="d dr"></div>
+                            <div>This creates an <strong>N × M problem</strong>: N chatbots × M tools means every
+                                integration is written and maintained separately.</div>
+                        </div>
+                        <div class="pt">
+                            <div class="d dr"></div>
+                            <div>Adding a new service (GitHub, Gmail, Slack, Jira) means writing custom Python code
+                                every time — <strong>brittle and hard to scale</strong>.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="callout">
+                        <span class="callout-icon">💡</span>
+                        <div><strong>Root cause:</strong> Tools are defined in the client code. The chatbot must know
+                            every tool's implementation detail. There is no standard way to <em>discover</em> tools from
+                            an external service.</div>
+                    </div>
+                    <div class="callout amber">
+                        <span class="callout-icon">🎯</span>
+                        <div><strong>MCP solves this</strong> by separating tool definitions into a <em>server</em>. The
+                            client just asks "what tools do you have?" and uses them — without knowing implementation
+                            details.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 2. MCP ARCHITECTURE -->
+    <div class="sec">
+        <div class="sh">
+            <div class="st">
+                <div class="si si-b">🏛️</div> MCP Architecture — Separation of Concerns
+            </div>
+            <span class="badge bb">Concept</span>
+        </div>
+        <div class="sb">
+            <div class="two">
+                <div class="col">
+                    <div class="pts">
+                        <div class="pt">
+                            <div class="d db"></div>
+                            <div><strong>MCP = Model Context Protocol</strong> — an open standard for connecting AI
+                                models to external data/tools via a client-server model.</div>
+                        </div>
+                        <div class="pt">
+                            <div class="d db"></div>
+                            <div><strong>Server</strong> owns the tools (GitHub API, expense DB, math functions…). Built
+                                with <code>FastMCP</code>. Tools registered via <code>@mcp.tool()</code>.</div>
+                        </div>
+                        <div class="pt">
+                            <div class="d db"></div>
+                            <div><strong>Client</strong> (LangGraph chatbot) connects to one or more servers, calls
+                                <code>client.get_tools()</code> to discover tools dynamically, then binds them to the
+                                LLM.
+                            </div>
+                        </div>
+                        <div class="pt">
+                            <div class="d db"></div>
+                            <div><strong>SOC</strong> — Separation of Concerns. Client = LangGraph + MCP client adapter.
+                                Server = tools + MCP server runtime.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div style="display:flex; flex-direction:column; gap:12px;">
+                        <div class="arch">
+                            <div>
+                                <div class="abox client">Client<br>
+                                    <div class="asub">LangGraph + MCP</div>
+                                </div>
+                            </div>
+                            <div class="aarr">⟵ MCP ⟶</div>
+                            <div style="display:flex; flex-direction:column; gap:8px;">
+                                <div class="abox local">Local Server<br>
+                                    <div class="asub">stdio / python3</div>
+                                </div>
+                                <div class="abox remote">Remote Server<br>
+                                    <div class="asub">streamable_http / sse</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pts">
+                            <div class="pt">
+                                <div class="d dy"></div>
+                                <div><strong>Local server</strong> — spawned as subprocess; transport:
+                                    <code>"stdio"</code>.
+                                </div>
+                            </div>
+                            <div class="pt">
+                                <div class="d dc"></div>
+                                <div><strong>Remote server</strong> — hosted on FastMCP Cloud; transport:
+                                    <code>"streamable_http"</code> or <code>"sse"</code>.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 3. MCP SERVER (FastMCP) -->
+    <div class="sec">
+        <div class="sh">
+            <div class="st">
+                <div class="si si-y">⚙️</div> MCP Server — arith_server.py (FastMCP)
+            </div>
+            <span class="badge by">Server</span>
+        </div>
+        <div class="sb">
+            <div class="two">
+                <div class="col">
+                    <div class="pts">
+                        <div class="pt">
+                            <div class="d dy"></div>
+                            <div>Use <code>fastmcp</code> library. Create a server instance:
+                                <code>mcp = FastMCP("arith")</code>.
+                            </div>
+                        </div>
+                        <div class="pt">
+                            <div class="d dy"></div>
+                            <div>Every tool is an <code>async def</code> function decorated with
+                                <code>@mcp.tool()</code>.
+                            </div>
+                        </div>
+                        <div class="pt">
+                            <div class="d dy"></div>
+                            <div>The docstring is critical — it becomes the tool description the LLM reads to decide
+                                when to call it.</div>
+                        </div>
+                        <div class="pt">
+                            <div class="d dy"></div>
+                            <div>Tools must be <strong>async</strong> because MCP protocol communication is inherently
+                                asynchronous.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="cw">
+                        <div class="cb"><span class="cl">arith_server.py (main.py)</span>
+                            <div class="md"><span class="md1"></span><span class="md2"></span><span class="md3"></span>
+                            </div>
+                        </div>
+                        <pre><span class="kw">from</span> __future__ <span class="kw">import</span> annotations
+<span class="kw">from</span> fastmcp <span class="kw">import</span> <span class="cls">FastMCP</span>
+
+mcp = <span class="cls">FastMCP</span>(<span class="str">"arith"</span>)
+
+<span class="op">@</span>mcp.tool()
+<span class="kw">async def</span> <span class="fn">add</span>(a: float, b: float) -> float:
+    <span class="str">"""Return a + b."""</span>
+    <span class="kw">return</span> _as_number(a) + _as_number(b)
+
+<span class="op">@</span>mcp.tool()
+<span class="kw">async def</span> <span class="fn">subtract</span>(a: float, b: float) -> float:
+    <span class="str">"""Return a - b."""</span>
+    <span class="kw">return</span> _as_number(a) - _as_number(b)
+
+<span class="op">@</span>mcp.tool()
+<span class="kw">async def</span> <span class="fn">divide</span>(a: float, b: float) -> float:
+    <span class="str">"""Return a / b. Raises on zero."""</span>
+    <span class="kw">if</span> _as_number(b) == <span class="num">0</span>:
+        <span class="kw">raise</span> <span class="cls">ZeroDivisionError</span>(<span class="str">"Division by zero"</span>)
+    <span class="kw">return</span> _as_number(a) / _as_number(b)</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 4. WHY ASYNC + MultiServerMCPClient -->
+    <div class="sec">
+        <div class="sh">
+            <div class="st">
+                <div class="si si-p">🔄</div> Async Requirement &amp; MultiServerMCPClient
+            </div>
+            <span class="badge bp">Async</span>
+        </div>
+        <div class="sb">
+            <div class="two">
+                <div class="col">
+                    <div class="callout blue">
+                        <span class="callout-icon">⚡</span>
+                        <div><strong>Why async?</strong> MCP uses network/subprocess I/O.
+                            <code>langchain_mcp_adapters</code> requires async context. The LangGraph node calling the
+                            LLM must <code>await</code> it.
+                        </div>
+                    </div>
+                    <div class="pts">
+                        <div class="pt">
+                            <div class="d dp"></div>
+                            <div>Convert <code>chat_node</code> to <code>async def</code> and use
+                                <code>await llm_with_tools.ainvoke(messages)</code>.
+                            </div>
+                        </div>
+                        <div class="pt">
+                            <div class="d dp"></div>
+                            <div>The entry point becomes <code>async def main()</code> run via
+                                <code>asyncio.run(main())</code>.
+                            </div>
+                        </div>
+                        <div class="pt">
+                            <div class="d dp"></div>
+                            <div>For Streamlit (sync context): spin up a <strong>dedicated background event
+                                    loop</strong> in a daemon thread. Use a <code>run_async()</code> helper to bridge
+                                sync → async calls.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="cw">
+                        <div class="cb"><span class="cl">MCP client setup</span>
+                            <div class="md"><span class="md1"></span><span class="md2"></span><span class="md3"></span>
+                            </div>
+                        </div>
+                        <pre><span class="kw">from</span> langchain_mcp_adapters.client <span class="kw">import</span> <span class="cls">MultiServerMCPClient</span>
+<span class="kw">import</span> asyncio, threading
+
+<span class="cm"># Background event loop (for Streamlit sync bridge)</span>
+_ASYNC_LOOP = asyncio.new_event_loop()
+_ASYNC_THREAD = threading.Thread(
+    target=_ASYNC_LOOP.run_forever, daemon=<span class="cls">True</span>)
+_ASYNC_THREAD.start()
+
+<span class="kw">def</span> <span class="fn">run_async</span>(coro):
+    future = asyncio.run_coroutine_threadsafe(coro, _ASYNC_LOOP)
+    <span class="kw">return</span> future.result()
+
+<span class="cm"># MCP client — connects to 2 servers</span>
+client = <span class="cls">MultiServerMCPClient</span>({
+    <span class="str">"arith"</span>: {                    <span class="cm"># local</span>
+        <span class="str">"transport"</span>: <span class="str">"stdio"</span>,
+        <span class="str">"command"</span>: <span class="str">"python3"</span>,
+        <span class="str">"args"</span>: [<span class="str">"/path/to/main.py"</span>],
+    },
+    <span class="str">"expense"</span>: {                <span class="cm"># remote FastMCP Cloud</span>
+        <span class="str">"transport"</span>: <span class="str">"streamable_http"</span>,
+        <span class="str">"url"</span>: <span class="str">"https://splendid-gold-dingo.fastmcp.app/mcp"</span>,
+    },
+})</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 5. LOAD MCP TOOLS + BIND -->
+    <div class="sec">
+        <div class="sh">
+            <div class="st">
+                <div class="si si-g">🔧</div> Loading MCP Tools &amp; Binding to LLM
+            </div>
+            <span class="badge bg">Code</span>
+        </div>
+        <div class="sb">
+            <div class="two">
+                <div class="col">
+                    <div class="pts">
+                        <div class="pt">
+                            <div class="d dg"></div>
+                            <div><code>client.get_tools()</code> is async — wrap it in a sync helper so it can be called
+                                at module load time.</div>
+                        </div>
+                        <div class="pt">
+                            <div class="d dg"></div>
+                            <div>MCP tools are returned as standard <code>BaseTool</code> objects — can be mixed with
+                                regular <code>@tool</code> functions.</div>
+                        </div>
+                        <div class="pt">
+                            <div class="d dg"></div>
+                            <div>Use the <code>*mcp_tools</code> spread operator to merge MCP tools with manually
+                                defined tools into one list.</div>
+                        </div>
+                        <div class="pt">
+                            <div class="d dg"></div>
+                            <div>Guard <code>bind_tools()</code> — if no tools loaded (server unreachable), fall back to
+                                bare LLM.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="cw">
+                        <div class="cb"><span class="cl">load_mcp_tools + bind</span>
+                            <div class="md"><span class="md1"></span><span class="md2"></span><span class="md3"></span>
+                            </div>
+                        </div>
+                        <pre><span class="kw">def</span> <span class="fn">load_mcp_tools</span>() -> list[<span class="cls">BaseTool</span>]:
+    <span class="kw">try</span>:
+        <span class="kw">return</span> run_async(client.get_tools())
+    <span class="kw">except</span> <span class="cls">Exception</span>:
+        <span class="kw">return</span> []
+
+mcp_tools = load_mcp_tools()
+
+<span class="cm"># Merge: manual tools + MCP server tools</span>
+tools = [search_tool, get_stock_price, <span class="op">*</span>mcp_tools]
+
+<span class="cm"># Bind (with fallback guard)</span>
+llm_with_tools = llm.bind_tools(tools) <span class="kw">if</span> tools <span class="kw">else</span> llm
+
+<span class="cm"># ToolNode — only if tools exist</span>
+tool_node = <span class="cls">ToolNode</span>(tools) <span class="kw">if</span> tools <span class="kw">else</span> <span class="cls">None</span></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 6. GRAPH + CHECKPOINTER -->
+    <div class="sec">
+        <div class="sh">
+            <div class="st">
+                <div class="si si-c">🏗️</div> Graph Wiring &amp; Async Checkpointer
+            </div>
+            <span class="badge bc">Code</span>
+        </div>
+        <div class="sb">
+            <div class="two">
+                <div class="col">
+                    <div class="pts">
+                        <div class="pt">
+                            <div class="d dc"></div>
+                            <div>Use <code>AsyncSqliteSaver</code> instead of the sync version — required because
+                                <code>chat_node</code> is now async.
+                            </div>
+                        </div>
+                        <div class="pt">
+                            <div class="d dc"></div>
+                            <div>Initialise the checkpointer once at module load using the <code>run_async()</code>
+                                helper: <code>checkpointer = run_async(_init_checkpointer())</code>.</div>
+                        </div>
+                        <div class="pt">
+                            <div class="d dc"></div>
+                            <div>Graph wiring is <strong>conditional</strong> — if <code>tool_node</code> is not None,
+                                add the tools node and conditional edges; otherwise wire directly to END.</div>
+                        </div>
+                        <div class="pt">
+                            <div class="d dc"></div>
+                            <div>Compile with: <code>chatbot = graph.compile(checkpointer=checkpointer)</code>.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="cw">
+                        <div class="cb"><span class="cl">checkpointer + graph</span>
+                            <div class="md"><span class="md1"></span><span class="md2"></span><span class="md3"></span>
+                            </div>
+                        </div>
+                        <pre><span class="kw">from</span> langgraph.checkpoint.sqlite.aio <span class="kw">import</span> <span class="cls">AsyncSqliteSaver</span>
+
+<span class="kw">async def</span> <span class="fn">_init_checkpointer</span>():
+    conn = <span class="kw">await</span> aiosqlite.connect(<span class="str">"chatbot.db"</span>)
+    <span class="kw">return</span> <span class="cls">AsyncSqliteSaver</span>(conn)
+
+checkpointer = run_async(_init_checkpointer())
+
+<span class="cm"># Graph</span>
+graph = <span class="cls">StateGraph</span>(<span class="cls">ChatState</span>)
+graph.add_node(<span class="str">"chat_node"</span>, chat_node)
+graph.add_edge(START, <span class="str">"chat_node"</span>)
+
+<span class="kw">if</span> tool_node:
+    graph.add_node(<span class="str">"tools"</span>, tool_node)
+    graph.add_conditional_edges(<span class="str">"chat_node"</span>, tools_condition)
+    graph.add_edge(<span class="str">"tools"</span>, <span class="str">"chat_node"</span>)
+<span class="kw">else</span>:
+    graph.add_edge(<span class="str">"chat_node"</span>, END)
+
+chatbot = graph.compile(checkpointer=checkpointer)</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 7. HELPER + FULL FILE STRUCTURE -->
+    <div class="sec">
+        <div class="sh">
+            <div class="st">
+                <div class="si si-o">📂</div> Helper Functions &amp; File Structure
+            </div>
+            <span class="badge bo">Structure</span>
+        </div>
+        <div class="sb">
+            <div class="two">
+                <div class="col">
+                    <div class="pts">
+                        <div class="pt">
+                            <div class="d do"></div>
+                            <div><strong>retrieve_all_threads()</strong> — sync wrapper that lists all threads from the
+                                checkpointer for the Streamlit sidebar.</div>
+                        </div>
+                        <div class="pt">
+                            <div class="d do"></div>
+                            <div><code>_alist_threads()</code> is async; iterates <code>checkpointer.alist(None)</code>
+                                and collects <code>thread_id</code>s from each checkpoint's config.</div>
+                        </div>
+                        <div class="pt">
+                            <div class="d do"></div>
+                            <div><strong>Backend file:</strong> <code>langgraph_mcp_backend.py</code> — all LangGraph +
+                                MCP logic, tools, graph, checkpointer.</div>
+                        </div>
+                        <div class="pt">
+                            <div class="d do"></div>
+                            <div><strong>Frontend file:</strong> <code>streamlit_frontend_mcp.py</code> — imports the
+                                backend; uses <code>run_async()</code> for all async calls.</div>
+                        </div>
+                    </div>
+                    <div class="cw" style="margin-top:4px;">
+                        <div class="cb"><span class="cl">retrieve_all_threads</span>
+                            <div class="md"><span class="md1"></span><span class="md2"></span><span class="md3"></span>
+                            </div>
+                        </div>
+                        <pre><span class="kw">async def</span> <span class="fn">_alist_threads</span>():
+    all_threads = set()
+    <span class="kw">async for</span> checkpoint <span class="kw">in</span> checkpointer.alist(<span class="cls">None</span>):
+        all_threads.add(
+            checkpoint.config[<span class="str">"configurable"</span>][<span class="str">"thread_id"</span>])
+    <span class="kw">return</span> list(all_threads)
+
+<span class="kw">def</span> <span class="fn">retrieve_all_threads</span>():
+    <span class="kw">return</span> run_async(_alist_threads())</pre>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="steps">
+                        <div class="step">
+                            <div class="sn">1</div>
+                            <div class="st2"><strong>Imports</strong> — langgraph, langchain, asyncio, threading, MCP
+                                adapter, aiosqlite.</div>
+                        </div>
+                        <div class="step">
+                            <div class="sn">2</div>
+                            <div class="st2"><strong>Async event loop</strong> — dedicated background loop +
+                                <code>run_async()</code> bridge for Streamlit.
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="sn">3</div>
+                            <div class="st2"><strong>MCP Client</strong> — <code>MultiServerMCPClient</code> configured
+                                with local (stdio) + remote (streamable_http) servers.</div>
+                        </div>
+                        <div class="step">
+                            <div class="sn">4</div>
+                            <div class="st2"><strong>Manual tools</strong> — <code>search_tool</code>,
+                                <code>get_stock_price</code>, <code>calculator</code>, <code>list_github_prs</code>
+                                defined with <code>@tool</code>.
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="sn">5</div>
+                            <div class="st2"><strong>Load MCP tools</strong> — <code>load_mcp_tools()</code> → merge
+                                with manual tools → <code>bind_tools()</code>.</div>
+                        </div>
+                        <div class="step">
+                            <div class="sn">6</div>
+                            <div class="st2"><strong>State + Graph</strong> — <code>ChatState</code>, async
+                                <code>chat_node</code>, conditional <code>ToolNode</code>.
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="sn">7</div>
+                            <div class="st2"><strong>Checkpointer</strong> — <code>AsyncSqliteSaver</code> initialised
+                                via <code>run_async()</code>; compiled into graph.</div>
+                        </div>
+                        <div class="step">
+                            <div class="sn">8</div>
+                            <div class="st2"><strong>Helpers</strong> — <code>retrieve_all_threads()</code> for the
+                                Streamlit sidebar conversation list.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 8. KEY DIFFERENCES SUMMARY -->
+    <div class="sec">
+        <div class="sh">
+            <div class="st">
+                <div class="si si-g">✅</div> Key Differences vs. Plain Tool Chatbot
+            </div>
+            <span class="badge bg">Summary</span>
+        </div>
+        <div class="sb">
+            <div class="two">
+                <div class="col">
+                    <div class="pts">
+                        <div class="pt">
+                            <div class="d dr"></div>
+                            <div><strong>Without MCP</strong> — tools defined in client code; every new service = new
+                                Python code in chatbot.</div>
+                        </div>
+                        <div class="pt">
+                            <div class="d dr"></div>
+                            <div>Sync everywhere — <code>llm.invoke()</code>, <code>graph.compile()</code>,
+                                <code>SqliteSaver</code>.
+                            </div>
+                        </div>
+                        <div class="pt">
+                            <div class="d dr"></div>
+                            <div>Tools list is fixed at startup.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="pts">
+                        <div class="pt">
+                            <div class="d dg"></div>
+                            <div><strong>With MCP</strong> — tools live on servers; client discovers them dynamically
+                                via <code>client.get_tools()</code>.</div>
+                        </div>
+                        <div class="pt">
+                            <div class="d dg"></div>
+                            <div>Everything async — <code>llm.ainvoke()</code>, <code>AsyncSqliteSaver</code>,
+                                background event loop.</div>
+                        </div>
+                        <div class="pt">
+                            <div class="d dg"></div>
+                            <div>Add/remove tools by pointing to a different MCP server — <strong>zero chatbot code
+                                    changes</strong>.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="div"></div>
+            <div class="callout green">
+                <span class="callout-icon">🚀</span>
+                <div><strong>FastMCP Cloud</strong> lets you deploy an MCP server remotely (e.g. expense tracker). The
+                    client connects via <code>"streamable_http"</code> transport and the URL from the FastMCP Cloud
+                    dashboard.</div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
