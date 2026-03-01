@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HITL with LangGraph — Notes</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0d0f14;
+            --surface: #13161e;
+            --surface2: #1a1e2a;
+            --border: #252a38;
+            --accent: #4f9cf9;
+            --accent2: #f97316;
+            --accent3: #22d3a5;
+            --text: #e2e8f0;
+            --muted: #64748b;
+            --code-bg: #0a0c10;
+            --tag-blue: rgba(79, 156, 249, 0.12);
+            --tag-orange: rgba(249, 115, 22, 0.12);
+            --tag-green: rgba(34, 211, 165, 0.12);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            line-height: 1.7;
+            padding: 40px 24px;
+        }
+
+        .page {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 28px;
+            margin-bottom: 48px;
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .badge {
+            background: var(--accent);
+            color: #000;
+            font-family: 'Syne', sans-serif;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 4px;
+            white-space: nowrap;
+            margin-top: 6px;
+        }
+
+        h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 800;
+            line-height: 1.15;
+            color: #fff;
+        }
+
+        h1 span {
+            color: var(--accent);
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: 13px;
+            margin-top: 6px;
+        }
+
+        /* Section */
+        section {
+            margin-bottom: 44px;
+        }
+
+        h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        h2::before {
+            content: '';
+            display: inline-block;
+            width: 3px;
+            height: 18px;
+            background: var(--accent);
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--accent2);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 10px;
+            margin-top: 20px;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin-bottom: 14px;
+        }
+
+        .card.accent-left {
+            border-left: 3px solid var(--accent);
+        }
+
+        .card.accent-orange {
+            border-left: 3px solid var(--accent2);
+        }
+
+        .card.accent-green {
+            border-left: 3px solid var(--accent3);
+        }
+
+        /* Grid */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        @media (max-width: 640px) {
+
+            .grid-2,
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Definition box */
+        .definition {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 22px 26px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .definition .quote-mark {
+            font-family: 'Syne', sans-serif;
+            font-size: 3rem;
+            color: var(--accent);
+            line-height: 1;
+            opacity: 0.3;
+            position: absolute;
+            top: 8px;
+            left: 16px;
+        }
+
+        .definition p {
+            padding-left: 10px;
+        }
+
+        .definition strong {
+            color: var(--accent);
+        }
+
+        /* Tags */
+        .tag {
+            display: inline-block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin: 2px;
+        }
+
+        .tag-blue {
+            background: var(--tag-blue);
+            color: var(--accent);
+            border: 1px solid rgba(79, 156, 249, 0.2);
+        }
+
+        .tag-orange {
+            background: var(--tag-orange);
+            color: var(--accent2);
+            border: 1px solid rgba(249, 115, 22, 0.2);
+        }
+
+        .tag-green {
+            background: var(--tag-green);
+            color: var(--accent3);
+            border: 1px solid rgba(34, 211, 165, 0.2);
+        }
+
+        /* Code */
+        pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 18px 20px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12.5px;
+            line-height: 1.7;
+            margin: 12px 0;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12.5px;
+            background: rgba(255, 255, 255, 0.06);
+            padding: 1px 6px;
+            border-radius: 3px;
+            color: #a5c9ff;
+        }
+
+        .kw {
+            color: #c792ea;
+        }
+
+        .fn {
+            color: #82aaff;
+        }
+
+        .str {
+            color: #c3e88d;
+        }
+
+        .cm {
+            color: #546e7a;
+            font-style: italic;
+        }
+
+        .num {
+            color: #f78c6c;
+        }
+
+        .cls {
+            color: #ffcb6b;
+        }
+
+        /* Flow diagram */
+        .flow {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            flex-wrap: wrap;
+            margin: 14px 0;
+        }
+
+        .flow-node {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--text);
+            white-space: nowrap;
+        }
+
+        .flow-node.highlight {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .flow-node.highlight-orange {
+            border-color: var(--accent2);
+            color: var(--accent2);
+        }
+
+        .flow-arrow {
+            color: var(--muted);
+            padding: 0 8px;
+            font-size: 13px;
+        }
+
+        /* Step list */
+        .steps {
+            counter-reset: step;
+            list-style: none;
+        }
+
+        .steps li {
+            counter-increment: step;
+            display: flex;
+            gap: 14px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            align-items: flex-start;
+        }
+
+        .steps li:last-child {
+            border-bottom: none;
+        }
+
+        .steps li::before {
+            content: counter(step);
+            background: var(--accent);
+            color: #000;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: 700;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        /* Bullet list */
+        ul.bullets {
+            list-style: none;
+            padding: 0;
+        }
+
+        ul.bullets li {
+            padding: 5px 0 5px 20px;
+            position: relative;
+            color: var(--text);
+        }
+
+        ul.bullets li::before {
+            content: '›';
+            position: absolute;
+            left: 4px;
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        /* Small label */
+        .label {
+            font-family: 'Syne', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        p {
+            margin-bottom: 10px;
+        }
+
+        strong {
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 40px 0;
+        }
+
+        /* Pattern cards */
+        .pattern-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        @media (max-width: 600px) {
+            .pattern-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .pattern-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+
+        .pattern-card .pname {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .pattern-card .pex {
+            font-size: 12px;
+            color: var(--muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Inline note */
+        .note {
+            background: rgba(249, 115, 22, 0.07);
+            border-left: 3px solid var(--accent2);
+            border-radius: 0 6px 6px 0;
+            padding: 10px 14px;
+            font-size: 13px;
+            color: #e2a87a;
+            margin: 12px 0;
+        }
+
+        .note-blue {
+            background: rgba(79, 156, 249, 0.07);
+            border-left: 3px solid var(--accent);
+            border-radius: 0 6px 6px 0;
+            padding: 10px 14px;
+            font-size: 13px;
+            color: #a5c9ff;
+            margin: 12px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+
+        <!-- Header -->
+        <header>
+            <div>
+                <div class="badge">CampusX · Module 21 · Human-in-the-Loop</div>
+                <h1>Human-in-the-Loop <span>(HITL)</span></h1>
+                <p class="subtitle">Dec 9–10, 2025 &nbsp;·&nbsp; 40-minute lecture notes</p>
+            </div>
+        </header>
+
+        <!-- ─── 1. WHAT IS HITL ─────────────────────────────────────────── -->
+        <section>
+            <h2>Topic 144. What is HITL?</h2>
+
+            <div class="definition">
+                <span class="quote-mark">"</span>
+                <p><strong>Human-in-the-Loop (HITL)</strong> is a <strong>design approach</strong> in AI systems where a
+                    human actively participates at <strong>critical points</strong> of the AI workflow — either to
+                    <strong>supervise, approve, correct, or guide</strong> the model's output.
+                </p>
+                <br>
+                <p>Think of HITL as putting a human <strong>"checkpoint"</strong> inside an AI pipeline so that
+                    important decisions are not made <strong>autonomously</strong> by the model.</p>
+            </div>
+
+            <div class="grid-2">
+                <div class="card accent-left">
+                    <span class="label">Why HITL Exists</span>
+                    <ul class="bullets">
+                        <li>To help <strong>agentic systems</strong></li>
+                        <li>To add <strong>accountability</strong></li>
+                    </ul>
+                </div>
+                <div class="card accent-green">
+                    <span class="label">HITL Ensures</span>
+                    <ul class="bullets">
+                        <li><strong>Accuracy</strong></li>
+                        <li><strong>Safety</strong></li>
+                        <li><strong>Ethical alignment</strong></li>
+                        <li><strong>Better user experience</strong></li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>Root Causes — Why LLMs Need HITL</h3>
+            <div class="card">
+                <p>LLMs are <strong>not perfect</strong> — they can produce:</p>
+                <ul class="bullets">
+                    <li><strong>Misinterpretation</strong> of instructions</li>
+                    <li><strong>Ambiguity</strong> in context understanding</li>
+                    <li><strong>Hallucinations</strong> — confident but wrong answers</li>
+                </ul>
+                <div class="note" style="margin-top:12px;">
+                    Example: Ask an agent to "delete 30 days → send 10 files current" — without HITL approval, it may
+                    take the wrong action.
+                </div>
+            </div>
+        </section>
+
+        <hr class="divider">
+
+        <!-- ─── 2. COMMON HITL PATTERNS ─────────────────────────────────── -->
+        <section>
+            <h2>Topic 145. Common HITL Patterns</h2>
+
+            <div class="pattern-grid">
+                <div class="pattern-card">
+                    <div class="pname">① Action Approval Pattern</div>
+                    <div class="pex">Approve / Reject Before Execution</div>
+                    <div style="margin-top:8px; font-size:13px; color:var(--muted);">Use case: payments, emails,
+                        deletions</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pname">② Output Review / Edit Pattern</div>
+                    <div class="pex">Human reviews &amp; edits before publish</div>
+                    <div style="margin-top:8px; font-size:13px; color:var(--muted);">Use case: research → review → post
+                    </div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pname">③ Ambiguity Clarification Pattern</div>
+                    <div class="pex">Ask human when intent is unclear</div>
+                    <div style="margin-top:8px; font-size:13px; color:var(--muted);">Use case: "next Friday" → Monday?
+                    </div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pname">④ Escalation Pattern</div>
+                    <div class="pex">AI escalates to human when stuck</div>
+                    <div style="margin-top:8px; font-size:13px; color:var(--muted);">Use case: Swissy → chatbot →
+                        escalate</div>
+                </div>
+            </div>
+
+            <div class="note-blue" style="margin-top:16px;">
+                <strong>Key context:</strong> Agentic AI gives autonomy to AI agents — e.g. customer → AI agents → human
+                judgement. LangGraph is the common implementation framework for HITL in agentic systems.
+            </div>
+        </section>
+
+        <hr class="divider">
+
+        <!-- ─── 3. HOW HITL WORKS ─────────────────────────────────────────── -->
+        <section>
+            <h2>Topic 146. How HITL Works — Conceptual Workflow</h2>
+
+            <div class="card accent-left">
+                <span class="label">Architecture Overview</span>
+                <div class="grid-2" style="margin-top:12px; gap:20px;">
+                    <div>
+                        <strong>Frontend</strong>
+                        <div class="flow"
+                            style="flex-direction:column; align-items:flex-start; gap:8px; margin-top:10px;">
+                            <div class="flow-node">Enter Topic (e.g. "GenAI")</div>
+                            <div class="flow-arrow">↓</div>
+                            <div class="flow-node highlight-orange">Submit Button → invoke()</div>
+                            <div class="flow-arrow">↑ result returns</div>
+                        </div>
+                    </div>
+                    <div>
+                        <strong>Backend (LangGraph)</strong>
+                        <div class="flow"
+                            style="flex-direction:column; align-items:flex-start; gap:8px; margin-top:10px;">
+                            <div class="flow-node highlight">START</div>
+                            <div class="flow-arrow">↓</div>
+                            <div class="flow-node">RESEARCH</div>
+                            <div class="flow-arrow">↓</div>
+                            <div class="flow-node highlight-orange">POST ← HITL interrupt here</div>
+                            <div class="flow-arrow">↓</div>
+                            <div class="flow-node">END</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3>State Object</h3>
+            <pre><span class="cm"># State passed through the graph</span>
+state = {
+  <span class="str">"topic"</span>: <span class="str">"GenAI"</span>,       <span class="cm"># input topic</span>
+  <span class="str">"draft"</span>: <span class="str">""</span>             <span class="cm"># filled by RESEARCH node</span>
+}</pre>
+
+            <h3>What happens at an interrupt (4-step process)</h3>
+            <ol class="steps">
+                <li><strong>Pause</strong> — graph execution stops at the interrupt point</li>
+                <li><strong>Save State</strong> — current state saved to checkpointer (MemorySaver)</li>
+                <li><strong>Prepare a message</strong> — interrupt payload sent to frontend</li>
+                <li><strong>msg → frontend</strong> — human sees the question/approval request</li>
+            </ol>
+
+            <h3>Human response cycle</h3>
+            <ol class="steps">
+                <li><strong>Receive the interrupt</strong> — read the payload</li>
+                <li><strong>User input</strong> — human types yes/no</li>
+                <li><strong>invoke(command = yes/no)</strong> — resume the graph with decision</li>
+            </ol>
+
+            <div class="card" style="margin-top:16px;">
+                <span class="label">Decision logic inside node</span>
+                <pre><span class="kw">decision</span> = interrupt()
+
+<span class="kw">if</span> decision == <span class="str">"yes"</span>:
+    post()
+<span class="kw">else</span>:
+    <span class="fn">reject</span>()</pre>
+            </div>
+        </section>
+
+        <hr class="divider">
+
+        <!-- ─── 4. BASIC CODE EXAMPLE ─────────────────────────────────────── -->
+        <section>
+            <h2>Topic 147. Basic HITL Code Example in LangGraph</h2>
+
+            <div class="note-blue">Graph: <code>__start__</code> → <code>chat</code> → <code>__end__</code> — simple
+                single-node chatbot with approval interrupt.</div>
+
+            <h3>1. ChatState</h3>
+            <pre><span class="kw">from</span> langgraph.graph <span class="kw">import</span> StateGraph, START, END
+<span class="kw">from</span> langgraph.types <span class="kw">import</span> interrupt, Command
+<span class="kw">from</span> langgraph.checkpoint.memory <span class="kw">import</span> MemorySaver
+<span class="kw">from</span> typing <span class="kw">import</span> Annotated
+<span class="kw">from</span> langchain_core.messages <span class="kw">import</span> BaseMessage, HumanMessage, AIMessage
+<span class="kw">from</span> langgraph.graph.message <span class="kw">import</span> add_messages
+
+<span class="kw">class</span> <span class="cls">ChatState</span>(TypedDict):
+    messages: <span class="cls">Annotated</span>[list[<span class="cls">BaseMessage</span>], add_messages]</pre>
+
+            <h3>2. Chat Node with Interrupt</h3>
+            <pre><span class="kw">def</span> <span class="fn">chat_node</span>(state: <span class="cls">ChatState</span>):
+    decision = interrupt({
+        <span class="str">"type"</span>: <span class="str">"approval"</span>,
+        <span class="str">"reason"</span>: <span class="str">"Model is about to answer a user question."</span>,
+        <span class="str">"question"</span>: state[<span class="str">"messages"</span>][-<span class="num">1</span>].content,
+        <span class="str">"instruction"</span>: <span class="str">"Approve this question? yes/no"</span>
+    })
+
+    <span class="kw">if</span> decision[<span class="str">"approved"</span>] == <span class="str">'no'</span>:
+        <span class="kw">return</span> {<span class="str">"messages"</span>: [<span class="cls">AIMessage</span>(content=<span class="str">"Not approved."</span>)]}
+    <span class="kw">else</span>:
+        response = llm.invoke(state[<span class="str">"messages"</span>])
+        <span class="kw">return</span> {<span class="str">"messages"</span>: [response]}</pre>
+
+            <h3>3. Build &amp; Compile Graph</h3>
+            <pre><span class="cm"># Build the graph: START -&gt; chat -&gt; END</span>
+builder = <span class="cls">StateGraph</span>(<span class="cls">ChatState</span>)
+builder.add_node(<span class="str">"chat"</span>, chat_node)
+builder.add_edge(START, <span class="str">"chat"</span>)
+builder.add_edge(<span class="str">"chat"</span>, END)
+
+<span class="cm"># Checkpointer is required for interrupts</span>
+checkpointer = <span class="cls">MemorySaver</span>()
+app = builder.compile(checkpointer=checkpointer)</pre>
+
+            <h3>4. Running — First invoke (triggers interrupt)</h3>
+            <pre>config = {<span class="str">"configurable"</span>: {<span class="str">"thread_id"</span>: <span class="str">"thread-1"</span>}}
+
+result = app.invoke(
+    {<span class="str">"messages"</span>: [<span class="cls">HumanMessage</span>(content=<span class="str">"Explain gradient descent in very simple terms."</span>)]},
+    config=config
+)
+
+<span class="cm"># result contains __interrupt__ key with payload:</span>
+<span class="cm"># {'type': 'approval', 'reason': '...', 'question': '...', 'instruction': '...'}</span>
+
+message = result[<span class="str">'__interrupt__'</span>][<span class="num">0</span>].value
+<span class="cm"># Shows the interrupt payload to the human</span></pre>
+
+            <h3>5. Get user decision &amp; resume</h3>
+            <pre>user_input = input(<span class="fn">f</span><span class="str">"\nBackend message - {message} \n Approve this question? (y/n): "</span>)
+
+<span class="cm"># Resume the graph with the approval decision</span>
+final_result = app.invoke(
+    <span class="cls">Command</span>(resume={<span class="str">"approved"</span>: user_input}),
+    config=config,
+)
+
+print(final_result)</pre>
+
+            <div class="note" style="margin-top:8px;">
+                If user inputs <code>"no"</code> → AI returns "Not approved." message. If <code>"yes"</code> → LLM
+                answers the question.
+            </div>
+        </section>
+
+        <hr class="divider">
+
+        <!-- ─── 5. ADVANCED EXAMPLE ───────────────────────────────────────── -->
+        <section>
+            <h2>Topic 148. Advanced Example — HITL in a Tool-Using Chatbot</h2>
+
+            <div class="note-blue">
+                Graph: <code>__start__</code> → <code>chat_node</code> ⇄ <code>tools</code> (conditional) →
+                <code>__end__</code>
+                <br>HITL interrupt is placed <strong>inside the tool itself</strong> (e.g.,
+                <code>purchase_stock</code>).
+            </div>
+
+            <h3>Tools defined</h3>
+            <pre>tools = [get_stock_price, purchase_stock]
+llm_with_tools = llm.bind_tools(tools)</pre>
+
+            <h3>purchase_stock tool with HITL</h3>
+            <pre><span class="kw">@tool</span>
+<span class="kw">def</span> <span class="fn">purchase_stock</span>(symbol: str, quantity: int) -> dict:
+    <span class="str">"""
+    Simulate purchasing a given quantity of a stock symbol.
+
+    HUMAN-IN-THE-LOOP:
+    Before confirming the purchase, this tool will interrupt
+    and wait for a human decision ("yes" / anything else).
+    """</span>
+    <span class="cm"># This pauses the graph and returns control to the caller</span>
+    decision = interrupt(<span class="fn">f</span><span class="str">"Approve buying {quantity} shares of {symbol}? (yes/no)"</span>)
+
+    <span class="kw">if</span> isinstance(decision, str) <span class="kw">and</span> decision.lower() == <span class="str">"yes"</span>:
+        <span class="kw">return</span> {
+            <span class="str">"status"</span>: <span class="str">"success"</span>,
+            <span class="str">"message"</span>: <span class="fn">f</span><span class="str">"Purchase order placed for {quantity} shares of {symbol}."</span>,
+            <span class="str">"symbol"</span>: symbol,
+            <span class="str">"quantity"</span>: quantity,
+        }
+    <span class="kw">else</span>:
+        <span class="kw">return</span> {
+            <span class="str">"status"</span>: <span class="str">"cancelled"</span>,
+            <span class="str">"message"</span>: <span class="fn">f</span><span class="str">"Purchase of {quantity} shares of {symbol} was declined by human."</span>,
+            <span class="str">"symbol"</span>: symbol,
+            <span class="str">"quantity"</span>: quantity,
+        }</pre>
+
+            <h3>State, Nodes &amp; Graph</h3>
+            <pre><span class="cm"># 3. State</span>
+<span class="kw">class</span> <span class="cls">ChatState</span>(TypedDict):
+    messages: <span class="cls">Annotated</span>[list[<span class="cls">BaseMessage</span>], add_messages]
+
+<span class="cm"># 4. Nodes</span>
+<span class="kw">def</span> <span class="fn">chat_node</span>(state: <span class="cls">ChatState</span>):
+    <span class="str">"""LLM node that may answer or request a tool call."""</span>
+    messages = state[<span class="str">"messages"</span>]
+    response = llm_with_tools.invoke(messages)
+    <span class="kw">return</span> {<span class="str">"messages"</span>: [response]}
+
+tool_node = <span class="cls">ToolNode</span>(tools)
+
+<span class="cm"># 5. Checkpointer (in-memory)</span>
+memory = <span class="cls">MemorySaver</span>()
+
+<span class="cm"># 6. Graph</span>
+graph = <span class="cls">StateGraph</span>(<span class="cls">ChatState</span>)
+graph.add_node(<span class="str">"chat_node"</span>, chat_node)
+graph.add_node(<span class="str">"tools"</span>, tool_node)
+graph.add_edge(START, <span class="str">"chat_node"</span>)
+graph.add_conditional_edges(<span class="str">"chat_node"</span>, tools_condition)
+graph.add_edge(<span class="str">"tools"</span>, <span class="str">"chat_node"</span>)
+chatbot = graph.compile(checkpointer=memory)</pre>
+
+            <h3>7. CLI loop with HITL handling</h3>
+            <pre><span class="kw">if</span> __name__ == <span class="str">"__main__"</span>:
+    thread_id = <span class="str">"demo-thread"</span>   <span class="cm"># fixed ID = conversation persisted in memory</span>
+
+    <span class="kw">while</span> True:
+        user_input = input(<span class="str">"You: "</span>)
+        <span class="kw">if</span> user_input.lower().strip() <span class="kw">in</span> {<span class="str">"exit"</span>, <span class="str">"quit"</span>}:
+            print(<span class="str">"Goodbye!"</span>); <span class="kw">break</span>
+
+        state = {<span class="str">"messages"</span>: [<span class="cls">HumanMessage</span>(content=user_input)]}
+
+        <span class="cm"># Run the graph (may hit an interrupt)</span>
+        result = chatbot.invoke(
+            state,
+            config={<span class="str">"configurable"</span>: {<span class="str">"thread_id"</span>: thread_id}},
+        )
+
+        <span class="cm"># Check for HITL interrupt from purchase_stock</span>
+        interrupts = result.get(<span class="str">"__interrupt__"</span>, [])
+
+        <span class="kw">if</span> interrupts:
+            prompt_to_human = interrupts[<span class="num">0</span>].value
+            print(<span class="fn">f</span><span class="str">"HITL: {prompt_to_human}"</span>)
+            decision = input(<span class="str">"Your decision: "</span>).strip().lower()
+
+            <span class="cm"># Resume graph with the human decision ("yes" / "no" / whatever)</span>
+            result = chatbot.invoke(
+                <span class="cls">Command</span>(resume=decision),
+                config={<span class="str">"configurable"</span>: {<span class="str">"thread_id"</span>: thread_id}},
+            )
+
+        <span class="cm"># Get the latest message from the assistant</span>
+        messages = result[<span class="str">"messages"</span>]
+        last_msg = messages[-<span class="num">1</span>]
+        print(<span class="fn">f</span><span class="str">"Bot: {last_msg.content}\n"</span>)</pre>
+        </section>
+
+        <hr class="divider">
+
+        <!-- ─── 6. KEY CONCEPTS SUMMARY ───────────────────────────────────── -->
+        <section>
+            <h2>Key Concepts Summary</h2>
+
+            <div class="grid-3">
+                <div class="card accent-left">
+                    <span class="label">interrupt()</span>
+                    <p>Pauses graph execution and surfaces a payload to the caller. Requires a
+                        <strong>checkpointer</strong> to save state.
+                    </p>
+                </div>
+                <div class="card accent-orange">
+                    <span class="label">MemorySaver</span>
+                    <p>In-memory checkpointer. Stores graph state per <code>thread_id</code>. Required for any graph
+                        using interrupts.</p>
+                </div>
+                <div class="card accent-green">
+                    <span class="label">Command(resume=…)</span>
+                    <p>Used to resume a paused graph. Pass human decision as <code>resume</code> value to continue
+                        execution.</p>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top:14px;">
+                <span class="label">Full HITL lifecycle</span>
+                <div class="flow" style="flex-wrap:wrap; gap:6px; margin-top:8px;">
+                    <div class="flow-node highlight">invoke(state)</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-node">graph runs</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-node highlight-orange">interrupt() hit</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-node">state saved</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-node">human decides</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-node highlight">invoke(Command(resume=…))</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-node">graph continues</div>
+                </div>
+            </div>
+
+            <div class="grid-2" style="margin-top:14px;">
+                <div class="card">
+                    <span class="label">Where to place interrupt()</span>
+                    <ul class="bullets">
+                        <li>Inside a <strong>node function</strong> (basic case)</li>
+                        <li>Inside a <strong>tool function</strong> (advanced — tool-using agents)</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <span class="label">Important rules</span>
+                    <ul class="bullets">
+                        <li>Always pass <code>checkpointer=</code> when compiling</li>
+                        <li>Use same <code>thread_id</code> to resume</li>
+                        <li><code>__interrupt__</code> key in result contains payload</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </div>
+</body>
+
+</html>

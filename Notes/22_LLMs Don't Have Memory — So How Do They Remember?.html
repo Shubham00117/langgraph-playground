@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Memory — Complete Notes</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=JetBrains+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0e0c0a;
+            --surface: #161412;
+            --surface2: #1e1b18;
+            --border: #2a2520;
+            --text: #e8e0d5;
+            --muted: #7a6f64;
+            --accent: #e8612a;
+            --accent2: #4a9eff;
+            --accent3: #52c48a;
+            --accent-pale: rgba(232, 97, 42, 0.1);
+            --blue-pale: rgba(74, 158, 255, 0.1);
+            --green-pale: rgba(82, 196, 138, 0.1);
+            --code-bg: #080806;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            font-size: 14.5px;
+            line-height: 1.75;
+            padding: 48px 24px;
+        }
+
+        .page {
+            max-width: 940px;
+            margin: 0 auto;
+        }
+
+        /* ─── Header ─── */
+        header {
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 32px;
+            margin-bottom: 56px;
+        }
+
+        .meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 14px;
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            font-weight: 900;
+            line-height: 1.1;
+            color: #fff;
+        }
+
+        h1 em {
+            color: var(--accent);
+            font-style: normal;
+        }
+
+        .sub {
+            color: var(--muted);
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        /* ─── TOC ─── */
+        .toc {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 22px 26px;
+            margin-bottom: 52px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px 32px;
+        }
+
+        .toc-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 12px;
+            grid-column: 1/-1;
+        }
+
+        .toc a {
+            color: var(--text);
+            text-decoration: none;
+            font-size: 13px;
+            padding: 3px 0;
+            border-bottom: 1px solid transparent;
+            transition: color 0.2s;
+            display: flex;
+            gap: 8px;
+            align-items: baseline;
+        }
+
+        .toc a:hover {
+            color: var(--accent);
+        }
+
+        .toc a .n {
+            color: var(--muted);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+        }
+
+        /* ─── Sections ─── */
+        section {
+            margin-bottom: 56px;
+        }
+
+        hr.div {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 48px 0;
+        }
+
+        h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+        .sec-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            background: var(--accent);
+            color: #000;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-weight: 700;
+        }
+
+        h3 {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin: 24px 0 10px;
+        }
+
+        p {
+            margin-bottom: 10px;
+            color: var(--text);
+        }
+
+        strong {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        /* ─── Cards ─── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 18px 22px;
+            margin-bottom: 12px;
+        }
+
+        .card.orange {
+            border-left: 3px solid var(--accent);
+        }
+
+        .card.blue {
+            border-left: 3px solid var(--accent2);
+        }
+
+        .card.green {
+            border-left: 3px solid var(--accent3);
+        }
+
+        /* ─── Definition ─── */
+        .def {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+            font-size: 15px;
+            line-height: 1.8;
+        }
+
+        .def strong {
+            color: var(--accent);
+        }
+
+        /* ─── Grid ─── */
+        .g2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .g3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        @media(max-width:660px) {
+
+            .g2,
+            .g3 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ─── Lists ─── */
+        ul.cl {
+            list-style: none;
+            padding: 0;
+        }
+
+        ul.cl li {
+            padding: 5px 0 5px 20px;
+            position: relative;
+            border-bottom: 1px solid var(--border);
+        }
+
+        ul.cl li:last-child {
+            border-bottom: none;
+        }
+
+        ul.cl li::before {
+            content: '›';
+            position: absolute;
+            left: 4px;
+            color: var(--accent);
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        ol.steps {
+            list-style: none;
+            counter-reset: step;
+            padding: 0;
+        }
+
+        ol.steps li {
+            counter-increment: step;
+            display: flex;
+            gap: 14px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+            align-items: flex-start;
+        }
+
+        ol.steps li:last-child {
+            border-bottom: none;
+        }
+
+        ol.steps li::before {
+            content: counter(step);
+            background: var(--accent);
+            color: #000;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: 700;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        /* ─── Code ─── */
+        pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px 20px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12.5px;
+            line-height: 1.75;
+            margin: 12px 0;
+            color: #c8bfb4;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            background: rgba(255, 255, 255, 0.07);
+            padding: 1px 6px;
+            border-radius: 3px;
+            color: #f0c09a;
+        }
+
+        .kw {
+            color: #c792ea;
+        }
+
+        .fn {
+            color: #82aaff;
+        }
+
+        .str {
+            color: #c3e88d;
+        }
+
+        .cm {
+            color: #546e7a;
+            font-style: italic;
+        }
+
+        .cls {
+            color: #ffcb6b;
+        }
+
+        /* ─── Flow ─── */
+        .flow {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 12px 0;
+        }
+
+        .fbox {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 6px 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .fbox.o {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-pale);
+        }
+
+        .fbox.b {
+            border-color: var(--accent2);
+            color: var(--accent2);
+            background: var(--blue-pale);
+        }
+
+        .fbox.g {
+            border-color: var(--accent3);
+            color: var(--accent3);
+            background: var(--green-pale);
+        }
+
+        .arr {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        /* ─── Note boxes ─── */
+        .note {
+            border-left: 3px solid var(--accent);
+            background: var(--accent-pale);
+            padding: 10px 14px;
+            border-radius: 0 6px 6px 0;
+            font-size: 13px;
+            color: #e8a07a;
+            margin: 12px 0;
+        }
+
+        .note-b {
+            border-left: 3px solid var(--accent2);
+            background: var(--blue-pale);
+            padding: 10px 14px;
+            border-radius: 0 6px 6px 0;
+            font-size: 13px;
+            color: #8ac4ff;
+            margin: 12px 0;
+        }
+
+        .note-g {
+            border-left: 3px solid var(--accent3);
+            background: var(--green-pale);
+            padding: 10px 14px;
+            border-radius: 0 6px 6px 0;
+            font-size: 13px;
+            color: #7ee0ad;
+            margin: 12px 0;
+        }
+
+        /* ─── Table ─── */
+        table.cmp {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13.5px;
+            margin: 14px 0;
+        }
+
+        table.cmp th {
+            background: var(--surface2);
+            color: var(--text);
+            font-weight: 600;
+            padding: 10px 14px;
+            text-align: left;
+            border-bottom: 2px solid var(--accent);
+        }
+
+        table.cmp td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface);
+            vertical-align: top;
+        }
+
+        table.cmp tr:last-child td {
+            border-bottom: none;
+        }
+
+        table.cmp td:first-child {
+            font-weight: 600;
+            color: var(--accent);
+            white-space: nowrap;
+        }
+
+        /* ─── Tool cards ─── */
+        .tool-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 18px 20px;
+            margin-bottom: 12px;
+        }
+
+        .tool-name {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--accent2);
+            margin-bottom: 6px;
+        }
+
+        .tool-tag {
+            display: inline-block;
+            font-size: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            padding: 2px 7px;
+            border-radius: 3px;
+            margin-bottom: 8px;
+        }
+
+        .tag-o {
+            background: var(--accent-pale);
+            color: var(--accent);
+            border: 1px solid rgba(232, 97, 42, 0.3);
+        }
+
+        .tag-b {
+            background: var(--blue-pale);
+            color: var(--accent2);
+            border: 1px solid rgba(74, 158, 255, 0.3);
+        }
+
+        .tag-g {
+            background: var(--green-pale);
+            color: var(--accent3);
+            border: 1px solid rgba(82, 196, 138, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+
+        <!-- Header -->
+        <header>
+            <div class="meta">
+                <span>CampusX · Module 22</span>
+                <span>LLM Memory</span>
+                <span>Dec 22, 2025 · 57:43</span>
+            </div>
+            <h1>LLMs Don't Have <em>Memory</em><br>— So How Do They Remember?</h1>
+            <p class="sub">First-principles lecture: from stateless math functions → STM → LTM → tools &amp; future
+                research</p>
+        </header>
+
+        <!-- TOC -->
+        <div class="toc">
+            <div class="toc-title">Contents</div>
+            <a href="#s1"><span class="n">149</span> LLM as a Math Function</a>
+            <a href="#s2"><span class="n">150</span> LLMs Are Stateless</a>
+            <a href="#s3"><span class="n">151</span> No Intrinsic Memory</a>
+            <a href="#s4"><span class="n">152</span> Context Window</a>
+            <a href="#s5"><span class="n">153</span> In-Context Learning</a>
+            <a href="#s6"><span class="n">154</span> Short-Term Memory (STM)</a>
+            <a href="#s7"><span class="n">155</span> STM Code Demo</a>
+            <a href="#s8"><span class="n">156</span> Problems with STM</a>
+            <a href="#s9"><span class="n">157</span> Why We Need LTM</a>
+            <a href="#s10"><span class="n">158</span> Types of LTM</a>
+            <a href="#s11"><span class="n">159</span> How LTM Works (4 Steps)</a>
+            <a href="#s12"><span class="n">160</span> Challenges &amp; Tools</a>
+        </div>
+
+        <!-- ─── 1. LLM as Math Function ─────────────────────────────────── -->
+        <section id="s1">
+            <h2><span class="sec-num">01</span> Topic 149. LLM as a Parameterized Math Function</h2>
+
+            <div class="def">
+                An LLM at inference is just a <strong>parameterized math function</strong>:<br>
+                <code style="font-size:16px; background:none; color:var(--accent);">y = fθ(x)</code>
+            </div>
+
+            <div class="g2">
+                <div class="card orange">
+                    <h3 style="margin-top:0;">x — Input (variable)</h3>
+                    <p>The prompt / input tokens. Changes every call. <strong>Not fixed</strong> — controlled by the
+                        user.</p>
+                    <p>Analogy: in <code>y = mx + b</code>, x is the data point you feed in.</p>
+                </div>
+                <div class="card blue">
+                    <h3 style="margin-top:0;">θ — Parameters (fixed)</h3>
+                    <p><strong>Billions</strong> of parameters learned during training. <strong>Fixed at
+                            inference</strong> — the user cannot change them.</p>
+                    <p>Analogy: <code>m</code> and <code>b</code> in <code>y = mx + b</code> — fixed after training.</p>
+                </div>
+            </div>
+
+            <div class="card green">
+                <h3 style="margin-top:0;">y — Output</h3>
+                <p>Output tokens generated from the input. Depends entirely on <strong>x</strong> (input) and
+                    <strong>θ</strong> (params).
+                </p>
+            </div>
+
+            <div class="note-b">
+                <strong>Key insight:</strong> θ is complex (billions of params trained on massive data). x is just
+                tokens you send in. y is what the model produces. Memory is <em>not</em> baked into θ — it has to be in
+                x.
+            </div>
+        </section>
+
+        <hr class="div">
+
+        <!-- ─── 2. Stateless ─────────────────────────────────────────────── -->
+        <section id="s2">
+            <h2><span class="sec-num">02</span> Topic 150. LLMs Are Stateless</h2>
+
+            <div class="def">
+                <strong>Stateless:</strong> A system whose output depends <em>only on the current input</em>, and not on
+                anything that happened before.
+            </div>
+
+            <p>Because the LLM is <code>y = fθ(x)</code>:</p>
+
+            <div class="g2">
+                <div class="card orange">
+                    <p><strong>y₁ = fθ(x₁)</strong> — first call produces y₁ from x₁</p>
+                    <p style="margin-bottom:0; color: var(--muted);">y₁ is discarded after this call.</p>
+                </div>
+                <div class="card orange">
+                    <p><strong>y₂ = fθ(x₂)</strong> — second call has NO knowledge of x₁ or y₁</p>
+                    <p style="margin-bottom:0; color: var(--muted);">It's a completely fresh calculation.</p>
+                </div>
+            </div>
+
+            <div class="note">
+                <strong>Bottom line:</strong> Each call is fully independent. The model doesn't "remember" — it just
+                runs the math on whatever tokens you hand it.
+            </div>
+        </section>
+
+        <hr class="div">
+
+        <!-- ─── 3. No Intrinsic Memory ───────────────────────────────────── -->
+        <section id="s3">
+            <h2><span class="sec-num">03</span> Topic 151. Fact: LLMs Have No Intrinsic Memory</h2>
+
+            <div class="def">
+                <strong>Fact:</strong> LLMs don't have any <strong>intrinsic memory</strong>. Memory must be added
+                <strong>externally</strong> — it is not stored inside the model itself.
+            </div>
+
+            <div class="card">
+                <h3 style="margin-top:0;">Proof — Chat Demo</h3>
+                <div class="flow">
+                    <div class="fbox">User: "Hi my name is Nitish"</div>
+                    <span class="arr">→</span>
+                    <div class="fbox g">LLM: "Hi Nitish how can I help you"</div>
+                </div>
+                <div class="flow">
+                    <div class="fbox">User: "What is my name?"</div>
+                    <span class="arr">→</span>
+                    <div class="fbox o">LLM: "I don't know"</div>
+                </div>
+                <p style="color:var(--muted); font-size:13px; margin-top:8px;">Each call is a new invocation of fθ(x).
+                    The second call has no x₁ in its input.</p>
+            </div>
+
+            <div class="note">
+                Memory is <strong>first-call only</strong> without explicit injection. Even if the model says "Hi
+                Nitish" in call 1, call 2 starts fresh.
+            </div>
+        </section>
+
+        <hr class="div">
+
+        <!-- ─── 4. Context Window ────────────────────────────────────────── -->
+        <section id="s4">
+            <h2><span class="sec-num">04</span> Topic 152. Context Window</h2>
+
+            <div class="def">
+                The <strong>context window</strong> is the maximum amount of text an LLM can read and process at one
+                time — measured in <strong>tokens</strong>.
+            </div>
+
+            <div class="g2">
+                <div class="card blue">
+                    <h3 style="margin-top:0;">What it is</h3>
+                    <ul class="cl">
+                        <li>It is the <strong>x</strong> in <code>y = fθ(x)</code></li>
+                        <li>Has a hard upper limit (max tokens)</li>
+                        <li>128k tokens ≈ ~200 pages of PDF</li>
+                        <li>Modern models: up to 1M+ tokens</li>
+                    </ul>
+                </div>
+                <div class="card blue">
+                    <h3 style="margin-top:0;">Camera analogy</h3>
+                    <ul class="cl">
+                        <li><strong>Smaller lens</strong> = smaller context window — sees less</li>
+                        <li><strong>Bigger lens</strong> = bigger context window — sees more</li>
+                        <li>Neither has any internal <strong>storage</strong></li>
+                        <li>Only what fits in the lens can be "seen"</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="note-b">
+                Bigger context window is better but <strong>not infinite</strong>. Beyond the limit, old content is
+                pushed out — the model literally cannot see it.
+            </div>
+        </section>
+
+        <hr class="div">
+
+        <!-- ─── 5. In-Context Learning ───────────────────────────────────── -->
+        <section id="s5">
+            <h2><span class="sec-num">05</span> Topic 153. In-Context Learning</h2>
+
+            <div class="def">
+                <strong>In-context learning</strong> is an <em>emergent ability</em> that allows an LLM to use
+                <strong>information and patterns present in the prompt itself</strong>, in addition to its trained
+                parametric knowledge, to generate an answer.
+            </div>
+
+            <div class="g2">
+                <div class="card green">
+                    <h3 style="margin-top:0;">Parametric knowledge</h3>
+                    <p>Baked into θ during training on massive data. Fixed. Available on every call.</p>
+                </div>
+                <div class="card orange">
+                    <h3 style="margin-top:0;">In-context knowledge</h3>
+                    <p>Injected via the prompt (x). Can include: documents, conversation history, facts, instructions —
+                        up to 100+ pages in the prompt.</p>
+                </div>
+            </div>
+
+            <div class="note-g">
+                <strong>This is the key mechanism for memory:</strong> you can't change θ, but you CAN stuff information
+                into x. In-context learning is why injecting history into the prompt gives the model "memory."
+            </div>
+        </section>
+
+        <hr class="div">
+
+        <!-- ─── 6. STM ───────────────────────────────────────────────────── -->
+        <section id="s6">
+            <h2><span class="sec-num">06</span> Topic 154. Short-Term Memory (STM)</h2>
+
+            <div class="def">
+                <strong>The solution to statelessness:</strong> Instead of calling <code>fθ(x₂)</code>, call<br>
+                <code style="color:var(--accent3); font-size:14px;">fθ(concat(x₁, y₁, x₂))</code><br>
+                — concatenate the <em>entire conversation history</em> into every new call.
+            </div>
+
+            <h3>How it works</h3>
+            <div class="flow">
+                <div class="fbox">x₁ = "Hi my name is Nitish"</div>
+                <span class="arr">→</span>
+                <div class="fbox g">y₁ = "Hi Nitish!"</div>
+                <span class="arr">→</span>
+                <div class="fbox b">append y₁ to messages list</div>
+            </div>
+            <div class="flow">
+                <div class="fbox">x₂ = "What is my name?"</div>
+                <span class="arr">→</span>
+                <div class="fbox o">invoke with [x₁, y₁, x₂]</div>
+                <span class="arr">→</span>
+                <div class="fbox g">y₂ = "Your name is Nitish."</div>
+            </div>
+
+            <h3>STM scope</h3>
+            <div class="card">
+                <p>STM is <strong>thread-scoped</strong> — the messages list lives in memory only for the duration of
+                    the session. Each conversation thread has its own isolated context. A new conversation = stranger
+                    (no memory).</p>
+            </div>
+
+            <div class="note-b">
+                ChatGPT's sidebar threads = STM. Each thread has its own <code>messages[ ]</code> list. Select a new
+                chat → empty list → LLM has no context.
+            </div>
+        </section>
+
+        <hr class="div">
+
+        <!-- ─── 7. STM Code Demo ─────────────────────────────────────────── -->
+        <section id="s7">
+            <h2><span class="sec-num">07</span> Topic 155. STM — Code Demo</h2>
+
+            <div class="note-b" style="margin-bottom:14px;">File: <code>0_llm_memory.ipynb</code></div>
+
+            <h3>Step 1 — Without memory (stateless behavior)</h3>
+            <pre><span class="kw">from</span> langchain_openai <span class="kw">import</span> <span class="cls">ChatOpenAI</span>
+llm = <span class="cls">ChatOpenAI</span>()
+
+llm.invoke(<span class="str">'My name is Nitish'</span>).content
+<span class="cm"># → 'Hello Nitish! How can I assist you today?'</span>
+
+llm.invoke(<span class="str">'What is my name?'</span>).content
+<span class="cm"># → "I'm sorry, but I don't have the capability to know your name..."</span>
+<span class="cm"># ↑ Stateless — second call has no memory of first</span></pre>
+
+            <h3>Step 2 — With STM (conversation history list)</h3>
+            <pre><span class="cm"># Build a messages list manually</span>
+messages = [<span class="str">'My name is Nitish'</span>]
+
+output = llm.invoke(messages).content
+<span class="cm"># → 'Nice to meet you, Nitish! How can I assist you today?'</span>
+
+messages.append(output)      <span class="cm"># save assistant response</span>
+messages.append(<span class="str">'What is my name?'</span>)
+
+<span class="cm"># messages list now contains full history:</span>
+<span class="cm"># ['My name is Nitish',</span>
+<span class="cm">#  'Nice to meet you, Nitish! ...',</span>
+<span class="cm">#  'What is my name?']</span>
+
+output = llm.invoke(messages).content
+<span class="cm"># → 'Your name is Nitish.'  ✓ Memory works!</span></pre>
+
+            <div class="note-g">
+                <strong>The trick:</strong> The entire conversation history is stuffed into x on every call. The LLM
+                doesn't "remember" — it just reads the history that was passed to it.
+            </div>
+        </section>
+
+        <hr class="div">
+
+        <!-- ─── 8. Problems with STM ─────────────────────────────────────── -->
+        <section id="s8">
+            <h2><span class="sec-num">08</span> Topic 156. Problems with Short-Term Memory</h2>
+
+            <div class="g3">
+                <div class="card orange">
+                    <h3 style="margin-top:0;">① Fragile</h3>
+                    <p>STM lives in a Python variable / process memory. Restart the server → messages list is gone. No
+                        persistence across restarts or crashes.</p>
+                    <p style="color:var(--muted); font-size:13px;">Fix: persist STM to a database (keyed by
+                        <code>thread_id</code>)
+                    </p>
+                </div>
+                <div class="card orange">
+                    <h3 style="margin-top:0;">② Context Window Overflow</h3>
+                    <p>Long conversations → messages list grows → eventually exceeds max tokens → LLM errors or cuts off
+                        early context.</p>
+                    <p style="color:var(--muted); font-size:13px;">Fix: trimming or summarization (see below)</p>
+                </div>
+                <div class="card orange">
+                    <h3 style="margin-top:0;">③ Thread-Scoped</h3>
+                    <p>Each conversation is isolated. Learning never compounds. Cross-thread reasoning is impossible.
+                        Each new chat = stranger.</p>
+                    <p style="color:var(--muted); font-size:13px;">Fix: Long-Term Memory (LTM)</p>
+                </div>
+            </div>
+
+            <h3>Context Window Problem — Solutions</h3>
+
+            <table class="cmp">
+                <thead>
+                    <tr>
+                        <th>Strategy</th>
+                        <th>How</th>
+                        <th>Trade-off</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Trimming</td>
+                        <td>Keep only the last N messages; drop everything older</td>
+                        <td>Blunt &amp; fast but loses early context</td>
+                    </tr>
+                    <tr>
+                        <td>Summarization</td>
+                        <td>Compress old messages into a summary using LLM</td>
+                        <td>Intelligent but lossy (details fade)</td>
+                    </tr>
+                    <tr>
+                        <td>Hybrid Context</td>
+                        <td>Summary of old + recent verbatim messages</td>
+                        <td>Best of both — fits inside context window</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="note">
+                The hybrid approach feeds the LLM: <code>[SUMMARY of past] + [recent raw messages]</code> — a coherent,
+                context-window-friendly input.
+            </div>
+        </section>
+
+        <hr class="div">
+
+        <!-- ─── 9. Why LTM ───────────────────────────────────────────────── -->
+        <section id="s9">
+            <h2><span class="sec-num">09</span> Topic 157. Why We Need Long-Term Memory</h2>
+
+            <div class="def">
+                We need a <strong>new kind of memory</strong> — information that survives beyond a single conversation,
+                a single session, sometimes even beyond days or weeks. This defines <em>continuity</em>.
+            </div>
+
+            <div class="g2">
+                <div class="card green">
+                    <h3 style="margin-top:0;">Information that should survive</h3>
+                    <ul class="cl">
+                        <li>Beyond a single conversation</li>
+                        <li>Beyond a single session</li>
+                        <li>Sometimes days or weeks</li>
+                    </ul>
+                    <p style="margin-top:10px; font-size:13px;">Things like: who the user is, how the system is expected
+                        to behave, what tends to work, what decisions were made in the past.</p>
+                </div>
+                <div class="card blue">
+                    <h3 style="margin-top:0;">LTM must be selective</h3>
+                    <p>Only information that is <strong>stable, useful, and reusable</strong> should survive. Everything
+                        else should naturally fade away.</p>
+                    <p style="font-size:13px; color:var(--muted);">Not every message deserves to be remembered forever —
+                        only insights that define the user's ongoing relationship with the system.</p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="div">
+
+        <!-- ─── 10. Types of LTM ─────────────────────────────────────────── -->
+        <section id="s10">
+            <h2><span class="sec-num">10</span> Topic 158. Three Types of Long-Term Memory</h2>
+
+            <div class="g3">
+                <div class="card orange">
+                    <h3 style="margin-top:0;">① Episodic Memory</h3>
+                    <p><em>"What happened"</em></p>
+                    <p>Stores past events and experiences, tied to time or context.</p>
+                    <p><strong>Examples:</strong> "Yesterday the user rejected solution A", "Last deployment failed due
+                        to missing credentials"</p>
+                    <p style="font-size:13px; color:var(--muted);">Answers: "What did we do last time?", "Have we tried
+                        this already?"<br>STM cannot do this — Episodic LTM can.</p>
+                </div>
+                <div class="card blue">
+                    <h3 style="margin-top:0;">② Semantic Memory</h3>
+                    <p><em>"What is true"</em></p>
+                    <p>Stores stable facts and knowledge not tied to a single event.</p>
+                    <p><strong>Examples:</strong> "User prefers Python", "This user is a beginner", "Budget constraint
+                        is ₹10k"</p>
+                    <p style="font-size:13px; color:var(--muted);">Most common form of LTM in products. Answers: "What
+                        do we always know about this user?"</p>
+                </div>
+                <div class="card green">
+                    <h3 style="margin-top:0;">③ Procedural Memory</h3>
+                    <p><em>"How to do things"</em></p>
+                    <p>Stores strategies, rules, and learned behaviors.</p>
+                    <p><strong>Examples:</strong> "When solving SQL problems use subqueries", "If tool X fails retry
+                        with tool Y", "Explain step by step for this user"</p>
+                    <p style="font-size:13px; color:var(--muted);">Enables learning that compounds over time. Answers:
+                        "What approach always works?"</p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="div">
+
+        <!-- ─── 11. How LTM Works ────────────────────────────────────────── -->
+        <section id="s11">
+            <h2><span class="sec-num">11</span> Topic 159. How Long-Term Memory Works — 4 Steps</h2>
+
+            <div class="note-b" style="margin-bottom:20px;">
+                Core question for each step: <em>"Is anything worth remembering? → Where? → What now? → How to use
+                    it?"</em>
+            </div>
+
+            <ol class="steps">
+                <li>
+                    <div>
+                        <strong>Step 1 — Creation / Update</strong>
+                        <p style="margin-top:6px; margin-bottom:0;">"Is anything from what just happened worth
+                            remembering beyond this conversation?"</p>
+                        <p style="font-size:13px; color:var(--muted);">System looks at: user messages, model responses,
+                            tool outcomes. Then it extracts memory candidates, filters out noise, decides scope (user /
+                            agent / app), and decides whether to: <strong>create</strong> a new memory,
+                            <strong>update</strong> an existing one, or <strong>ignore</strong> it.
+                        </p>
+                    </div>
+                </li>
+                <li>
+                    <div>
+                        <strong>Step 2 — Storage</strong>
+                        <p style="margin-top:6px; margin-bottom:0;">"Where and how do we keep this memory?"</p>
+                        <p style="font-size:13px; color:var(--muted);">Writing to a durable store with identifiers and
+                            metadata so it survives restarts and crashes. Storage type depends on memory type:
+                            relational DB, key-value store, log, or <strong>vector database</strong> (for semantic
+                            lookup).</p>
+                    </div>
+                </li>
+                <li>
+                    <div>
+                        <strong>Step 3 — Retrieval</strong>
+                        <p style="margin-top:6px; margin-bottom:0;">"Given the current situation, what should I remember
+                            right now?"</p>
+                        <p style="font-size:13px; color:var(--muted);">System looks at current input → decides if memory
+                            is needed → searches memory stores → selects a small, relevant subset.<br><strong>Key point:
+                                Retrieval is selective, not exhaustive.</strong></p>
+                    </div>
+                </li>
+                <li>
+                    <div>
+                        <strong>Step 4 — Injection</strong>
+                        <p style="margin-top:6px; margin-bottom:0;">"How does memory actually influence the model?"</p>
+                        <p style="font-size:13px; color:var(--muted);">Retrieved memory is <strong>inserted into
+                                STM</strong> — it becomes part of the prompt. The model sees it as just more tokens.</p>
+                        <div class="flow" style="margin-top:8px;">
+                            <div class="fbox o">LTM store</div>
+                            <span class="arr">→</span>
+                            <div class="fbox">search</div>
+                            <span class="arr">→</span>
+                            <div class="fbox b">STM (context)</div>
+                            <span class="arr">→</span>
+                            <div class="fbox g">LLM</div>
+                        </div>
+                    </div>
+                </li>
+            </ol>
+        </section>
+
+        <hr class="div">
+
+        <!-- ─── 12. Challenges & Tools ───────────────────────────────────── -->
+        <section id="s12">
+            <h2><span class="sec-num">12</span> Topic 160. Challenges &amp; Tools for Memory Systems</h2>
+
+            <h3>The Three Core Challenges</h3>
+            <div class="g3">
+                <div class="card orange">
+                    <p><strong>1. What to remember</strong></p>
+                    <p style="font-size:13px; color:var(--muted);">Deciding what is worth remembering from a
+                        conversation — filtering signal from noise.</p>
+                </div>
+                <div class="card orange">
+                    <p><strong>2. Right time retrieval</strong></p>
+                    <p style="font-size:13px; color:var(--muted);">Retrieving the right memory at the right time — not
+                        too much, not too little.</p>
+                </div>
+                <div class="card orange">
+                    <p><strong>3. Orchestration</strong></p>
+                    <p style="font-size:13px; color:var(--muted);">Orchestrating the entire creation → storage →
+                        retrieval → injection pipeline.</p>
+                </div>
+            </div>
+
+            <h3>Tools &amp; Libraries</h3>
+
+            <div class="tool-card">
+                <div class="tool-name">LangMem (by LangGraph)</div>
+                <span class="tool-tag tag-b">LangGraph native</span>
+                <p>Helps agents <strong>learn and adapt from interactions</strong> over time. Provides tooling to
+                    extract important information from conversations, optimize agent behavior through prompt refinement,
+                    and maintain long-term memory.</p>
+                <ul class="cl" style="margin-top:10px;">
+                    <li><strong>Core memory API</strong> — works with any storage system</li>
+                    <li><strong>Memory management tools</strong> — agents record/search "in the hot path"</li>
+                    <li><strong>Background memory manager</strong> — auto-extracts, consolidates, updates knowledge</li>
+                    <li><strong>Native LangGraph LTM Store integration</strong> — available by default in all LangGraph
+                        Platform deployments</li>
+                </ul>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-name">Mem0</div>
+                <span class="tool-tag tag-o">Open source · 44k ⭐ · YC backed</span>
+                <p>A <strong>universal, self-improving memory layer</strong> for LLM applications. "AI Agents Forget.
+                    Mem0 Remembers." Powers personalised AI experiences that cut costs and enhance user delight.
+                    Interoperable between models and modalities.</p>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-name">Supermemory</div>
+                <span class="tool-tag tag-g">Long-term memory API</span>
+                <p>Personalise your AI app with a <strong>long-term memory API</strong>. Blazing fast and scalable
+                    memory, interoperable between models and modalities. Setup in 5 mins.</p>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-name">Titans + MIRAS (Google Research)</div>
+                <span class="tool-tag tag-b">Research · Dec 2025</span>
+                <p>Google Research's architecture that allows AI models to work <strong>much faster and handle massive
+                        contexts</strong> by <em>updating their core memory while it's actively running</em> — going
+                    beyond the fixed context window limitation at the architecture level.</p>
+            </div>
+
+            <div class="note-g" style="margin-top:20px;">
+                <strong>Direction:</strong> libs/managed services → GenAI / agent memory layer. The entire memory system
+                (creation, storage, retrieval, injection) is increasingly abstracted away by frameworks like LangMem,
+                Mem0, and Supermemory.
+            </div>
+        </section>
+
+        <hr class="div">
+
+        <!-- Quick Reference Summary -->
+        <section>
+            <h2><span class="sec-num">∑</span> Quick Reference</h2>
+            <table class="cmp">
+                <thead>
+                    <tr>
+                        <th>Concept</th>
+                        <th>Key Takeaway</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>LLM = y=fθ(x)</td>
+                        <td>Parameterized math function. θ fixed. x variable. No memory by design.</td>
+                    </tr>
+                    <tr>
+                        <td>Stateless</td>
+                        <td>Each call is independent. y₂ = fθ(x₂) — knows nothing about y₁.</td>
+                    </tr>
+                    <tr>
+                        <td>Context Window</td>
+                        <td>Max tokens in x. 128k ≈ 200 pages. No internal storage — bigger lens, not hard drive.</td>
+                    </tr>
+                    <tr>
+                        <td>In-Context Learning</td>
+                        <td>Emergent ability: LLM uses information inside the prompt itself, not just θ.</td>
+                    </tr>
+                    <tr>
+                        <td>STM</td>
+                        <td>Concat full history into x. Thread-scoped. Fragile. Context window limited.</td>
+                    </tr>
+                    <tr>
+                        <td>STM Overflow fixes</td>
+                        <td>Trimming (last N) / Summarization / Hybrid context.</td>
+                    </tr>
+                    <tr>
+                        <td>LTM — Episodic</td>
+                        <td>"What happened" — past events, experiences tied to time.</td>
+                    </tr>
+                    <tr>
+                        <td>LTM — Semantic</td>
+                        <td>"What is true" — stable user facts, preferences, constraints.</td>
+                    </tr>
+                    <tr>
+                        <td>LTM — Procedural</td>
+                        <td>"How to do things" — strategies, rules, learned behaviors.</td>
+                    </tr>
+                    <tr>
+                        <td>LTM Step 1</td>
+                        <td>Creation: extract candidates → filter → decide create / update / ignore.</td>
+                    </tr>
+                    <tr>
+                        <td>LTM Step 2</td>
+                        <td>Storage: durable store with IDs + metadata. Survives restarts.</td>
+                    </tr>
+                    <tr>
+                        <td>LTM Step 3</td>
+                        <td>Retrieval: selective (not exhaustive) based on current input.</td>
+                    </tr>
+                    <tr>
+                        <td>LTM Step 4</td>
+                        <td>Injection: retrieved memory inserted into STM → becomes prompt tokens → LLM.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+    </div>
+</body>
+
+</html>

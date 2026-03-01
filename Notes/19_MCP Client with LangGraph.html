@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MCP Client with LangGraph — Notes</title>
+    <title>Module 19 | MCP Client with LangGraph</title>
     <link
         href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600;700&display=swap"
         rel="stylesheet">
@@ -585,20 +585,22 @@
 
 <body>
 
-    <!-- HEADER -->
-    <div class="hdr">
-        <div class="crumb">LangGraph <span>/</span> Agentic AI <span>/</span> CampusX</div>
-        <h1>MCP Client with LangGraph</h1>
-        <p>How to integrate Model Context Protocol (MCP) servers into a LangGraph chatbot — covering the why,
-            architecture, server setup, async conversion, and full client implementation.</p>
-    </div>
+    <header style="border-left: 3px solid #3b82f6; padding-left: 20px; margin-bottom: 48px;">
+        <div class="badge"
+            style="background: #3b82f6; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; display: inline-block; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">
+            CampusX · Module 19 · MCP Client with LangGraph</div>
+        <h1 style="font-size: 2rem; color: #fff; margin: 0;">MCP Client with LangGraph</h1>
+        <p style="color: #94a3b8; font-size: 0.95rem; margin-top: 8px;">How to integrate Model Context Protocol (MCP)
+            servers into a LangGraph chatbot — covering the why, architecture, server setup, async conversion, and full
+            client implementation.</p>
+    </header>
 
 
     <!-- 1. THE PROBLEM (N×M) -->
     <div class="sec">
         <div class="sh">
             <div class="st">
-                <div class="si si-r">⚠️</div> The Problem — Brittle Tool Integration
+                <div class="si si-r">⚠️</div> Topic 132. The Problem — Brittle Tool Integration
             </div>
             <span class="badge br">Problem</span>
         </div>
@@ -646,7 +648,7 @@
     <div class="sec">
         <div class="sh">
             <div class="st">
-                <div class="si si-b">🏛️</div> MCP Architecture — Separation of Concerns
+                <div class="si si-b">🏛️</div> Topic 133. MCP Architecture — Separation of Concerns
             </div>
             <span class="badge bb">Concept</span>
         </div>
@@ -721,7 +723,7 @@
     <div class="sec">
         <div class="sh">
             <div class="st">
-                <div class="si si-y">⚙️</div> MCP Server — arith_server.py (FastMCP)
+                <div class="si si-y">⚙️</div> Topic 134. MCP Server — arith_server.py (FastMCP)
             </div>
             <span class="badge by">Server</span>
         </div>
@@ -791,7 +793,7 @@ mcp = <span class="cls">FastMCP</span>(<span class="str">"arith"</span>)
     <div class="sec">
         <div class="sh">
             <div class="st">
-                <div class="si si-p">🔄</div> Async Requirement &amp; MultiServerMCPClient
+                <div class="si si-p">🔄</div> Topic 135. Async Requirement &amp; MultiServerMCPClient
             </div>
             <span class="badge bp">Async</span>
         </div>
@@ -868,7 +870,7 @@ client = <span class="cls">MultiServerMCPClient</span>({
     <div class="sec">
         <div class="sh">
             <div class="st">
-                <div class="si si-g">🔧</div> Loading MCP Tools &amp; Binding to LLM
+                <div class="si si-g">🔧</div> Topic 136. Loading MCP Tools &amp; Binding to LLM
             </div>
             <span class="badge bg">Code</span>
         </div>
@@ -931,7 +933,7 @@ tool_node = <span class="cls">ToolNode</span>(tools) <span class="kw">if</span> 
     <div class="sec">
         <div class="sh">
             <div class="st">
-                <div class="si si-c">🏗️</div> Graph Wiring &amp; Async Checkpointer
+                <div class="si si-c">🏗️</div> Topic 137. Graph Wiring &amp; Async Checkpointer
             </div>
             <span class="badge bc">Code</span>
         </div>
@@ -999,7 +1001,7 @@ chatbot = graph.compile(checkpointer=checkpointer)</pre>
     <div class="sec">
         <div class="sh">
             <div class="st">
-                <div class="si si-o">📂</div> Helper Functions &amp; File Structure
+                <div class="si si-o">📂</div> Topic 138. Helper Functions &amp; File Structure
             </div>
             <span class="badge bo">Structure</span>
         </div>
@@ -1101,7 +1103,7 @@ chatbot = graph.compile(checkpointer=checkpointer)</pre>
     <div class="sec">
         <div class="sh">
             <div class="st">
-                <div class="si si-g">✅</div> Key Differences vs. Plain Tool Chatbot
+                <div class="si si-g">✅</div> Topic 139. Key Differences vs. Plain Tool Chatbot
             </div>
             <span class="badge bg">Summary</span>
         </div>

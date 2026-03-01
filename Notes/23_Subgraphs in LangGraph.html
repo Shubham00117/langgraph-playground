@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subgraphs in LangGraph — Notes</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700;900&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f4f1eb;
+            --surface: #ffffff;
+            --surface2: #ede9e0;
+            --border: #d6d0c4;
+            --ink: #1a1712;
+            --muted: #7a7268;
+            --accent: #2d6a4f;
+            --accent2: #c2410c;
+            --accent3: #1d4ed8;
+            --accent-pale: rgba(45, 106, 79, 0.08);
+            --orange-pale: rgba(194, 65, 12, 0.08);
+            --blue-pale: rgba(29, 78, 216, 0.08);
+            --code-bg: #1a1712;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--ink);
+            font-family: 'Outfit', sans-serif;
+            font-size: 15px;
+            line-height: 1.7;
+            padding: 48px 24px;
+        }
+
+        .page {
+            max-width: 920px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            margin-bottom: 52px;
+            padding-bottom: 28px;
+            border-bottom: 2px solid var(--ink);
+        }
+
+        .tag-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .chip {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 3px 10px;
+            border-radius: 2px;
+            border: 1px solid currentColor;
+        }
+
+        .chip-green {
+            color: var(--accent);
+            background: var(--accent-pale);
+        }
+
+        .chip-red {
+            color: var(--accent2);
+            background: var(--orange-pale);
+        }
+
+        .chip-blue {
+            color: var(--accent3);
+            background: var(--blue-pale);
+        }
+
+        h1 {
+            font-family: 'Fraunces', serif;
+            font-size: 2.8rem;
+            font-weight: 900;
+            line-height: 1.1;
+            color: var(--ink);
+        }
+
+        h1 em {
+            color: var(--accent);
+            font-style: normal;
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: 13px;
+            margin-top: 8px;
+        }
+
+        /* Section titles */
+        h2 {
+            font-family: 'Fraunces', serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--ink);
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sec-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            background: var(--ink);
+            color: var(--bg);
+            padding: 2px 7px;
+            border-radius: 2px;
+        }
+
+        h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 10px;
+            margin-top: 22px;
+        }
+
+        section {
+            margin-bottom: 52px;
+        }
+
+        hr.divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 44px 0;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px 22px;
+            margin-bottom: 12px;
+        }
+
+        .card.green {
+            border-left: 3px solid var(--accent);
+        }
+
+        .card.red {
+            border-left: 3px solid var(--accent2);
+        }
+
+        .card.blue {
+            border-left: 3px solid var(--accent3);
+        }
+
+        /* Grids */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        @media (max-width: 640px) {
+
+            .grid-2,
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Definition box */
+        .def {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 22px 26px;
+            margin-bottom: 20px;
+        }
+
+        .def strong {
+            color: var(--accent);
+        }
+
+        /* Lists */
+        ul.clean {
+            list-style: none;
+            padding: 0;
+        }
+
+        ul.clean li {
+            padding: 5px 0 5px 18px;
+            position: relative;
+        }
+
+        ul.clean li::before {
+            content: '—';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        ol.steps {
+            list-style: none;
+            counter-reset: step;
+            padding: 0;
+        }
+
+        ol.steps li {
+            counter-increment: step;
+            display: flex;
+            gap: 14px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            align-items: flex-start;
+        }
+
+        ol.steps li:last-child {
+            border-bottom: none;
+        }
+
+        ol.steps li::before {
+            content: counter(step);
+            background: var(--ink);
+            color: var(--bg);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: 700;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        /* Code */
+        pre {
+            background: var(--code-bg);
+            color: #e2ddd5;
+            border-radius: 8px;
+            padding: 18px 20px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12.5px;
+            line-height: 1.75;
+            margin: 12px 0;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            background: var(--surface2);
+            padding: 1px 6px;
+            border-radius: 3px;
+            color: var(--accent2);
+        }
+
+        .kw {
+            color: #c792ea;
+        }
+
+        .fn {
+            color: #82aaff;
+        }
+
+        .str {
+            color: #c3e88d;
+        }
+
+        .cm {
+            color: #546e7a;
+            font-style: italic;
+        }
+
+        .cls {
+            color: #ffcb6b;
+        }
+
+        .num {
+            color: #f78c6c;
+        }
+
+        /* Comparison table */
+        .compare {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            margin: 14px 0;
+        }
+
+        .compare th {
+            background: var(--ink);
+            color: var(--bg);
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            padding: 10px 16px;
+            text-align: left;
+        }
+
+        .compare td {
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface);
+            vertical-align: top;
+        }
+
+        .compare tr:last-child td {
+            border-bottom: none;
+        }
+
+        .compare td:first-child {
+            font-weight: 500;
+            color: var(--ink);
+        }
+
+        /* Flow inline */
+        .flow {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 12px 0;
+        }
+
+        .fn-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 7px 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .fn-box.g {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-pale);
+        }
+
+        .fn-box.r {
+            border-color: var(--accent2);
+            color: var(--accent2);
+            background: var(--orange-pale);
+        }
+
+        .fn-box.b {
+            border-color: var(--accent3);
+            color: var(--accent3);
+            background: var(--blue-pale);
+        }
+
+        .arrow {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        /* Note boxes */
+        .note {
+            border-left: 3px solid var(--accent2);
+            background: var(--orange-pale);
+            padding: 10px 14px;
+            border-radius: 0 6px 6px 0;
+            font-size: 13px;
+            color: #7c2d12;
+            margin: 12px 0;
+        }
+
+        .note-blue {
+            border-left: 3px solid var(--accent3);
+            background: var(--blue-pale);
+            padding: 10px 14px;
+            border-radius: 0 6px 6px 0;
+            font-size: 13px;
+            color: #1e3a8a;
+            margin: 12px 0;
+        }
+
+        .note-green {
+            border-left: 3px solid var(--accent);
+            background: var(--accent-pale);
+            padding: 10px 14px;
+            border-radius: 0 6px 6px 0;
+            font-size: 13px;
+            color: #14532d;
+            margin: 12px 0;
+        }
+
+        p {
+            margin-bottom: 10px;
+        }
+
+        strong {
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+
+        <!-- Header -->
+        <header>
+            <div class="tag-row">
+                <span class="chip chip-green">CampusX · Module 23</span>
+                <span class="chip chip-blue">Subgraphs in LangGraph</span>
+                <span class="chip chip-red">Dec 15, 2025 · 22:46</span>
+            </div>
+            <h1>Subgraphs in <em>LangGraph</em></h1>
+            <p class="subtitle">Concept → Need → Types → Practical Example → Two Mechanisms Compared</p>
+        </header>
+
+        <!-- ─── 1. WHAT ARE SUBGRAPHS ──────────────────────────────────── -->
+        <section>
+            <h2><span class="sec-num">01</span> Topic 161. What are Subgraphs?</h2>
+
+            <div class="def">
+                <p>A <strong>subgraph</strong> in LangGraph means a graph that is <strong>embedded and executed as a
+                        node</strong> inside another (parent) graph.</p>
+                <p style="margin-bottom:0;">Think of it as a tree of nodes — one of the leaf nodes can itself be a
+                    fully-functional graph.</p>
+            </div>
+
+            <div class="grid-3">
+                <div class="card green">
+                    <h3 style="margin-top:0;">Concept</h3>
+                    <p>Graph-within-a-graph. A subgraph is compiled independently, then plugged into a parent as a
+                        regular node.</p>
+                </div>
+                <div class="card blue">
+                    <h3 style="margin-top:0;">Need</h3>
+                    <p>Complex multi-step agent workflows that benefit from encapsulation and independent testing.</p>
+                </div>
+                <div class="card red">
+                    <h3 style="margin-top:0;">Practical</h3>
+                    <p>Build reusable task modules (translate, summarize, etc.) and compose them into larger pipelines.
+                    </p>
+                </div>
+            </div>
+
+            <h3>Visual structure</h3>
+            <div class="flow">
+                <div class="fn-box g">Parent Graph</div>
+                <span class="arrow">→</span>
+                <div class="fn-box">node</div>
+                <span class="arrow">→</span>
+                <div class="fn-box b">Sub Graph 1 {foo:bar, hello:world}</div>
+                <span class="arrow">→</span>
+                <div class="fn-box">node</div>
+                <span class="arrow">→</span>
+                <div class="fn-box r">Sub Graph 2 {foo:bar, fizz:buzz}</div>
+            </div>
+            <p style="color:var(--muted); font-size:13px;">Parent passes state with shared keys (e.g. <code>foo</code>);
+                each subgraph may add its own keys.</p>
+        </section>
+
+        <hr class="divider">
+
+        <!-- ─── 2. WHY SUBGRAPHS ARE NEEDED ───────────────────────────── -->
+        <section>
+            <h2><span class="sec-num">02</span> Topic 162. Why Subgraphs are Needed</h2>
+
+            <p>Modern agentic pipelines are far more than <code>User → LLM → Output</code>. They include:</p>
+
+            <div class="grid-2" style="margin: 16px 0;">
+                <ul class="clean">
+                    <li>Tool calls</li>
+                    <li>RAG (retrieval)</li>
+                    <li>Conditional routing</li>
+                    <li>Retries</li>
+                </ul>
+                <ul class="clean">
+                    <li>Memory</li>
+                    <li>HITL (human-in-the-loop)</li>
+                    <li>Evaluation</li>
+                    <li>Guardrails</li>
+                </ul>
+            </div>
+
+            <h3>Example — Software Dev Agent</h3>
+            <div class="card">
+                <p>A TL (Tech Lead) agent coordinates: <strong>BT</strong> (Backend), <strong>FT</strong> (Frontend) →
+                    coding → <strong>Test</strong> → CI/CD → <strong>Code</strong> + <strong>DevOps</strong> → deploy
+                </p>
+                <p style="margin-bottom:0;">Each role (BT, FT, Test) is a subgraph — independently designed, yet
+                    orchestrated by the parent TL graph.</p>
+            </div>
+
+            <div class="grid-2" style="margin-top:14px;">
+                <div class="card green">
+                    <h3 style="margin-top:0;">Design Benefits</h3>
+                    <ul class="clean">
+                        <li><strong>Modularity</strong> — clean separation of concerns</li>
+                        <li><strong>Reusability</strong> — plug the same subgraph anywhere</li>
+                        <li><strong>Maintainability</strong> — update one module independently</li>
+                    </ul>
+                </div>
+                <div class="card red">
+                    <h3 style="margin-top:0;">Engineering Benefits</h3>
+                    <ul class="clean">
+                        <li><strong>Failure Isolation</strong> — errors stay inside the subgraph</li>
+                        <li><strong>State Separation</strong> — subgraph has its own private state</li>
+                        <li><strong>Observability</strong> — trace &amp; debug per subgraph</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <hr class="divider">
+
+        <!-- ─── 3. TYPES OF SUBGRAPH ──────────────────────────────────── -->
+        <section>
+            <h2><span class="sec-num">03</span> Topic 163. Two Types of Subgraph Mechanism</h2>
+
+            <table class="compare">
+                <thead>
+                    <tr>
+                        <th>Mechanism</th>
+                        <th>How It Works</th>
+                        <th>State Handling</th>
+                        <th>Best For</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>① Isolated Subgraph<br><code style="font-size:11px;">subgraph.invoke({...})</code></td>
+                        <td>Parent node manually calls <code>subgraph.invoke()</code> inside a regular function, maps
+                            inputs &amp; outputs explicitly</td>
+                        <td><strong>Separate state</strong> — SubState is independent of ParentState</td>
+                        <td>Different state schemas; need explicit field mapping</td>
+                    </tr>
+                    <tr>
+                        <td>② Shared State Subgraph<br><code style="font-size:11px;">add_node("x", subgraph)</code></td>
+                        <td>Compiled subgraph is passed directly as a node to <code>parent_builder.add_node()</code>
+                        </td>
+                        <td><strong>Shared state</strong> — both parent &amp; subgraph use the same TypedDict</td>
+                        <td>Same state schema; cleaner, less boilerplate</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="note-green">
+                <strong>Key insight:</strong> The difference is whether the subgraph uses its own private schema
+                (isolated) or shares the parent's schema (shared). Choose based on how tightly coupled the state needs
+                to be.
+            </div>
+        </section>
+
+        <hr class="divider">
+
+        <!-- ─── 4. PRACTICAL EXAMPLE — ISOLATED ───────────────────────── -->
+        <section>
+            <h2><span class="sec-num">04</span> Topic 164. Practical Example — Translation Workflow (Isolated)</h2>
+
+            <div class="note-blue">
+                <strong>Use case:</strong> User asks a question → LLM answers in English → subgraph translates to
+                Hindi<br>
+                <strong>File:</strong> <code>15_subgraphs.ipynb</code>
+            </div>
+
+            <h3>Workflow diagram</h3>
+            <div class="flow" style="gap:8px;">
+                <div class="fn-box g">START</div>
+                <span class="arrow">→</span>
+                <div class="fn-box">generate (answer in ENG)</div>
+                <span class="arrow">→</span>
+                <div class="fn-box r">translate → invoke subgraph</div>
+                <span class="arrow">→</span>
+                <div class="fn-box">END</div>
+            </div>
+            <p style="font-size:13px; color:var(--muted);">Inside translate node:
+                <code>subgraph.invoke({'input_text': state['answer_eng']})</code> returns <code>translated_text</code>
+            </p>
+
+            <h3>1. Subgraph state &amp; LLM</h3>
+            <pre><span class="kw">from</span> typing_extensions <span class="kw">import</span> TypedDict
+<span class="kw">from</span> langgraph.graph <span class="kw">import</span> StateGraph, START, END
+<span class="kw">from</span> langchain_openai <span class="kw">import</span> ChatOpenAI
+
+<span class="cm"># Subgraph has its OWN state (separate from parent)</span>
+<span class="kw">class</span> <span class="cls">SubState</span>(TypedDict):
+    input_text: str
+    translated_text: str
+
+subgraph_llm = <span class="cls">ChatOpenAI</span>(model=<span class="str">'gpt-4o'</span>)</pre>
+
+            <h3>2. Subgraph node &amp; compilation</h3>
+            <pre><span class="kw">def</span> <span class="fn">translate_text</span>(state: <span class="cls">SubState</span>):
+    prompt = <span class="fn">f</span><span class="str">"""Translate the following text to Hindi.
+Keep it natural and clear. Do not add extra content.
+
+Text:
+{state["input_text"]}"""</span>.strip()
+
+    translated_text = subgraph_llm.invoke(prompt).content
+    <span class="kw">return</span> {<span class="str">'translated_text'</span>: translated_text}
+
+<span class="cm"># Build the subgraph: START → translate_text → END</span>
+subgraph_builder = <span class="cls">StateGraph</span>(<span class="cls">SubState</span>)
+subgraph_builder.add_node(<span class="str">'translate_text'</span>, translate_text)
+subgraph_builder.add_edge(START, <span class="str">'translate_text'</span>)
+subgraph_builder.add_edge(<span class="str">'translate_text'</span>, END)
+subgraph = subgraph_builder.compile()</pre>
+
+            <h3>3. Parent state</h3>
+            <pre><span class="kw">class</span> <span class="cls">ParentState</span>(TypedDict):
+    question: str
+    answer_eng: str
+    answer_hin: str
+
+parent_llm = <span class="cls">ChatOpenAI</span>(model=<span class="str">'gpt-4o-mini'</span>)</pre>
+
+            <h3>4. Parent nodes</h3>
+            <pre><span class="kw">def</span> <span class="fn">generate_answer</span>(state: <span class="cls">ParentState</span>):
+    answer = parent_llm.invoke(
+        <span class="fn">f</span><span class="str">"You are a helpful assistant. Answer clearly.\n\nQuestion: {state['question']}"</span>
+    ).content
+    <span class="kw">return</span> {<span class="str">'answer_eng'</span>: answer}
+
+<span class="kw">def</span> <span class="fn">translate_answer</span>(state: <span class="cls">ParentState</span>):
+    <span class="cm"># Manually call the subgraph — mapping parent fields to subgraph input</span>
+    result = subgraph.invoke({<span class="str">'input_text'</span>: state[<span class="str">'answer_eng'</span>]})
+    <span class="kw">return</span> {<span class="str">'answer_hin'</span>: result[<span class="str">'translated_text'</span>]}</pre>
+
+            <h3>5. Build &amp; run parent graph</h3>
+            <pre>parent_builder = <span class="cls">StateGraph</span>(<span class="cls">ParentState</span>)
+parent_builder.add_node(<span class="str">"answer"</span>, generate_answer)
+parent_builder.add_node(<span class="str">"translate"</span>, translate_answer)
+
+parent_builder.add_edge(START, <span class="str">'answer'</span>)
+parent_builder.add_edge(<span class="str">'answer'</span>, <span class="str">'translate'</span>)
+parent_builder.add_edge(<span class="str">'translate'</span>, END)
+
+graph = parent_builder.compile()
+
+<span class="cm"># Run it</span>
+graph.invoke({<span class="str">'question'</span>: <span class="str">'What is quantum physics'</span>})
+<span class="cm"># Returns: {question, answer_eng (English explanation), answer_hin (Hindi translation)}</span></pre>
+        </section>
+
+        <hr class="divider">
+
+        <!-- ─── 5. SHARED STATE SUBGRAPH ──────────────────────────────── -->
+        <section>
+            <h2><span class="sec-num">05</span> Topic 165. Shared State Mechanism — <code>add_node(subgraph)</code></h2>
+
+            <div class="note-blue">
+                <strong>File:</strong> <code>15_subgraph_shared.ipynb</code> — Same example, different wiring. Both
+                parent &amp; subgraph use <code>ParentState</code>.
+            </div>
+
+            <div class="card blue" style="margin-bottom:14px;">
+                <p><strong>Key difference:</strong> The subgraph node is built on <code>ParentState</code> (not a
+                    private SubState). It reads from and writes directly to the shared state — no manual field mapping
+                    needed.</p>
+            </div>
+
+            <h3>Subgraph reads from &amp; writes to ParentState directly</h3>
+            <pre><span class="kw">class</span> <span class="cls">ParentState</span>(TypedDict):
+    question: str
+    answer_eng: str
+    answer_hin: str      <span class="cm"># written by subgraph</span>
+
+parent_llm  = <span class="cls">ChatOpenAI</span>(model=<span class="str">'gpt-4o-mini'</span>)
+subgraph_llm = <span class="cls">ChatOpenAI</span>(model=<span class="str">'gpt-4o'</span>)
+
+<span class="kw">def</span> <span class="fn">translate_text</span>(state: <span class="cls">ParentState</span>):   <span class="cm"># uses ParentState, not SubState</span>
+    prompt = <span class="fn">f</span><span class="str">"""Translate the following text to Hindi.
+Keep it natural and clear. Do not add extra content.
+
+Text:
+{state["answer_eng"]}"""</span>.strip()
+
+    translated_text = subgraph_llm.invoke(prompt).content
+    <span class="kw">return</span> {<span class="str">'answer_hin'</span>: translated_text}  <span class="cm"># directly updates parent state</span>
+
+<span class="cm"># Build subgraph on ParentState</span>
+subgraph_builder = <span class="cls">StateGraph</span>(<span class="cls">ParentState</span>)
+subgraph_builder.add_node(<span class="str">'translate_text'</span>, translate_text)
+subgraph_builder.add_edge(START, <span class="str">'translate_text'</span>)
+subgraph_builder.add_edge(<span class="str">'translate_text'</span>, END)
+subgraph = subgraph_builder.compile()</pre>
+
+            <h3>Parent graph — pass compiled subgraph directly as a node</h3>
+            <pre><span class="kw">def</span> <span class="fn">generate_answer</span>(state: <span class="cls">ParentState</span>):
+    answer = parent_llm.invoke(...).content
+    <span class="kw">return</span> {<span class="str">'answer_eng'</span>: answer}
+
+parent_builder = <span class="cls">StateGraph</span>(<span class="cls">ParentState</span>)
+parent_builder.add_node(<span class="str">"answer"</span>, generate_answer)
+parent_builder.add_node(<span class="str">"translate"</span>, subgraph)   <span class="cm"># &lt;-- subgraph passed directly</span>
+
+parent_builder.add_edge(START, <span class="str">'answer'</span>)
+parent_builder.add_edge(<span class="str">'answer'</span>, <span class="str">'translate'</span>)
+parent_builder.add_edge(<span class="str">'translate'</span>, END)
+
+graph = parent_builder.compile()
+graph.invoke({<span class="str">'question'</span>: <span class="str">'What is quantum physics'</span>})</pre>
+        </section>
+
+        <hr class="divider">
+
+        <!-- ─── 6. BEST PRACTICES & DOCS ──────────────────────────────── -->
+        <section>
+            <h2><span class="sec-num">06</span> Topic 166. Best Practices &amp; LangGraph Docs</h2>
+
+            <div class="grid-2">
+                <div class="card green">
+                    <h3 style="margin-top:0;">Persistence (Checkpointing)</h3>
+                    <p>Only provide <code>checkpointer</code> when compiling the <strong>parent graph</strong>.
+                        LangGraph automatically propagates it to child subgraphs.</p>
+                    <pre style="font-size:11.5px; margin-top:10px;">graph = parent_builder.compile(
+    checkpointer=<span class="cls">MemorySaver</span>()
+)</pre>
+                </div>
+                <div class="card blue">
+                    <h3 style="margin-top:0;">View Subgraph State</h3>
+                    <p>With persistence enabled, inspect subgraph checkpoint state:</p>
+                    <pre style="font-size:11.5px; margin-top:10px;"><span class="cm"># Parent state only</span>
+graph.get_state(config)
+
+<span class="cm"># Include subgraph state</span>
+graph.get_state(config, subgraphs=True)</pre>
+                    <div class="note" style="margin-top:8px; font-size:12px;">⚠ Subgraph state is only available
+                        <strong>while interrupted</strong>. Once resumed, it's gone.
+                    </div>
+                </div>
+            </div>
+
+            <h3>Stream subgraph outputs</h3>
+            <pre><span class="cm"># Include subgraph outputs in streamed results</span>
+<span class="kw">for</span> chunk <span class="kw">in</span> graph.stream(
+    {<span class="str">"foo"</span>: <span class="str">"foo"</span>},
+    subgraphs=True,             <span class="cm"># ← key flag</span>
+    stream_mode=<span class="str">"updates"</span>,
+):
+    print(chunk)</pre>
+
+            <div class="note-green">
+                <strong>Docs reference:</strong> <code>docs.langchain.com/oss/python/langgraph/use-subgraphs</code> —
+                covers: invoke a graph from a node, add a graph as a node, add persistence, view subgraph state, stream
+                subgraph outputs.
+            </div>
+        </section>
+
+        <hr class="divider">
+
+        <!-- ─── 7. SUMMARY ────────────────────────────────────────────── -->
+        <section>
+            <h2><span class="sec-num">07</span> Topic 167. Quick Summary</h2>
+
+            <table class="compare">
+                <thead>
+                    <tr>
+                        <th>Topic</th>
+                        <th>Key Takeaway</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>What is a subgraph</td>
+                        <td>A compiled LangGraph graph embedded as a node inside a parent graph</td>
+                    </tr>
+                    <tr>
+                        <td>Why use subgraphs</td>
+                        <td>Modularity, reusability, maintainability, failure isolation, state separation</td>
+                    </tr>
+                    <tr>
+                        <td>Isolated mechanism</td>
+                        <td>Call <code>subgraph.invoke()</code> manually inside a node function; subgraph has its own
+                            private state schema</td>
+                    </tr>
+                    <tr>
+                        <td>Shared mechanism</td>
+                        <td>Pass compiled subgraph directly to <code>add_node()</code>; both use the same state schema
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Checkpointing</td>
+                        <td>Set it only on the parent — propagates automatically to all subgraphs</td>
+                    </tr>
+                    <tr>
+                        <td>Streaming</td>
+                        <td>Use <code>subgraphs=True</code> in <code>graph.stream()</code> to include subgraph outputs
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+    </div>
+</body>
+
+</html>

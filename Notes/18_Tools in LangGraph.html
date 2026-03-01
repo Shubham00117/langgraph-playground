@@ -533,20 +533,21 @@
 
 <body>
 
-    <!-- PAGE HEADER -->
-    <div class="page-header">
-        <div class="breadcrumb">LangGraph <span>/</span> Agentic AI <span>/</span> CampusX</div>
-        <h1>Tools in LangGraph</h1>
-        <p>How to equip an LLM agent with external tools — web search, calculator, and live APIs — using ToolNode and
-            tools_condition.</p>
-    </div>
+    <header style="border-left: 3px solid #6c63ff; padding-left: 20px; margin-bottom: 48px;">
+        <div class="badge"
+            style="background: #6c63ff; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; display: inline-block; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">
+            CampusX · Module 18 · Tools in LangGraph</div>
+        <h1 style="font-size: 2rem; color: #fff; margin: 0;">Tools in LangGraph</h1>
+        <p style="color: #94a3b8; font-size: 0.95rem; margin-top: 8px;">How to equip an LLM agent with external tools —
+            web search, calculator, and live APIs — using ToolNode and tools_condition.</p>
+    </header>
 
 
     <!-- 1. CORE CONCEPTS -->
     <div class="section">
         <div class="sec-head">
             <div class="sec-title">
-                <div class="sec-icon ic-o">🧠</div> Core Concepts
+                <div class="sec-icon ic-o">🧠</div> Topic 127. Core Concepts
             </div>
             <span class="badge bd-o">Concept</span>
         </div>
@@ -556,18 +557,16 @@
                     <div class="pts">
                         <div class="pt">
                             <div class="dot-o"></div>
-                            <div>A <strong>Tool</strong> is any Python function decorated with <code>@tool</code> — web
-                                search, calculator, API call, etc.</div>
+                            <div><strong>Tool:</strong> Python function + <code>@tool</code>. LLM uses
+                                <strong>docstrings</strong> to determine when and how to call them.
+                            </div>
                         </div>
                         <div class="pt">
                             <div class="dot-o"></div>
-                            <div><strong>Tool Calling</strong> — the LLM decides <em>which</em> tool to call and
-                                <em>what arguments</em> to pass, based on the user's question.</div>
-                        </div>
-                        <div class="pt">
-                            <div class="dot-o"></div>
-                            <div>The <strong>docstring</strong> of each <code>@tool</code> function is read by the LLM
-                                to decide when to use it — keep it clear and specific.</div>
+                            <div><strong>Tool Calling:</strong> The LLM identifies the intent to use a tool and outputs
+                                its name + structured arguments instead of raw text (execution happens later in
+                                <code>ToolNode</code>).
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -575,13 +574,15 @@
                     <div class="pts">
                         <div class="pt">
                             <div class="dot-b"></div>
-                            <div><strong>ToolNode</strong> — prebuilt LangGraph node. Listens for tool calls from the
-                                LLM, routes to the correct function, and returns results to the graph.</div>
+                            <div><strong>ToolNode:</strong> The execution layer that runs the requested Python functions
+                                and returns results as <code>ToolMessage</code> objects, feeding them back into the
+                                graph state.</div>
                         </div>
                         <div class="pt">
                             <div class="dot-b"></div>
-                            <div><strong>tools_condition</strong> — prebuilt conditional edge. Answers: <em>"Route to
-                                    ToolNode, or end the workflow?"</em> based on the last LLM message.</div>
+                            <div><strong>tools_condition:</strong> The decision logic that inspects the LLM's response;
+                                if tool calls are present, it loops to <code>ToolNode</code>, otherwise it terminates
+                                the workflow.</div>
                         </div>
                     </div>
                 </div>
@@ -594,7 +595,7 @@
     <div class="section">
         <div class="sec-head">
             <div class="sec-title">
-                <div class="sec-icon ic-b">🔀</div> Graph Architecture
+                <div class="sec-icon ic-b">🔀</div> Topic 128. Graph Architecture
             </div>
             <span class="badge bd-b">Design</span>
         </div>
@@ -604,23 +605,23 @@
                     <div class="pts">
                         <div class="pt">
                             <div class="dot-b"></div>
-                            <div>The graph contains <strong>two nodes</strong> — <code>chat_node</code> and
-                                <code>tools</code> — connected in a loop.</div>
+                            <div><strong>Entry:</strong> Workflow begins at <code>__start__</code> and moves immediately
+                                to the <code>chat_node</code>.</div>
                         </div>
                         <div class="pt">
                             <div class="dot-b"></div>
-                            <div><code>chat_node</code> (LLM) — either answers directly <em>→ end</em>, or requests a
-                                tool call <em>→ tools</em>.</div>
+                            <div><strong>Decision Edge:</strong> The <code>tools_condition</code> acts as a router after
+                                the LLM responds.</div>
                         </div>
                         <div class="pt">
                             <div class="dot-b"></div>
-                            <div><code>tool_node</code> — executes the tool, then <strong>always loops back</strong> to
-                                <code>chat_node</code> so the LLM can see the result and continue.</div>
+                            <div><strong>Branching:</strong> If no tool is needed, it goes to <code>__end__</code>. If a
+                                tool is requested, it routes to the <code>tools</code> node.</div>
                         </div>
                         <div class="pt">
                             <div class="dot-b"></div>
-                            <div><code>tools_condition</code> is wired as a conditional edge on <code>chat_node</code>
-                                to make the routing decision.</div>
+                            <div><strong>The Loop:</strong> After execution, the <code>tools</code> node cycles back to
+                                <code>chat_node</code> to provide the LLM with the tool output.</div>
                         </div>
                     </div>
                 </div>
@@ -655,44 +656,21 @@
     <div class="section">
         <div class="sec-head">
             <div class="sec-title">
-                <div class="sec-icon ic-g">📦</div> Imports &amp; Tool Definitions
+                <div class="sec-icon ic-g">📦</div> Topic 129. Imports &amp; Tool Definitions
             </div>
             <span class="badge bd-g">Code</span>
         </div>
         <div class="sec-body">
-            <div class="two-col">
-                <div class="col">
-                    <div class="code-wrap">
-                        <div class="code-bar">
-                            <span class="code-label">imports</span>
-                            <div class="mac-dots">
-                                <div class="mac-dot md1"></div>
-                                <div class="mac-dot md2"></div>
-                                <div class="mac-dot md3"></div>
-                            </div>
-                        </div>
-                        <pre><span class="kw">from</span> langgraph.graph    <span class="kw">import</span> <span class="cls">StateGraph</span>, START, END
-<span class="kw">from</span> langgraph.prebuilt <span class="kw">import</span> <span class="cls">ToolNode</span>, tools_condition
-<span class="kw">from</span> langchain_community.tools <span class="kw">import</span> <span class="cls">DuckDuckGoSearchRun</span>
-<span class="kw">from</span> langchain_core.tools    <span class="kw">import</span> tool
-<span class="kw">from</span> langchain_core.messages <span class="kw">import</span> <span class="cls">BaseMessage</span>, <span class="cls">HumanMessage</span>
-<span class="kw">from</span> langchain_openai        <span class="kw">import</span> <span class="cls">ChatOpenAI</span>
-<span class="kw">from</span> typing <span class="kw">import</span> <span class="cls">TypedDict</span>, <span class="cls">Annotated</span>
-<span class="kw">from</span> langgraph.graph.message <span class="kw">import</span> add_messages
-<span class="kw">import</span> requests</pre>
+            <div class="code-wrap">
+                <div class="code-bar">
+                    <span class="code-label">3 tools defined</span>
+                    <div class="mac-dots">
+                        <div class="mac-dot md1"></div>
+                        <div class="mac-dot md2"></div>
+                        <div class="mac-dot md3"></div>
                     </div>
                 </div>
-                <div class="col">
-                    <div class="code-wrap">
-                        <div class="code-bar">
-                            <span class="code-label">3 tools defined</span>
-                            <div class="mac-dots">
-                                <div class="mac-dot md1"></div>
-                                <div class="mac-dot md2"></div>
-                                <div class="mac-dot md3"></div>
-                            </div>
-                        </div>
-                        <pre><span class="cm"># Tool 1 — prebuilt web search</span>
+                <pre><span class="cm"># Tool 1 — prebuilt web search</span>
 search_tool = <span class="cls">DuckDuckGoSearchRun</span>(region=<span class="str">"us-en"</span>)
 
 <span class="cm"># Tool 2 — custom calculator</span>
@@ -709,8 +687,6 @@ search_tool = <span class="cls">DuckDuckGoSearchRun</span>(region=<span class="s
     <span class="str">"""Fetch latest price for e.g. AAPL."""</span>
     url = <span class="str">f"https://alphavantage.co/query?symbol=<span class="op">{symbol}</span>"</span>
     <span class="kw">return</span> requests.get(url).json()</pre>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -720,7 +696,7 @@ search_tool = <span class="cls">DuckDuckGoSearchRun</span>(region=<span class="s
     <div class="section">
         <div class="sec-head">
             <div class="sec-title">
-                <div class="sec-icon ic-g">🏗️</div> Bind Tools &amp; Wire the Graph
+                <div class="sec-icon ic-g">🏗️</div> Topic 130. Bind Tools &amp; Wire the Graph
             </div>
             <span class="badge bd-g">Code</span>
         </div>
@@ -750,8 +726,7 @@ llm_with_tools = llm.bind_tools(tools)
                     <div class="pts">
                         <div class="pt">
                             <div class="dot-g"></div>
-                            <div><code>bind_tools()</code> injects the tool schemas into the LLM so it knows which tools
-                                exist and when to call each one.</div>
+                            <div><code>bind_tools()</code> injects schemas into the LLM, enabling tool selection.</div>
                         </div>
                     </div>
                 </div>
@@ -794,7 +769,7 @@ chatbot = graph.compile()</pre>
     <div class="section">
         <div class="sec-head">
             <div class="sec-title">
-                <div class="sec-icon ic-p">🖥️</div> Streamlit Frontend — Streaming with Tool Status
+                <div class="sec-icon ic-p">🖥️</div> Topic 131. Streamlit Frontend — Streaming with Tool Status
             </div>
             <span class="badge bd-p">Frontend</span>
         </div>
@@ -804,25 +779,19 @@ chatbot = graph.compile()</pre>
                     <div class="steps">
                         <div class="step">
                             <div class="step-num">1</div>
-                            <div class="step-text">Use <code>stream_mode="messages"</code> to receive individual message
-                                chunks token-by-token instead of waiting for the full response.</div>
+                            <div class="step-text">Use <code>stream_mode="messages"</code> for token-by-token updates.
+                            </div>
                         </div>
                         <div class="step">
                             <div class="step-num">2</div>
-                            <div class="step-text">The stream yields two types — <strong>AIMessage</strong> (LLM text
-                                tokens) and <strong>ToolMessage</strong> (tool call inputs/outputs).</div>
+                            <div class="step-text">Distinguish between **AIMessage** (text) and **ToolMessage**
+                                (status).</div>
                         </div>
                         <div class="step">
                             <div class="step-num">3</div>
-                            <div class="step-text">On a <strong>ToolMessage</strong> chunk, show a
-                                <code>st.status()</code> spinner: <em>"⚙ Using search_tool …"</em>. Update it while
-                                running, mark complete when done.</div>
-                        </div>
-                        <div class="step">
-                            <div class="step-num">4</div>
-                            <div class="step-text">On an <strong>AIMessage</strong> chunk,
-                                <code>yield chunk.content</code> into <code>st.write_stream()</code> for live text
-                                rendering.</div>
+                            <div class="step-text">Use <code>st.status()</code> for tool progress and
+                                <code>st.write_stream()</code> for text.
+                            </div>
                         </div>
                     </div>
                 </div>

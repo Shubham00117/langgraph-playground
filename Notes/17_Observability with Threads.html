@@ -281,7 +281,9 @@
 <body>
 
     <header>
-        <div class="label">LangGraph · LangSmith</div>
+        <div class="badge"
+            style="background: var(--accent); color: #000; font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 10px; border-radius: 4px; display: inline-block; margin-bottom: 12px;">
+            CampusX · Module 17 · Observability with Threads</div>
         <h1>Observability with Threads</h1>
         <p>How to track multi-turn conversations in LangSmith using the Threads feature</p>
     </header>
@@ -290,125 +292,72 @@
     <div class="section">
         <div class="section-header">
             <div class="icon icon-green">🧵</div>
-            <h2>What is a Thread?</h2>
+            <h2>Topic 123. What is a Thread?</h2>
             <span class="tag tag-green">Concept</span>
         </div>
         <div class="section-body">
-            <div class="point">A <strong>Thread</strong> is a sequence of traces that represent a <strong>single
-                    conversation</strong> — each turn/response is its own trace, all linked together under one thread
-                ID.</div>
-            <div class="point">Threads let you view the full conversation history in LangSmith instead of seeing
-                isolated, disconnected runs.</div>
-            <div class="point">Useful for chatbot-like apps where users engage in multi-turn conversations with an LLM.
-            </div>
+            <div class="point">A <strong>Thread</strong> is a collection of individual traces linked together to
+                represent a single, continuous conversation.</div>
+            <div class="point">Allows monitoring the entire multi-turn chat history logically within LangSmith instead
+                of viewing isolated runs.</div>
         </div>
     </div>
 
-    <!-- Linking Traces to a Thread -->
+    <!-- Linking Traces & The CONFIG Object -->
     <div class="section">
         <div class="section-header">
             <div class="icon icon-blue">🔗</div>
-            <h2>Linking Traces to a Thread</h2>
-            <span class="tag tag-blue">How-to</span>
+            <h2>Topic 124. Linking Traces & The CONFIG Object</h2>
+            <span class="tag tag-blue">Implementation</span>
         </div>
         <div class="section-body">
-            <div class="point">Pass a special <strong>metadata key</strong> with a unique thread identifier to associate
-                traces together.</div>
-            <div class="point">The metadata key name must be one of: <code>session_id</code>, <code>thread_id</code>, or
-                <code>conversation_id</code>.</div>
-            <div class="point">The value can be any string — recommended to use a <strong>UUID</strong> (e.g.,
-                <code>f47ac10b-58cc-4372-a567-0e02b2c3d479</code>).</div>
-            <div class="point">In a Streamlit app, store the thread ID in <code>st.session_state["thread_id"]</code> so
-                it persists across turns.</div>
-        </div>
-    </div>
-
-    <!-- CONFIG Object -->
-    <div class="section">
-        <div class="section-header">
-            <div class="icon icon-amber">⚙️</div>
-            <h2>The CONFIG Object</h2>
-            <span class="tag tag-green">Code</span>
-        </div>
-        <div class="section-body">
-            <div class="point">Pass the CONFIG dict to your LangGraph <code>.stream()</code> call on every turn to group
-                it into the correct thread.</div>
-            <pre><span class="cm"># Python — streamlit_frontend_database.py</span>
+            <div class="point">A unique identifier (e.g., UUID) must be passed through a metadata key
+                (<code>thread_id</code>, <code>session_id</code>, or <code>conversation_id</code>).</div>
+            <div class="point">On every turn, pass a CONFIG dictionary to link the trace into the correct thread:</div>
+            <pre><span class="cm"># Python — Streamlit Example</span>
 <span class="key">CONFIG</span> = {
-    <span class="str">"configurable"</span>: {<span class="str">"thread_id"</span>: <span class="val">st.session_state["thread_id"]</span>},
-    <span class="str">"metadata"</span>: {
-        <span class="str">"thread_id"</span>: <span class="val">st.session_state["thread_id"]</span>
-    },
-    <span class="str">"run_name"</span>: <span class="str">"chat_turn"</span>,
+    <span class="str">"configurable"</span>: {<span class="str">"thread_id"</span>: <span class="val">st.session_state["thread_id"]</span>}, <span class="cm"># Used by LangGraph for state/memory</span>
+    <span class="str">"metadata"</span>: {<span class="str">"thread_id"</span>: <span class="val">st.session_state["thread_id"]</span>},     <span class="cm"># Used by LangSmith to group traces</span>
+    <span class="str">"run_name"</span>: <span class="str">"chat_turn"</span>,                                      <span class="cm"># Labels run for easy filtering</span>
 }</pre>
-            <div class="point"><code>configurable.thread_id</code> — used by LangGraph checkpointer for
-                <strong>memory/state</strong>.</div>
-            <div class="point"><code>metadata.thread_id</code> — used by <strong>LangSmith</strong> to group traces into
-                a thread.</div>
-            <div class="point"><code>run_name</code> — labels each run as <code>"chat_turn"</code> in LangSmith for easy
-                filtering.</div>
         </div>
     </div>
 
-    <!-- Viewing Threads in LangSmith -->
-    <div class="section">
-        <div class="section-header">
-            <div class="icon icon-green">👁️</div>
-            <h2>Viewing Threads in LangSmith</h2>
-            <span class="tag tag-blue">UI</span>
-        </div>
-        <div class="section-body">
-            <div class="point">Navigate to your project → click the <strong>Threads</strong> tab (next to Runs).</div>
-            <div class="point">Each row is one thread (conversation). Shows <strong>First Input</strong>, <strong>Last
-                    Output</strong>, trace count, and token count.</div>
-            <div class="point">Opening a thread shows all turns side-by-side: <strong>Turn 1, Turn 2, Turn 3…</strong>
-                with Human / AI messages.</div>
-            <div class="point">The trace panel on the left shows the call hierarchy:
-                <code>chat_turn → chat_node → ChatOpenAI</code>.</div>
-            <div class="point">Right panel shows per-run details: latency, tokens, cost, status, input/output.</div>
-        </div>
-    </div>
-
-    <!-- Data Flow Summary -->
+    <!-- End-to-End Flow -->
     <div class="section">
         <div class="section-header">
             <div class="icon icon-blue">🔄</div>
-            <h2>End-to-End Flow</h2>
+            <h2>Topic 125. End-to-End Flow</h2>
         </div>
         <div class="section-body">
             <div class="flow">
-                <span class="flow-step">User sends message</span>
+                <span class="flow-step">1. Generate & store UUID</span>
                 <span class="flow-arrow">→</span>
-                <span class="flow-step">CONFIG built with thread_id</span>
+                <span class="flow-step">2. User sends message</span>
                 <span class="flow-arrow">→</span>
-                <span class="flow-step">chatbot.stream(…, config=CONFIG)</span>
+                <span class="flow-step">3. Build CONFIG</span>
                 <span class="flow-arrow">→</span>
-                <span class="flow-step">LangSmith traces run</span>
-                <span class="flow-arrow">→</span>
-                <span class="flow-step">Grouped into Thread by thread_id</span>
+                <span class="flow-step">4. chatbot.stream(..., config=CONFIG)</span>
             </div>
-            <div class="point">Each new chat session in the Streamlit sidebar generates a <strong>fresh UUID</strong> as
-                a new <code>thread_id</code>.</div>
-            <div class="point">Switching conversations loads a different thread ID → LangGraph restores the correct
-                state from its checkpointer.</div>
+            <div class="point">LangGraph updates conversation memory, and LangSmith groups the trace under the thread.
+            </div>
+            <div class="point">Switching conversations simply involves loading a different <code>thread_id</code>.</div>
         </div>
     </div>
 
-    <!-- Key Takeaways -->
+    <!-- Observability in LangSmith -->
     <div class="section">
         <div class="section-header">
-            <div class="icon icon-amber">✅</div>
-            <h2>Key Takeaways</h2>
+            <div class="icon icon-green">👁️</div>
+            <h2>Topic 126. Observability UI in LangSmith</h2>
+            <span class="tag tag-blue">Interface</span>
         </div>
         <div class="section-body">
-            <div class="point"><strong>One thread_id per conversation</strong> — generate it once and reuse for all
-                turns in that chat session.</div>
-            <div class="point"><strong>Two roles for thread_id:</strong> LangGraph uses it for memory; LangSmith uses it
-                for observability grouping.</div>
-            <div class="point"><strong>run_name</strong> ("chat_turn") makes it easy to filter by run type in
-                LangSmith's sidebar.</div>
-            <div class="point">LangSmith Threads tab gives a clean <strong>conversation-level</strong> view vs. Runs tab
-                which shows individual trace-level detail.</div>
+            <div class="point">The <strong>Threads tab</strong> gives a clean, high-level conversation view.</div>
+            <div class="point">The traditional <strong>Runs tab</strong> shows low-level, individual trace details.
+            </div>
+            <div class="point">Threads display turns side-by-side, track token counts, latency, cost, and the entire
+                call hierarchy.</div>
         </div>
     </div>
 
